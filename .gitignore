@@ -69,3 +69,6 @@ VR_mafia_client/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 # Temporary auto-generated Android Assets
 VR_mafia_client/[Aa]ssets/[Ss]treamingAssets/aa.meta
 VR_mafia_client/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+#Server
+node_modules
