@@ -72,3 +72,5 @@ VR_mafia_client/[Aa]ssets/[Ss]treamingAssets/aa/*
 
 #Server
 node_modules
+TcpServer/TcpServer/bin
+TcpServer/TcpServer/obj
