@@ -11,7 +11,7 @@ namespace MyPacket
     class GameServer
     {
         private TcpListener server;
-        private List<User> users = new List<User>();
+        private Dictionary<int, User> users = new Dictionary<int, User>();
         public GameServer(TcpListener server)
         {
             this.server = server;
@@ -28,7 +28,7 @@ namespace MyPacket
             {
                 var client = server.AcceptTcpClient();
                 var user = new User(client);
-                users.Add(user);
+                users[user.ID] = user;
                 user.On(PacketType.CONNECT, OnConnect);
                 user.On(PacketType.DISCONNECT, OnDisconnect);
                 user.On(PacketType.SET_NAME, OnSetName);
@@ -40,12 +40,15 @@ namespace MyPacket
             var user = socket as User;
             Console.WriteLine("connect");
             user.Emit(PacketType.CONNECT, new ConnectData(user.ID).ToBytes());
-            user.Emit(PacketType.SET_NAME, new SetNameData("민수").ToBytes());
+            user.Emit(PacketType.SET_NAME, new SetNameData(user.Name).ToBytes());
         }
         private void OnDisconnect(MySocket socket, Packet packet)
         {
+            var user = socket as User;
             Console.WriteLine("disconnect");
-            socket.Close();
+            user.Close();
+            users.Remove(user.ID);
+
         }
         private void OnSetName(MySocket socket, Packet packet)
         {
