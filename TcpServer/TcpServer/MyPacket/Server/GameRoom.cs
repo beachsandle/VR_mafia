@@ -8,5 +8,10 @@ namespace MyPacket
 {
     class GameRoom
     {
+        private static int roomID = 1;
+        public int ID
+        {
+            get;set;
+        }
     }
 }
