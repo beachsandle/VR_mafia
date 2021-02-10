@@ -36,6 +36,11 @@ public class Player : MonoBehaviour
     {
         Rotate();
         Move();
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            UIManager.instance.Kill();
+        }
     }
 
     #region 움직임 관련
