@@ -15,6 +15,7 @@ namespace MyPacket
         DISCONNECT,
         SET_NAME,
         ROOM_LIST_REQ,
+        MOVE,
         END
     }
 }

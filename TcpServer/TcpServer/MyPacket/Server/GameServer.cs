@@ -32,6 +32,7 @@ namespace MyPacket
                 user.On(PacketType.CONNECT, OnConnect);
                 user.On(PacketType.DISCONNECT, OnDisconnect);
                 user.On(PacketType.SET_NAME, OnSetName);
+                user.On(PacketType.MOVE, OnMove);
                 user.Listen();
             }
         }
@@ -57,6 +58,17 @@ namespace MyPacket
             data.FromBytes(packet.Bytes);
             Console.WriteLine($"set name : {data.UserName}");
             user.Name = data.UserName;
+        }
+        private void OnMove(MySocket socket, Packet packet)
+        {
+            var user = socket as User;
+            foreach (var p in users)
+            {
+                if (p.Value != user)
+                {
+                    p.Value.Emit(PacketType.MOVE, packet.Bytes);
+                }
+            }
         }
     }
 }
