@@ -637,7 +637,7 @@ GameObject:
   - component: {fileID: 255774642}
   - component: {fileID: 255774644}
   - component: {fileID: 255774643}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1325,7 +1325,7 @@ GameObject:
   - component: {fileID: 845509646}
   - component: {fileID: 845509645}
   - component: {fileID: 845509644}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1867,7 +1867,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 517fd327b9f71d6499f2797d47ef5fec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  KillUI: {fileID: 0}
+  killUI: {fileID: 252407044}
 --- !u!1 &1593465547
 GameObject:
   m_ObjectHideFlags: 0
@@ -1902,6 +1902,7 @@ MonoBehaviour:
   jumpSpeed: 8
   rotateSpeed: 100
   gravity: 20
+  range: 5
 --- !u!143 &1593465549
 CharacterController:
   m_ObjectHideFlags: 0
