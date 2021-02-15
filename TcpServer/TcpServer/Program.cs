@@ -8,7 +8,7 @@ namespace TcpServer
     {
         static void Main(string[] args)
         {
-            var tcpServer = new TcpListener(IPAddress.Any, 8000);
+            var tcpServer = new TcpListener(IPAddress.Any, 8080);
             var server = new GameServer(tcpServer);
             server.Start();
         }

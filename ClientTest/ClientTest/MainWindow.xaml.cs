@@ -23,7 +23,7 @@ namespace ClientTest
             InitializeComponent();
             userNameInput = FindName("UserNameInput") as TextBox;
 
-            var client = new TcpClient("127.0.0.1", 8000);
+            var client = new TcpClient("127.0.0.1", 8080);
             socket = new MySocket(client);
             socket.On(PacketType.CONNECT, OnConnect);
             socket.On(PacketType.DISCONNECT, OnDisconnect);

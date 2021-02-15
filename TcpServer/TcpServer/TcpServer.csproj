@@ -43,16 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyPacket\MySocket.cs" />
+    <Compile Include="MyPacket\Server\GameRoom.cs" />
+    <Compile Include="MyPacket\Server\GameServer.cs" />
+    <Compile Include="MyPacket\Server\MySocket.cs" />
     <Compile Include="MyPacket\PacketData\ConnectData.cs" />
     <Compile Include="MyPacket\PacketData\IPacketData.cs" />
     <Compile Include="MyPacket\PacketData\SetNameData.cs" />
     <Compile Include="MyPacket\Packet\Packet.cs" />
     <Compile Include="MyPacket\Packet\PacketHeader.cs" />
     <Compile Include="MyPacket\Packet\PacketType.cs" />
-    <Compile Include="MyPacket\Server\GameRoom.cs" />
-    <Compile Include="MyPacket\Server\GameServer.cs" />
-    <Compile Include="MyPacket\Server\User.cs" />
+    <Compile Include="MyPacket\User.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
