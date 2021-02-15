@@ -19,7 +19,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public GameObject KillUI;
+    public GameObject killUI;
 
     void Start()
     {
@@ -31,8 +31,11 @@ public class UIManager : MonoBehaviour
         
     //}
 
-    public void Kill()
+    public void CanKill(bool canKill)
     {
-        Debug.Log("Killed..!");
+        if (canKill)
+            killUI.GetComponent<Image>().color = Color.red;
+        else
+            killUI.GetComponent<Image>().color = Color.white;
     }
 }

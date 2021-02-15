@@ -10,6 +10,10 @@ public class Player : MonoBehaviour
     private Transform HEAD;
     private Transform BODY;
     private Vector3 moveDirection = Vector3.zero;
+    private float rotX, rotY;
+
+    private RaycastHit hit;
+    private int layermask;
 
     [Header("속도 및 중력")]
     public float moveSpeed = 4.0F;
@@ -17,7 +21,8 @@ public class Player : MonoBehaviour
     public float rotateSpeed = 100.0F;
     public float gravity = 20.0F;
 
-    private float rotX, rotY;
+    public float range = 5.0F;
+
 
     void Start()
     {
@@ -30,6 +35,8 @@ public class Player : MonoBehaviour
         BODY = transform.GetChild(1);
 
         Cursor.lockState = CursorLockMode.Locked;
+
+        layermask = (1 << 10);
     }
 
     void Update()
@@ -37,10 +44,35 @@ public class Player : MonoBehaviour
         Rotate();
         Move();
 
+        FindTarget();
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            UIManager.instance.Kill();
+            Kill();
         }
+    }
+
+    void FindTarget()
+    {
+        if(Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
+        {
+            Debug.Log("Hit Player");
+            Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
+
+            UIManager.instance.CanKill(true);
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, transform.forward * range, Color.red);
+
+            UIManager.instance.CanKill(false);
+        }
+    }
+
+    void Kill()
+    {
+        if(hit.transform)
+            Destroy(hit.transform.gameObject);
     }
 
     #region 움직임 관련
