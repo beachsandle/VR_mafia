@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.IO;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
@@ -10,6 +9,20 @@ using MyPacket;
 
 public class TestClientManager : MonoBehaviour
 {
+	private static TestClientManager _instance;
+	public static TestClientManager instance
+	{
+		get
+		{
+			if (_instance == null)
+			{
+				_instance = FindObjectOfType<TestClientManager>();
+			}
+
+			return _instance;
+		}
+	}
+
 	private TcpClient client;
 	private MySocket socket;
 	private bool socketReady;
@@ -17,18 +30,29 @@ public class TestClientManager : MonoBehaviour
 	public string hostIp;
 	public int port;
 
-	
+	private int playerID;
+
     private void Start()
     {
 		ConnectToServer();
     }
     private void Update()
     {
-        if (socketReady)
-        {
-
-        }
+        //if (socketReady)
+        //{
+			
+        //}
     }
+
+	private float[] Vector3ToFloatArr(Vector3 v)
+    {
+		return new float[] { v.x, v.y, v.z };
+    }
+	private Vector3 FloatArrToVector3(float[] f)
+    {
+		return new Vector3(f[0], f[1], f[2]);
+    }
+
 	private void OnApplicationQuit()
 	{
 		CloseSocket();
@@ -49,6 +73,7 @@ public class TestClientManager : MonoBehaviour
 			socket.On(PacketType.CONNECT, OnConnect);
 			socket.On(PacketType.DISCONNECT, OnDisconnect);
 			socket.On(PacketType.SET_NAME, OnSetName);
+			socket.On(PacketType.MOVE, OnMove);
 
 			socket.Listen();
 			socket.Emit(PacketType.CONNECT);
@@ -62,11 +87,11 @@ public class TestClientManager : MonoBehaviour
 
 	private void OnConnect(MySocket socket, Packet packet)
 	{
-		//var data = new ConnectData();
-		//data.FromBytes(packet.Bytes);
-		Debug.Log("OnConnect");
-		//PlayerID = data.player_id;
-	}
+        var data = new ConnectData();
+        data.FromBytes(packet.Bytes);
+        Debug.Log("OnConnect : " + data.player_id);
+        playerID = data.player_id;
+    }
 	private void OnDisconnect(MySocket socket, Packet packet)
 	{
 		socket.Disconnect();
@@ -80,6 +105,19 @@ public class TestClientManager : MonoBehaviour
         //UserName = data.UserName;
         //Dispatcher.Invoke(() => { userNameInput.Text = UserName; });
     }
+
+	private void OnMove(MySocket socket, Packet packet)
+    {
+		var data = new MoveData();
+		data.FromBytes(packet.Bytes);
+		Debug.Log(FloatArrToVector3(data.position));
+    }
+	public void EmitMove(Vector3 pos, Quaternion rot)
+    {
+		if (!socketReady) return;
+		
+		socket.Emit(PacketType.MOVE, new MoveData(playerID, Vector3ToFloatArr(pos), Vector3ToFloatArr(rot.eulerAngles)).ToBytes());
+	}
 
 	private void CloseSocket()
     {
