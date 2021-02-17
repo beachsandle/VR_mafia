@@ -6,25 +6,12 @@ using System.IO;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
+using MyPacket;
 
 public class TestClientManager : MonoBehaviour
 {
-	[Serializable]
-	enum PacketType
-	{
-		NONE,
-		CONNECT,
-		DISCONNECT,
-		SET_NAME,
-		ROOM_LIST_REQ,
-		MOVE,
-		END
-	}
-
-	private TcpClient socket;
-	private NetworkStream stream;
-	private StreamWriter writer;
-	private StreamReader reader;
+	private TcpClient client;
+	private MySocket socket;
 	private bool socketReady;
 
 	public string hostIp;
@@ -37,16 +24,16 @@ public class TestClientManager : MonoBehaviour
     }
     private void Update()
     {
-        if(socketReady && stream.DataAvailable)
+        if (socketReady)
         {
-			string data = reader.ReadLine();
-			if(data != null)
-            {
-				Debug.Log(data);
-				Send("받았음.");
-            }
+
         }
     }
+	private void OnApplicationQuit()
+	{
+		CloseSocket();
+	}
+
 	public void ConnectToServer()
 	{
 		if (socketReady) return;
@@ -56,46 +43,51 @@ public class TestClientManager : MonoBehaviour
 
 		try
 		{
-			socket = new TcpClient(hostIp, port);
-			stream = socket.GetStream();
-			writer = new StreamWriter(stream);
-			reader = new StreamReader(stream);
+			client = new TcpClient(hostIp, port);
+			
+			socket = new MySocket(client);
+			socket.On(PacketType.CONNECT, OnConnect);
+			socket.On(PacketType.DISCONNECT, OnDisconnect);
+			socket.On(PacketType.SET_NAME, OnSetName);
+
+			socket.Listen();
+			socket.Emit(PacketType.CONNECT);
 			socketReady = true;
-			Emit();
 		}
 		catch (Exception e)
 		{
 			Debug.Log("Socket Error" + e.Message);
 		}
 	}
-	void Send(string data)
+
+	private void OnConnect(MySocket socket, Packet packet)
+	{
+		//var data = new ConnectData();
+		//data.FromBytes(packet.Bytes);
+		Debug.Log("OnConnect");
+		//PlayerID = data.player_id;
+	}
+	private void OnDisconnect(MySocket socket, Packet packet)
+	{
+		socket.Disconnect();
+		Debug.Log("Disconnect");
+	}
+	private void OnSetName(MySocket socket, Packet packet)
+	{
+		//var data = new SetNameData();
+		//data.FromBytes(packet.Bytes);
+		Debug.Log("OnSetName");
+        //UserName = data.UserName;
+        //Dispatcher.Invoke(() => { userNameInput.Text = UserName; });
+    }
+
+	private void CloseSocket()
     {
 		if (!socketReady) return;
 
-		writer.WriteLine(data);
-		writer.Flush();
-    }
+		socket.Emit(PacketType.DISCONNECT);
+		socket.Disconnect();
 
-    private void OnApplicationQuit()
-    {
-		CloseSocket();
-    }
-	void CloseSocket()
-    {
-		if (!socketReady) return;
-
-		writer.Close();
-		reader.Close();
-		socket.Close();
 		socketReady = false;
     }
-
-	public void Emit()
-	{
-		var result = new byte[8];
-		BitConverter.GetBytes(2).CopyTo(result, 0);
-		BitConverter.GetBytes(0).CopyTo(result, 4);
-
-		stream.Write(result, 0, 8);
-	}
 }
