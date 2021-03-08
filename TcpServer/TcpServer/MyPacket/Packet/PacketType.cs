@@ -13,9 +13,22 @@ namespace MyPacket
         NONE,
         CONNECT,
         DISCONNECT,
+        MOVE,
+        //lobby
         SET_NAME,
         ROOM_LIST_REQ,
-        MOVE,
+        ROOM_LIST_RES,
+        CREATE_ROOM_REQ,
+        CREATE_ROOM_RES,
+        JOIN_ROOM_REQ,
+        JOIN_ROOM_RES,
+        JOIN_EVENT,
+        //waiting
+        LEAVE_ROOM_REQ,
+        LEAVE_ROOM_RES,
+        LEAVE_EVENT,
+        GAME_START_REQ,
+        GAME_START,
         END
     }
 }

@@ -114,8 +114,11 @@ namespace MyPacket
             {
                 if (stream.CanRead && stream.DataAvailable)
                 {
-                    ReadPacket();
-                    handler[header.Type](this, new Packet(header, buffer));
+                    lock (stream)
+                    {
+                        ReadPacket();
+                        handler[header.Type](this, new Packet(header, buffer));
+                    }
                 }
             }
         }
@@ -124,15 +127,12 @@ namespace MyPacket
         /// </summary>
         private void ReadPacket()
         {
-            lock (stream)
-            {
-                stream.Read(buffer, 0, PacketHeader.SIZE);
-                header.FromBytes(buffer);
-                if (buffer.Length < header.Size)
-                    buffer = new byte[buffer.Length * 2];
-                if (header.Size != 0)
-                    stream.Read(buffer, 0, header.Size);
-            }
+            stream.Read(buffer, 0, PacketHeader.SIZE);
+            header.FromBytes(buffer);
+            if (buffer.Length < header.Size)
+                buffer = new byte[buffer.Length * 2];
+            if (header.Size != 0)
+                stream.Read(buffer, 0, header.Size);
         }
         /// <summary>
         /// 공백 핸들러
