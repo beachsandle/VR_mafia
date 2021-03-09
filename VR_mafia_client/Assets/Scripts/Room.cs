@@ -1,18 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Room : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private Text roomName;
+    [SerializeField] private Text hostName;
+    [SerializeField] private Text headCount;
 
-    // Update is called once per frame
-    void Update()
+    public void SetRoomInfo(string rName, string hName, int hCount)
     {
-        
+        roomName.text = rName;
+        hostName.text = hName;
+        headCount.text = hCount.ToString() + "/8";
     }
 }

@@ -5,19 +5,29 @@ using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
-    [SerializeField] private GameObject RoomList;
+    [SerializeField] private GameObject roomList;
 
     [Header("Button")]
-    [SerializeField] private Button JoinButton;
-    [SerializeField] private Button CreateButton;
-    [SerializeField] private Button RefreshButton;
+    [SerializeField] private Button joinButton;
+    [SerializeField] private Button createButton;
+    [SerializeField] private Button refreshButton;
 
     void Start()
     {
-        CreateButton.onClick.AddListener(OnCreateButton);
+        createButton.onClick.AddListener(OnCreateButton);
+    }
+
+    void OnJoinButton()
+    {
+
     }
 
     void OnCreateButton()
+    {
+        roomList.GetComponent<RoomList>().CreateRoom();
+    }
+
+    void OnRefreshButton()
     {
 
     }

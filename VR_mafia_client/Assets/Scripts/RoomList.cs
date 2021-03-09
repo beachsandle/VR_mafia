@@ -2,17 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class RoomList : MonoBehaviour
 {
-    // Start is called before the first frame update
+    [SerializeField]
+    private GameObject roomObject;
+
+    private GameObject content;
     void Start()
     {
-        
+        content = transform.GetChild(0).GetChild(0).gameObject;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void CreateRoom()
     {
-        
+        GameObject room = Instantiate(roomObject);
+        room.transform.SetParent(content.transform);
+
+        room.GetComponent<Room>().SetRoomInfo("a", "b", 1);
     }
 }
