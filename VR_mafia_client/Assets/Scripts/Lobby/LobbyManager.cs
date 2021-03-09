@@ -49,6 +49,7 @@ public class LobbyManager : MonoBehaviour
 
     void OnRefreshButton()
     {
+        roomList.Clear();
         TestClientManager.instance.EmitRoomListReq();
     }
 
@@ -77,6 +78,8 @@ public class LobbyManager : MonoBehaviour
     }
     void OnOKButton()
     {
+        TestClientManager.instance.userName = inputField.text;
+        TestClientManager.instance.socket.Emit(MyPacket.PacketType.SET_NAME, new MyPacket.SetNameData(inputField.text).ToBytes());
         playerName.text = inputField.text;
         changeNamePanel.SetActive(false);
     }

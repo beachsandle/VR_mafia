@@ -8,7 +8,7 @@ namespace MyPacket
     /// 패킷의 헤더
     /// </summary>
     [Serializable]
-    struct PacketHeader
+    public struct PacketHeader
     {
         public static readonly int SIZE = 8;
         public PacketType Type { get; set; }

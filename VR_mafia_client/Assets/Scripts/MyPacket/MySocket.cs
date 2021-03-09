@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MyPacket
 {
-    class MySocket : MonoBehaviour
+    public class MySocket : MonoBehaviour
     {
         #region delegate
         public delegate void MessageHandler(MySocket socket, Packet packet);
@@ -23,6 +23,7 @@ namespace MyPacket
         #region constructor
         public void Init(TcpClient client)
         {
+            DontDestroyOnLoad(this);
             this.client = client;
             stream = client.GetStream();
             buffer = new byte[1024];

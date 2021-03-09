@@ -13,7 +13,13 @@ public class RoomList : MonoBehaviour
     {
         content = transform.GetChild(0).GetChild(0).gameObject;
     }
-
+    public void Clear()
+    {
+        for (int i = 0, end = content.transform.childCount; i < end; ++i)
+        {
+            Destroy(content.transform.GetChild(i).gameObject);
+        }
+    }
     public void CreateRoom(string rName = "rName", string hName = "hName", int hCount = 0, int rId = -1)
     {
         GameObject room = Instantiate(roomObject);

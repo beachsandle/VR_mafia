@@ -80,7 +80,6 @@ namespace MyPacket
             data.FromBytes(packet.Bytes);
             var room = new GameRoom(user, data.RoomName);
             rooms[room.Id] = room;
-            user.JoinRoom(room);
             OutLobby(user);
             EnterWaitingRoom(user);
             user.Emit(PacketType.CREATE_ROOM_RES);
@@ -140,7 +139,9 @@ namespace MyPacket
             var user = socket as User;
             var room = user.Room;
             StartGame(room);
+            socket.Emit(PacketType.GAME_START);
             room.Broadcast(PacketType.GAME_START);
+            Console.WriteLine($"start : {user.Id}");
         }
         #endregion
         private void EnterWaitingRoom(User user)
