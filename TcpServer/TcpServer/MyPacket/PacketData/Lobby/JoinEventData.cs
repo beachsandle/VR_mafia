@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    struct ConnectData : IPacketData
+    class JoinEventData : IPacketData
     {
         public int Size
         {
@@ -13,19 +15,19 @@ namespace MyPacket
                 return 4;
             }
         }
-        public int PlayerId { get; set; }
-        public ConnectData(int playerId = -1)
+        public UserInfo Info { get; set; }
+        public JoinEventData(UserInfo info = null)
         {
-            PlayerId = playerId;
+            Info = info;
         }
         public byte[] ToBytes()
         {
-            return BitConverter.GetBytes(PlayerId);
+            return Info.ToBytes();
         }
         public void FromBytes(byte[] bytes)
         {
-            if (bytes.Length != 0)
-                PlayerId = BitConverter.ToInt32(bytes, 0);
+            Info = new UserInfo();
+            Info.FromBytes(bytes);
         }
     }
 }

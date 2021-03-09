@@ -7,13 +7,28 @@ namespace MyPacket
 {
     class User : MySocket
     {
-        protected static int playerID = 1;
-        public int ID { get; private set; }
+        private static int playerId = 1;
+        public int Id { get; private set; }
         public string Name { get; set; }
+        public GameRoom Room { get; private set; }
         public User(TcpClient client) : base(client)
         {
-            ID = playerID++;
-            Name = $"Player{ID.ToString("X")}";
+            Id = playerId++;
+            Name = $"Player{Id.ToString("X")}";
+        }
+        public bool JoinRoom(GameRoom room)
+        {
+            Room = room;
+            return room.Join(this);
+        }
+        public void LeaveRoom()
+        {
+            Room.Leave(this);
+            Room = null;
+        }
+        public UserInfo GetInfo()
+        {
+            return new UserInfo(Id, Name);
         }
     }
 }

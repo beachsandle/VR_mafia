@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    struct ConnectData : IPacketData
+    struct LeaveEventData : IPacketData
     {
         public int Size
         {
@@ -14,7 +14,7 @@ namespace MyPacket
             }
         }
         public int PlayerId { get; set; }
-        public ConnectData(int playerId = -1)
+        public LeaveEventData(int playerId = -1)
         {
             PlayerId = playerId;
         }
@@ -24,8 +24,7 @@ namespace MyPacket
         }
         public void FromBytes(byte[] bytes)
         {
-            if (bytes.Length != 0)
-                PlayerId = BitConverter.ToInt32(bytes, 0);
+            PlayerId = BitConverter.ToInt32(bytes, 0);
         }
     }
 }

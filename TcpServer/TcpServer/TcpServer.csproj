@@ -43,18 +43,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyPacket\Server\GameRoom.cs" />
-    <Compile Include="MyPacket\Server\GameServer.cs" />
-    <Compile Include="MyPacket\Server\MySocket.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\LeaveEventData.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\JoinEventData.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\JoinRoomResData.cs" />
+    <Compile Include="MyPacket\UserInfo.cs" />
+    <Compile Include="MyPacket\GameRoomInfo.cs" />
+    <Compile Include="MyPacket\MySocket.cs" />
+    <Compile Include="MyPacket\PacketData\MoveData.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\CreateRoomReqData.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\JoinRoomReqData.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\RoomListResData.cs" />
     <Compile Include="MyPacket\PacketData\ConnectData.cs" />
     <Compile Include="MyPacket\PacketData\IPacketData.cs" />
-    <Compile Include="MyPacket\PacketData\SetNameData.cs" />
+    <Compile Include="MyPacket\PacketData\Lobby\SetNameData.cs" />
     <Compile Include="MyPacket\Packet\Packet.cs" />
     <Compile Include="MyPacket\Packet\PacketHeader.cs" />
     <Compile Include="MyPacket\Packet\PacketType.cs" />
-    <Compile Include="MyPacket\User.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\GameRoom.cs" />
+    <Compile Include="Server\GameServer.cs" />
+    <Compile Include="Server\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
