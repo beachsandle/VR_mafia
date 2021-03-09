@@ -5,7 +5,13 @@ using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
-    [SerializeField] private GameObject roomList;
+    public static LobbyManager instance;
+    void Awake()
+    {
+        instance = this;
+    }
+
+    [SerializeField] private RoomList roomList;
     [Header("UI")]
     [SerializeField] private Text playerName;
 
@@ -24,23 +30,31 @@ public class LobbyManager : MonoBehaviour
     void Start()
     {
         createButton.onClick.AddListener(OnCreateButton);
+        joinButton.onClick.AddListener(OnJoinButton);
+        refreshButton.onClick.AddListener(OnRefreshButton);
 
         InitChangeNamePanel();
     }
 
     void OnJoinButton()
     {
-
+        TestClientManager.instance.EmitJoinRoomReq(1);
     }
 
     void OnCreateButton()
     {
-        roomList.GetComponent<RoomList>().CreateRoom();
+        // roomList.CreateRoom();
+        TestClientManager.instance.EmitCreateRoomReq("new room");
     }
 
     void OnRefreshButton()
     {
+        TestClientManager.instance.EmitRoomListReq();
+    }
 
+    public void UpdateRooms(string rn, string hn, int p, int i) // 임시
+    {
+        roomList.CreateRoom(rn, hn, p, i);
     }
 
     #region ChangeNamePanel

@@ -38,7 +38,7 @@ namespace MyPacket
         private void OnConnect(MySocket socket, Packet packet)
         {
             var user = socket as User;
-            Console.WriteLine("connect");
+            Console.WriteLine($"connect : {user.Id}");
             EnterLobby(user);
             user.Emit(PacketType.CONNECT, new ConnectData(user.Id).ToBytes());
             user.Emit(PacketType.SET_NAME, new SetNameData(user.Name).ToBytes());
@@ -46,7 +46,7 @@ namespace MyPacket
         private void OnDisconnect(MySocket socket, Packet packet)
         {
             var user = socket as User;
-            Console.WriteLine("disconnect");
+            Console.WriteLine($"disconnect : {user.Id}");
             user.Close();
             users.Remove(user.Id);
 
@@ -65,11 +65,13 @@ namespace MyPacket
             var data = new SetNameData();
             data.FromBytes(packet.Bytes);
             user.Name = data.UserName;
+            Console.WriteLine($"setname : {user.Id}");
         }
         private void OnRoomListReq(MySocket socket, Packet packet)
         {
             var roominfos = (from r in rooms.Values select r.GetInfo()).ToList();
             socket.Emit(PacketType.ROOM_LIST_RES, new RoomListResData(roominfos).ToBytes());
+            Console.WriteLine($"room list req");
         }
         private void OnCreateRoomReq(MySocket socket, Packet packet)
         {
@@ -82,6 +84,7 @@ namespace MyPacket
             OutLobby(user);
             EnterWaitingRoom(user);
             user.Emit(PacketType.CREATE_ROOM_RES);
+            Console.WriteLine($"create room req : {user.Id}");
         }
         private void OnJoinRoomReq(MySocket socket, Packet packet)
         {
@@ -89,6 +92,8 @@ namespace MyPacket
             var data = new JoinRoomReqData();
             data.FromBytes(packet.Bytes);
             var room = rooms[data.RoomId];
+
+            Console.WriteLine($"join room : {user.Id}");
             if (user.JoinRoom(room))
             {
                 OutLobby(user);
@@ -98,7 +103,6 @@ namespace MyPacket
             }
             else
                 user.Emit(PacketType.JOIN_ROOM_RES, new JoinRoomResData(false).ToBytes());
-
         }
         #endregion
         private void EnterLobby(User user)

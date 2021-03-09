@@ -18,7 +18,7 @@ namespace MyPacket
         {
             get
             {
-                int size = 4;
+                int size = 1;
                 foreach (var u in Users)
                     size += u.Size;
                 return size;
@@ -28,8 +28,8 @@ namespace MyPacket
         public byte[] ToBytes()
         {
             var bytes = new byte[Size];
-            Array.Copy(BitConverter.GetBytes(Result), bytes, 4);
-            int idx = 4;
+            Array.Copy(BitConverter.GetBytes(Result), bytes, 1);
+            int idx = 1;
             foreach (var user in Users)
             {
                 Array.Copy(user.ToBytes(), 0, bytes, idx, user.Size);
@@ -41,7 +41,7 @@ namespace MyPacket
         public void FromBytes(byte[] bytes)
         {
             Result = BitConverter.ToBoolean(bytes, 0);
-            int idx = 4;
+            int idx = 1;
             Users = new List<UserInfo>();
             while (idx < bytes.Length)
             {

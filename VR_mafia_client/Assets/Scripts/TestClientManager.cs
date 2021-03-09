@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System;
 using System.Text;
 using System.Net.Sockets;
@@ -9,18 +10,10 @@ using MyPacket;
 
 public class TestClientManager : MonoBehaviour
 {
-	private static TestClientManager _instance;
-	public static TestClientManager instance
+	public static TestClientManager instance;
+	void Awake()
 	{
-		get
-		{
-			if (_instance == null)
-			{
-				_instance = FindObjectOfType<TestClientManager>();
-			}
-
-			return _instance;
-		}
+        instance = this;
 	}
 
 	private TcpClient client;
@@ -57,7 +50,6 @@ public class TestClientManager : MonoBehaviour
 	{
 		CloseSocket();
 	}
-
 	public void ConnectToServer()
 	{
 		if (socketReady) return;
@@ -68,13 +60,10 @@ public class TestClientManager : MonoBehaviour
 		try
 		{
 			client = new TcpClient(hostIp, port);
-			
-			socket = new MySocket(client);
+			socket = new GameObject("socket").AddComponent<MySocket>();
+			socket.Init(client);
 			socket.On(PacketType.CONNECT, OnConnect);
 			socket.On(PacketType.DISCONNECT, OnDisconnect);
-			socket.On(PacketType.SET_NAME, OnSetName);
-			socket.On(PacketType.MOVE, OnMove);
-
 			socket.Listen();
 			socket.Emit(PacketType.CONNECT);
 			socketReady = true;
@@ -91,7 +80,13 @@ public class TestClientManager : MonoBehaviour
         data.FromBytes(packet.Bytes);
         Debug.Log("OnConnect : " + data.PlayerId);
         playerID = data.PlayerId;
-    }
+		socket.Clear(PacketType.CONNECT);
+		socket.On(PacketType.SET_NAME, OnSetName);
+		socket.On(PacketType.ROOM_LIST_RES, OnRoomListRes);
+		socket.On(PacketType.CREATE_ROOM_RES, OnCreateRoomRes);
+		socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
+		socket.Emit(PacketType.ROOM_LIST_REQ);
+	}
 	private void OnDisconnect(MySocket socket, Packet packet)
 	{
 		socket.Disconnect();
@@ -104,6 +99,51 @@ public class TestClientManager : MonoBehaviour
 		Debug.Log("OnSetName");
         //UserName = data.UserName;
         //Dispatcher.Invoke(() => { userNameInput.Text = UserName; });
+    }
+	private void OnRoomListRes(MySocket socket, Packet packet)
+    {
+		Debug.Log("OnRoomListRes");
+		var data = new RoomListResData();
+		data.FromBytes(packet.Bytes);
+
+		int roomCount = data.Rooms.Count;
+		for(int i = 0; i < roomCount; i++)
+        {
+			var r = data.Rooms[i];
+			LobbyManager.instance.UpdateRooms(r.Name, r.HostId.ToString(), r.Participants, r.Id);
+		}
+    }
+	private void OnCreateRoomRes(MySocket socket, Packet packet)
+    {
+		Debug.Log("!!!!");
+		SceneManager.LoadScene("WaitingRoom");
+    }
+	public void EmitCreateRoomReq(string roomName)
+    {
+		if (!socketReady) return;
+
+		socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
+    }
+
+	private void OnJoinRoomRes(MySocket socket, Packet packet)
+	{
+		Debug.Log("join res");
+
+		SceneManager.LoadScene("WaitingRoom");
+	}
+	public void EmitJoinRoomReq(int roomId)
+    {
+		socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
+    }
+
+	private void OnJoinEvent(MySocket socket, Packet packet)
+    {
+		// 다른 유저 참여했을 때 그 유저 정보 가져옴
+    }
+
+	public void EmitRoomListReq()
+    {
+		socket.Emit(PacketType.ROOM_LIST_REQ);
     }
 
 	private void OnMove(MySocket socket, Packet packet)

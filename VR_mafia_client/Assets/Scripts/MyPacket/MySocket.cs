@@ -4,10 +4,11 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEngine;
 
 namespace MyPacket
 {
-    class MySocket
+    class MySocket : MonoBehaviour
     {
         #region delegate
         public delegate void MessageHandler(MySocket socket, Packet packet);
@@ -20,7 +21,7 @@ namespace MyPacket
         protected Dictionary<PacketType, MessageHandler> handler;
         #endregion
         #region constructor
-        public MySocket(TcpClient client)
+        public void Init(TcpClient client)
         {
             this.client = client;
             stream = client.GetStream();
@@ -117,9 +118,18 @@ namespace MyPacket
                     lock (stream)
                     {
                         ReadPacket();
-                        handler[header.Type](this, new Packet(header, buffer));
+                        eventQ.Enqueue(new Packet(header, buffer));
                     }
                 }
+            }
+        }
+        private Queue<Packet> eventQ = new Queue<Packet>();
+        private void Update()
+        {
+            while (eventQ.Count != 0)
+            {
+                var packet = eventQ.Dequeue();
+                handler[packet.Header.Type](this, packet);
             }
         }
         /// <summary>

@@ -43,7 +43,7 @@ namespace MyPacket
             Id = BitConverter.ToInt32(bytes, 0);
             HostId = BitConverter.ToInt32(bytes, 4);
             Participants = BitConverter.ToInt32(bytes, 8);
-            Name = Encoding.UTF8.GetString(bytes, 12, bytes.Length - 16);
+            Name = Encoding.UTF8.GetString(bytes, 12, bytes.Length - 12);
         }
     }
 }

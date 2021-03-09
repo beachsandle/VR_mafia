@@ -14,11 +14,11 @@ public class RoomList : MonoBehaviour
         content = transform.GetChild(0).GetChild(0).gameObject;
     }
 
-    public void CreateRoom()
+    public void CreateRoom(string rName = "rName", string hName = "hName", int hCount = 0, int rId = -1)
     {
         GameObject room = Instantiate(roomObject);
         room.transform.SetParent(content.transform);
 
-        room.GetComponent<Room>().SetRoomInfo("a", "b", 1);
+        room.GetComponent<Room>().SetRoomInfo(rName, hName, hCount, rId);
     }
 }
