@@ -43,6 +43,7 @@ public class Player : MonoBehaviour
     {
         Rotate();
         Move();
+        TestClientManager.instance.EmitMove(transform.position, transform.rotation);
 
         FindTarget();
 
@@ -56,7 +57,7 @@ public class Player : MonoBehaviour
     {
         if(Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
         {
-            Debug.Log("Hit Player");
+            //Debug.Log("Hit Player");
             Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
 
             UIManager.instance.CanKill(true);
