@@ -8,9 +8,9 @@ namespace MyPacket
     class User : MySocket
     {
         private static int playerId = 1;
-        private GameRoom room;
         public int Id { get; private set; }
         public string Name { get; set; }
+        public GameRoom Room { get; private set; }
         public User(TcpClient client) : base(client)
         {
             Id = playerId++;
@@ -18,8 +18,13 @@ namespace MyPacket
         }
         public bool JoinRoom(GameRoom room)
         {
-            this.room = room;
+            Room = room;
             return room.Join(this);
+        }
+        public void LeaveRoom()
+        {
+            Room.Leave(this);
+            Room = null;
         }
         public UserInfo GetInfo()
         {

@@ -15,6 +15,7 @@ namespace MyPacket
         public int Participants { get; private set; } = 0;
         public static int Maximum = 10;
         public string Name { get; set; }
+        public bool IsStarted { get; private set; } = false;
         public GameRoom(User host = null, string name = "")
         {
             Id = roomId++;
@@ -34,6 +35,11 @@ namespace MyPacket
             users[user.Id] = user;
             ++Participants;
             return true;
+        }
+        public void Leave(User user)
+        {
+            --Participants;
+            users.Remove(user.Id);
         }
         public void Broadcast(PacketType type, byte[] bytes, User sender = null)
         {
