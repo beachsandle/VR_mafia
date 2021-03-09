@@ -89,8 +89,8 @@ public class TestClientManager : MonoBehaviour
 	{
         var data = new ConnectData();
         data.FromBytes(packet.Bytes);
-        Debug.Log("OnConnect : " + data.player_id);
-        playerID = data.player_id;
+        Debug.Log("OnConnect : " + data.PlayerId);
+        playerID = data.PlayerId;
     }
 	private void OnDisconnect(MySocket socket, Packet packet)
 	{
