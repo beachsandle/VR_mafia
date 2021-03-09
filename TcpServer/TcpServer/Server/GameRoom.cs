@@ -41,7 +41,7 @@ namespace MyPacket
             --Participants;
             users.Remove(user.Id);
         }
-        public void Broadcast(PacketType type, byte[] bytes, User sender = null)
+        public void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
         {
             foreach (var p in users)
             {
@@ -57,6 +57,20 @@ namespace MyPacket
         public List<UserInfo> GetUserInfos()
         {
             return (from u in users.Values select u.GetInfo()).ToList();
+        }
+        public void On(PacketType type, MySocket.MessageHandler handler)
+        {
+            foreach(var user in users.Values)
+            {
+                user.On(type, handler);
+            }
+        }
+        public void Clear(PacketType type)
+        {
+            foreach (var user in users.Values)
+            {
+                user.Clear(type);
+            }
         }
     }
 }

@@ -133,7 +133,10 @@ namespace MyPacket
         }
         private void OnGameStartReq(MySocket socket, Packet packet)
         {
-
+            var user = socket as User;
+            var room = user.Room;
+            StartGame(room);
+            room.Broadcast(PacketType.GAME_START);
         }
         #endregion
         private void EnterWaitingRoom(User user)
@@ -149,13 +152,12 @@ namespace MyPacket
         private void OnMove(MySocket socket, Packet packet)
         {
             var user = socket as User;
-            foreach (var p in users)
-            {
-                if (p.Value != user)
-                {
-                    p.Value.Emit(PacketType.MOVE, packet.Bytes);
-                }
-            }
+            var room = user.Room;
+            room.Broadcast(PacketType.MOVE, packet.Bytes, user);
+        }
+        private void StartGame(GameRoom room)
+        {
+            room.On(PacketType.MOVE, OnMove);
         }
     }
 }
