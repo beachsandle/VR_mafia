@@ -47,6 +47,8 @@ namespace MyPacket
         {
             var user = socket as User;
             Console.WriteLine($"disconnect : {user.Id}");
+            user.LeaveRoom();
+            users.Remove(user.Id);
             user.Close();
             users.Remove(user.Id);
 
@@ -80,6 +82,7 @@ namespace MyPacket
             data.FromBytes(packet.Bytes);
             var room = new GameRoom(user, data.RoomName);
             rooms[room.Id] = room;
+            user.JoinRoom(room);
             OutLobby(user);
             EnterWaitingRoom(user);
             user.Emit(PacketType.CREATE_ROOM_RES);

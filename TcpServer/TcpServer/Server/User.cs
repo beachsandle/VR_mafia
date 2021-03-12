@@ -23,8 +23,11 @@ namespace MyPacket
         }
         public void LeaveRoom()
         {
-            Room.Leave(this);
-            Room = null;
+            if (Room != null)
+            {
+                Room.Leave(this);
+                Room = null;
+            }
         }
         public UserInfo GetInfo()
         {

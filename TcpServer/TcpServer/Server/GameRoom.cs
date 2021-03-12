@@ -23,8 +23,6 @@ namespace MyPacket
             if (host != null)
             {
                 HostId = host.Id;
-                users[HostId] = host;
-                Participants = 1;
                 Name = name;
             }
         }
