@@ -56,6 +56,33 @@ public class LobbyManager : MonoBehaviour
         roomList.CreateRoom(rn, hn, p, i);
     }
 
+    #region CreateRoomPanel
+    void InitCreateRoomPanel()
+    {
+        createRoomPanel.SetActive(true);
+
+        createRoomPanel.transform.GetChild(0).Find("OK Button").GetComponent<Button>().onClick.AddListener(OnCreateRoomOKButton);
+        createRoomPanel.transform.GetChild(0).Find("NO Button").GetComponent<Button>().onClick.AddListener(OnCreateRoomNOButton);
+        nameInputField.characterLimit = 10;
+
+        createRoomPanel.SetActive(false);
+    }
+    void OnCreateRoomButton()
+    {
+        createRoomPanel.SetActive(true);
+        roomNameInputField.text = "";
+    }
+    void OnCreateRoomOKButton()
+    {
+        TestClientManager.instance.EmitCreateRoomReq(roomNameInputField.text);
+        createRoomPanel.SetActive(false);
+    }
+    void OnCreateRoomNOButton()
+    {
+        createRoomPanel.SetActive(false);
+    }
+    #endregion
+
     #region ChangeNamePanel
     void InitChangeNamePanel()
     {
@@ -82,33 +109,6 @@ public class LobbyManager : MonoBehaviour
     void OnChangeNameNOButton()
     {
         changeNamePanel.SetActive(false);
-    }
-    #endregion
-
-    #region CreateRoomPanel
-    void InitCreateRoomPanel()
-    {
-        createRoomPanel.SetActive(true);
-
-        createRoomPanel.transform.GetChild(0).Find("OK Button").GetComponent<Button>().onClick.AddListener(OnCreateRoomOKButton);
-        createRoomPanel.transform.GetChild(0).Find("NO Button").GetComponent<Button>().onClick.AddListener(OnCreateRoomNOButton);
-        nameInputField.characterLimit = 10;
-
-        createRoomPanel.SetActive(false);
-    }
-    void OnCreateRoomButton()
-    {
-        createRoomPanel.SetActive(true);
-        roomNameInputField.text = "";
-    }
-    void OnCreateRoomOKButton()
-    {
-        TestClientManager.instance.EmitCreateRoomReq(roomNameInputField.text);
-        createRoomPanel.SetActive(false);
-    }
-    void OnCreateRoomNOButton()
-    {
-        createRoomPanel.SetActive(false);
     }
     #endregion
 }
