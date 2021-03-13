@@ -21,30 +21,28 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] private Button refreshButton;
     [SerializeField] private Button changeNameButton;
 
-    [Header("ChangeNamePanel")]
+    [Header("ChangeName Panel")]
     [SerializeField] private GameObject changeNamePanel;
-    [SerializeField] private InputField inputField;
-    [SerializeField] private Button okButton;
-    [SerializeField] private Button noButton;
+    [SerializeField] private InputField nameInputField;
+
+    [Header("CreateRoom Panel")]
+    [SerializeField] private GameObject createRoomPanel;
+    [SerializeField] private InputField roomNameInputField;
 
     void Start()
     {
-        createButton.onClick.AddListener(OnCreateButton);
+        createButton.onClick.AddListener(OnCreateRoomButton);
         joinButton.onClick.AddListener(OnJoinButton);
         refreshButton.onClick.AddListener(OnRefreshButton);
+        changeNameButton.onClick.AddListener(OnChangeNameButton);
 
         InitChangeNamePanel();
+        InitCreateRoomPanel();
     }
 
     void OnJoinButton()
     {
         TestClientManager.instance.EmitJoinRoomReq(1);
-    }
-
-    void OnCreateButton()
-    {
-        // roomList.CreateRoom();
-        TestClientManager.instance.EmitCreateRoomReq("new room");
     }
 
     void OnRefreshButton()
@@ -63,29 +61,54 @@ public class LobbyManager : MonoBehaviour
     {
         changeNamePanel.SetActive(true);
 
-        changeNameButton.onClick.AddListener(OnChangeNameButton);
-        okButton.onClick.AddListener(OnOKButton);
-        noButton.onClick.AddListener(OnNoButton);
-
-        inputField.characterLimit = 10;
+        changeNamePanel.transform.GetChild(0).Find("OK Button").GetComponent<Button>().onClick.AddListener(OnChangeNameOKButton);
+        changeNamePanel.transform.GetChild(0).Find("NO Button").GetComponent<Button>().onClick.AddListener(OnChangeNameNOButton);
+        nameInputField.characterLimit = 10;
 
         changeNamePanel.SetActive(false);
     }
     void OnChangeNameButton()
     {
         changeNamePanel.SetActive(true);
-        inputField.text = playerName.text;
+        nameInputField.text = playerName.text;
     }
-    void OnOKButton()
+    void OnChangeNameOKButton()
     {
-        TestClientManager.instance.userName = inputField.text;
-        TestClientManager.instance.socket.Emit(MyPacket.PacketType.SET_NAME, new MyPacket.SetNameData(inputField.text).ToBytes());
-        playerName.text = inputField.text;
+        TestClientManager.instance.userName = nameInputField.text;
+        TestClientManager.instance.socket.Emit(MyPacket.PacketType.SET_NAME, new MyPacket.SetNameData(nameInputField.text).ToBytes());
+        playerName.text = nameInputField.text;
         changeNamePanel.SetActive(false);
     }
-    void OnNoButton()
+    void OnChangeNameNOButton()
     {
         changeNamePanel.SetActive(false);
+    }
+    #endregion
+
+    #region CreateRoomPanel
+    void InitCreateRoomPanel()
+    {
+        createRoomPanel.SetActive(true);
+
+        createRoomPanel.transform.GetChild(0).Find("OK Button").GetComponent<Button>().onClick.AddListener(OnCreateRoomOKButton);
+        createRoomPanel.transform.GetChild(0).Find("NO Button").GetComponent<Button>().onClick.AddListener(OnCreateRoomNOButton);
+        nameInputField.characterLimit = 10;
+
+        createRoomPanel.SetActive(false);
+    }
+    void OnCreateRoomButton()
+    {
+        createRoomPanel.SetActive(true);
+        roomNameInputField.text = "";
+    }
+    void OnCreateRoomOKButton()
+    {
+        TestClientManager.instance.EmitCreateRoomReq(roomNameInputField.text);
+        createRoomPanel.SetActive(false);
+    }
+    void OnCreateRoomNOButton()
+    {
+        createRoomPanel.SetActive(false);
     }
     #endregion
 }
