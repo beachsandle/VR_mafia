@@ -9,16 +9,16 @@ public class Room : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Text roomName;
     [SerializeField] private Text hostName;
     [SerializeField] private Text headCount;
-    
+
     private int roomId = -1;
     private float last = 0f;
     private float interval = 0.4f;
 
     public void OnPointerClick(PointerEventData pointerEventData)
     {
-        if(Time.time - last < interval)
+        if (Time.time - last < interval)
             Debug.Log(name + " DoubleClicked!");
-        
+
         last = Time.time;
     }
 

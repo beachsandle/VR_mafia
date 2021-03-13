@@ -144,6 +144,7 @@ public class TestClientManager : MonoBehaviour
         var data = new RoomListResData();
         data.FromBytes(packet.Bytes);
 
+        //TODO: HostId에서 HostName으로 받을 수 있게 변경
         int roomCount = data.Rooms.Count;
         for (int i = 0; i < roomCount; i++)
         {
