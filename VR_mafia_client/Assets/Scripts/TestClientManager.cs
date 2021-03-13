@@ -125,7 +125,6 @@ public class TestClientManager : MonoBehaviour
     }
 	private void OnCreateRoomRes(MySocket socket, Packet packet)
     {
-		Debug.Log("!!!!");
 		users.Add(new UserInfo(playerID, userName));
 		SceneManager.LoadScene("WaitingRoom");
     }
@@ -157,6 +156,9 @@ public class TestClientManager : MonoBehaviour
     {
 		var data = new JoinEventData();
 		data.FromBytes(packet.Bytes);
+
+		//TODO: Name 값이 비어있음
+		//Debug.Log("Join : " + data.Info.Name);
 		
 		WaitingRoomManager.instance.AddPlayer(data.Info);
     }

@@ -9,30 +9,45 @@ public class WaitingRoomManager : MonoBehaviour
     [Header("Button")]
     [SerializeField] private Button startButton;
 
-    public Text[] p;
-
-    int idNum = 1;
+    Transform[] playerTRs;
+    static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black };
+    const int HEAD_COUNT = 8;
 
     public static WaitingRoomManager instance;
     void Awake()
     {
         instance = this;
+
+        playerTRs = new Transform[HEAD_COUNT];
+        for (int i = 0; i < HEAD_COUNT; i++)
+        {
+            playerTRs[i] = GameObject.Find("Player" + (i + 1)).transform;
+        }
     }
 
     void Start()
     {
         startButton.onClick.AddListener(OnStartButton);
 
-        for(int i = 0; i < TestClientManager.instance.users.Count; i++)
+        for (int i = 0; i < TestClientManager.instance.users.Count; i++)
         {
-            p[i].text = TestClientManager.instance.users[i].Name;
+            SetPlayerInfo(i);
         }
     }
 
     public void AddPlayer(UserInfo user)
     {
-        var p = GameObject.Find("PlayerT" + idNum++);
-        p.GetComponent<Text>().text = user.Name;
+        //TODO: SetPlayerInfo()로 교체
+        //SetPlayerInfo(TestClientManager.instance.users.Count);
+
+        playerTRs[TestClientManager.instance.users.Count].Find("Name").GetComponent<Text>().text = user.Name;
+        playerTRs[TestClientManager.instance.users.Count].Find("Image").GetComponent<Image>().color = colors[TestClientManager.instance.users.Count];
+    }
+
+    private void SetPlayerInfo(int playerNum)
+    {
+        playerTRs[playerNum].Find("Name").GetComponent<Text>().text = TestClientManager.instance.users[playerNum].Name;
+        playerTRs[playerNum].Find("Image").GetComponent<Image>().color = colors[playerNum];
     }
 
     void OnStartButton()
