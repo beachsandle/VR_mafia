@@ -39,6 +39,10 @@ public class LobbyManager : MonoBehaviour
         InitChangeNamePanel();
         InitCreateRoomPanel();
     }
+    public void UpdateRooms(string rn, string hn, int p, int i) // 임시
+    {
+        roomList.CreateRoom(rn, hn, p, i);
+    }
 
     void OnJoinButton()
     {
@@ -49,11 +53,6 @@ public class LobbyManager : MonoBehaviour
     {
         roomList.Clear();
         TestClientManager.instance.EmitRoomListReq();
-    }
-
-    public void UpdateRooms(string rn, string hn, int p, int i) // 임시
-    {
-        roomList.CreateRoom(rn, hn, p, i);
     }
 
     #region CreateRoomPanel
