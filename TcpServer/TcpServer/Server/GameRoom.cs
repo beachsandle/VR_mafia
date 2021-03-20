@@ -50,7 +50,7 @@ namespace MyPacket
         }
         public GameRoomInfo GetInfo()
         {
-            return new GameRoomInfo(Id, HostId, Participants, Name);
+            return new GameRoomInfo(Id, HostId, Participants, IsStarted, Name);
         }
         public List<UserInfo> GetUserInfos()
         {
@@ -58,7 +58,7 @@ namespace MyPacket
         }
         public void On(PacketType type, MySocket.MessageHandler handler)
         {
-            foreach(var user in users.Values)
+            foreach (var user in users.Values)
             {
                 user.On(type, handler);
             }

@@ -18,6 +18,16 @@ namespace MyPacket
         protected PacketHeader header;
         protected byte[] buffer;
         protected Dictionary<PacketType, MessageHandler> handler;
+        protected Queue<Packet> messageQueue;
+        #endregion
+        #region property
+        public int MessageCount
+        {
+            get
+            {
+                return messageQueue.Count;
+            }
+        }
         #endregion
         #region constructor
         public MySocket(TcpClient client)
@@ -84,12 +94,20 @@ namespace MyPacket
                 stream.Write(packet.ToBytes(), 0, packet.Size);
             }
         }
+        public void Handle()
+        {
+            if (messageQueue.Count != 0)
+            {
+                var packet = messageQueue.Dequeue();
+                handler[packet.Header.Type](this, packet);
+            }
+        }
         /// <summary>
         /// 비동기 방식으로 메시지 처리 시작
         /// </summary>
-        public virtual void Listen()
+        public void Listen(bool isAsync)
         {
-            var thread = new Thread(new ThreadStart(ListenMessage));
+            var thread = new Thread(isAsync ? new ThreadStart(ListenMessageAsync) : new ThreadStart(ListenMessage));
             thread.Start();
         }
         #endregion
@@ -108,7 +126,7 @@ namespace MyPacket
         /// <summary>
         /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 처리
         /// </summary>
-        private void ListenMessage()
+        private void ListenMessageAsync()
         {
             while (client.Connected)
             {
@@ -118,6 +136,23 @@ namespace MyPacket
                     {
                         ReadPacket();
                         handler[header.Type](this, new Packet(header, buffer));
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 저장
+        /// </summary>
+        private void ListenMessage()
+        {
+            while (client.Connected)
+            {
+                if (stream.CanRead && stream.DataAvailable)
+                {
+                    lock (stream)
+                    {
+                        ReadPacket();
+                        messageQueue.Enqueue(new Packet(header, buffer));
                     }
                 }
             }

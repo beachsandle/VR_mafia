@@ -58,7 +58,7 @@ namespace MyPacket
         {
             user.On(PacketType.CONNECT, OnConnect);
             user.On(PacketType.DISCONNECT, OnDisconnect);
-            user.Listen();
+            user.Listen(true);
         }
         #region lobby handler
         private void OnSetName(MySocket socket, Packet packet)
