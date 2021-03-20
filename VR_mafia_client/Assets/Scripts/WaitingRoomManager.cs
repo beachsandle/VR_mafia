@@ -15,7 +15,7 @@ public class WaitingRoomManager : MonoBehaviour
 
     private Transform[] playerTRs;
     static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black };
-    const int HEAD_COUNT = 8;
+    const int HEAD_COUNT = 10;
 
     public static WaitingRoomManager instance;
     void Awake()

@@ -26,7 +26,7 @@ public class Room : MonoBehaviour, IPointerClickHandler
     {
         roomName.text = rName;
         hostName.text = hName;
-        headCount.text = hCount.ToString() + "/8";
+        headCount.text = hCount.ToString() + "/10";
         roomId = rId;
     }
 }
