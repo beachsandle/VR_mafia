@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyPacket\ByteBuilder.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\LeaveEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinRoomResData.cs" />

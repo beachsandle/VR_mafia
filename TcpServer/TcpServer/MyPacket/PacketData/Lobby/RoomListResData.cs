@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    struct RoomListResData : IPacketData
+    public struct RoomListResData : IPacketData
     {
         public List<GameRoomInfo> Rooms { get; set; }
 

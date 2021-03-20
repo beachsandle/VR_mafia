@@ -6,16 +6,20 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    class GameRoom
+    public class GameRoom
     {
+        #region field
         private static int roomId = 1;
-        Dictionary<int, User> users;
+        private Dictionary<int, User> users;
+        #endregion
+        #region property
         public int Id { get; private set; }
         public int HostId { get; private set; }
         public int Participants { get; private set; } = 0;
         public static int Maximum = 10;
         public string Name { get; set; }
         public bool IsStarted { get; private set; } = false;
+        #endregion
         public GameRoom(User host = null, string name = "")
         {
             Id = roomId++;
@@ -52,10 +56,6 @@ namespace MyPacket
         {
             return new GameRoomInfo(Id, HostId, Participants, IsStarted, Name);
         }
-        public List<UserInfo> GetUserInfos()
-        {
-            return (from u in users.Values select u.GetInfo()).ToList();
-        }
         public void On(PacketType type, MySocket.MessageHandler handler)
         {
             foreach (var user in users.Values)
@@ -69,6 +69,15 @@ namespace MyPacket
             {
                 user.Clear(type);
             }
+        }
+        public List<UserInfo> GetUserInfos()
+        {
+            return (from u in users.Values select u.GetInfo()).ToList();
+        }
+        public void GameStart()
+        {
+            IsStarted = true;
+            Broadcast(PacketType.GAME_START);
         }
     }
 }

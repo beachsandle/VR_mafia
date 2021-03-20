@@ -9,7 +9,7 @@ using MyPacket;
 
 namespace MyPacket
 {
-    class GameServer
+    public class GameServer
     {
         private TcpListener server;
         private Dictionary<int, User> users = new Dictionary<int, User>();
@@ -141,9 +141,7 @@ namespace MyPacket
         {
             var user = socket as User;
             var room = user.Room;
-            StartGame(room);
-            socket.Emit(PacketType.GAME_START);
-            room.Broadcast(PacketType.GAME_START);
+            room.GameStart();
             Console.WriteLine($"start : {user.Id}");
         }
         #endregion
@@ -162,10 +160,6 @@ namespace MyPacket
             var user = socket as User;
             var room = user.Room;
             room.Broadcast(PacketType.MOVE, packet.Bytes, user);
-        }
-        private void StartGame(GameRoom room)
-        {
-            room.On(PacketType.MOVE, OnMove);
         }
     }
 }

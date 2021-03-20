@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace MyPacket
 {
-    class MySocket
+    public class MySocket
     {
         #region delegate
         public delegate void MessageHandler(MySocket socket, Packet packet);

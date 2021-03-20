@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    struct JoinRoomResData : IPacketData
+    public struct JoinRoomResData : IPacketData
     {
         public bool Result { get; set; }
         public List<UserInfo> Users { get; set; }
@@ -27,15 +27,13 @@ namespace MyPacket
 
         public byte[] ToBytes()
         {
-            var bytes = new byte[Size];
-            Array.Copy(BitConverter.GetBytes(Result), bytes, 1);
-            int idx = 1;
+            var bb = new ByteBuilder(Size);
+            bb.Append(Result);
             foreach (var user in Users)
             {
-                Array.Copy(user.ToBytes(), 0, bytes, idx, user.Size);
-                idx += user.Size;
+                bb.Append(user.ToBytes());
             }
-            return bytes;
+            return bb.Get();
         }
 
         public void FromBytes(byte[] bytes)

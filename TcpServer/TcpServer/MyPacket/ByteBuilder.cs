@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    class ByteBuilder
+    public class ByteBuilder
     {
         private byte[] bytes;
         private int cursor = 0;

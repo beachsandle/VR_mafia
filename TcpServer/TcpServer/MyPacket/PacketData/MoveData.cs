@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    class MoveData : IPacketData
+    public class MoveData : IPacketData
     {
         public int player_id;
         public float[] position;

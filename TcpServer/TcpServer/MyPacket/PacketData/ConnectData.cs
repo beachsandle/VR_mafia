@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    struct ConnectData : IPacketData
+    public struct ConnectData : IPacketData
     {
         public int Size
         {

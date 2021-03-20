@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    class User : MySocket
+    public class User : MySocket
     {
         private static int playerId = 1;
         public int Id { get; private set; }

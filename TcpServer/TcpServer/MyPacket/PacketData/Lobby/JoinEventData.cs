@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    class JoinEventData : IPacketData
+    public class JoinEventData : IPacketData
     {
         public int Size
         {

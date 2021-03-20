@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    class UserInfo
+    public class UserInfo
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";

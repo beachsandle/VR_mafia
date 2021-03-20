@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    struct Packet
+    public struct Packet
     {
         public PacketHeader Header { get; private set; }
         public byte[] Bytes { get; private set; }
