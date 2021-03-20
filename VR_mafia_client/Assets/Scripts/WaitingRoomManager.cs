@@ -8,8 +8,12 @@ public class WaitingRoomManager : MonoBehaviour
 {
     [Header("Button")]
     [SerializeField] private Button startButton;
+    [SerializeField] private Button leaveButton;
 
-    Transform[] playerTRs;
+    [Header("UI")]
+    [SerializeField] private Text roomNameText;
+
+    private Transform[] playerTRs;
     static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black };
     const int HEAD_COUNT = 8;
 
@@ -28,6 +32,7 @@ public class WaitingRoomManager : MonoBehaviour
     void Start()
     {
         startButton.onClick.AddListener(OnStartButton);
+        leaveButton.onClick.AddListener(OnLeaveButton);
 
         for (int i = 0; i < TestClientManager.instance.users.Count; i++)
         {
@@ -50,8 +55,17 @@ public class WaitingRoomManager : MonoBehaviour
         playerTRs[playerNum].Find("Image").GetComponent<Image>().color = colors[playerNum];
     }
 
+    private void SetRoomName(string roomName)
+    {
+        roomNameText.text = roomName;
+    }
+
     void OnStartButton()
     {
         TestClientManager.instance.EmitGameStartReq();
+    }
+    void OnLeaveButton()
+    {
+        //TODO: 로비로 돌아가는 코드 추가
     }
 }
