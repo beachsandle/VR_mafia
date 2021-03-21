@@ -90,11 +90,22 @@ namespace MyPacket
         public void Emit(PacketType type, byte[] bytes = null)
         {
             var packet = new Packet(type, bytes);
-            lock (stream)
+            try
             {
-                stream.Write(packet.ToBytes(), 0, packet.Size);
+                lock (stream)
+                {
+                    stream.Write(packet.ToBytes(), 0, packet.Size);
+                }
+            }
+            //클라이언트 강제 종료시 연결 해제
+            catch (System.IO.IOException)
+            {
+                handler[PacketType.DISCONNECT](this, new Packet());
             }
         }
+        /// <summary>
+        /// 가장 먼저 들어온 패킷 처리
+        /// </summary>
         public void Handle()
         {
             if (messageQueue.Count != 0)
@@ -140,6 +151,7 @@ namespace MyPacket
                     }
                 }
             }
+            Console.WriteLine("disconnect");
         }
         /// <summary>
         /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 저장
