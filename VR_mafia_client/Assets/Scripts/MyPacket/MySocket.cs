@@ -4,11 +4,10 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using UnityEngine;
 
 namespace MyPacket
 {
-    public class MySocket : MonoBehaviour
+    public class MySocket
     {
         #region delegate
         public delegate void MessageHandler(MySocket socket, Packet packet);
@@ -19,14 +18,24 @@ namespace MyPacket
         protected PacketHeader header;
         protected byte[] buffer;
         protected Dictionary<PacketType, MessageHandler> handler;
+        protected Queue<Packet> messageQueue;
+        #endregion
+        #region property
+        public int MessageCount
+        {
+            get
+            {
+                return messageQueue.Count;
+            }
+        }
         #endregion
         #region constructor
-        public void Init(TcpClient client)
+        public MySocket(TcpClient client)
         {
-            DontDestroyOnLoad(this);
             this.client = client;
             stream = client.GetStream();
             buffer = new byte[1024];
+            messageQueue = new Queue<Packet>();
             HandlerInit();
         }
         #endregion
@@ -86,12 +95,20 @@ namespace MyPacket
                 stream.Write(packet.ToBytes(), 0, packet.Size);
             }
         }
+        public void Handle()
+        {
+            if (messageQueue.Count != 0)
+            {
+                var packet = messageQueue.Dequeue();
+                handler[packet.Header.Type](this, packet);
+            }
+        }
         /// <summary>
         /// 비동기 방식으로 메시지 처리 시작
         /// </summary>
-        public virtual void Listen()
+        public void Listen(bool isAsync)
         {
-            var thread = new Thread(new ThreadStart(ListenMessage));
+            var thread = new Thread(isAsync ? new ThreadStart(ListenMessageAsync) : new ThreadStart(ListenMessage));
             thread.Start();
         }
         #endregion
@@ -110,6 +127,23 @@ namespace MyPacket
         /// <summary>
         /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 처리
         /// </summary>
+        private void ListenMessageAsync()
+        {
+            while (client.Connected)
+            {
+                if (stream.CanRead && stream.DataAvailable)
+                {
+                    lock (stream)
+                    {
+                        ReadPacket();
+                        handler[header.Type](this, new Packet(header, buffer));
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 저장
+        /// </summary>
         private void ListenMessage()
         {
             while (client.Connected)
@@ -119,18 +153,9 @@ namespace MyPacket
                     lock (stream)
                     {
                         ReadPacket();
-                        eventQ.Enqueue(new Packet(header, buffer));
+                        messageQueue.Enqueue(new Packet(header, buffer));
                     }
                 }
-            }
-        }
-        private Queue<Packet> eventQ = new Queue<Packet>();
-        private void Update()
-        {
-            while (eventQ.Count != 0)
-            {
-                var packet = eventQ.Dequeue();
-                handler[packet.Header.Type](this, packet);
             }
         }
         /// <summary>

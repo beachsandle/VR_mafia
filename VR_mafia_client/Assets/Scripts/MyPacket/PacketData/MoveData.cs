@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    class MoveData : IPacketData
+    public class MoveData : IPacketData
     {
         public int player_id;
         public float[] position;
@@ -44,13 +44,13 @@ namespace MyPacket
 
         public byte[] ToBytes()
         {
-            var bytes = new byte[28];
-            Array.Copy(BitConverter.GetBytes(player_id), bytes, 4);
+            var bb = new ByteBuilder(28);
+            bb.Append(player_id);
             for (int i = 0; i < 3; ++i)
-                Array.Copy(BitConverter.GetBytes(position[i]), 0, bytes, 4 + i * 4, 4);
+                bb.Append(position[i]);
             for (int i = 0; i < 3; ++i)
-                Array.Copy(BitConverter.GetBytes(rotation[i]), 0, bytes, 16 + i * 4, 4);
-            return bytes;
+                bb.Append(rotation[i]);
+            return bb.Get();
         }
     }
 }

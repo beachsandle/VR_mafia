@@ -37,10 +37,8 @@ public class TestClientManager : MonoBehaviour
     }
     private void Update()
     {
-        //if (socketReady)
-        //{
-
-        //}
+        while (socket.MessageCount > 0)
+            socket.Handle();
     }
 
     private float[] Vector3ToFloatArr(Vector3 v)
@@ -66,11 +64,10 @@ public class TestClientManager : MonoBehaviour
         try
         {
             client = new TcpClient(hostIp, port);
-            socket = new GameObject("socket").AddComponent<MySocket>();
-            socket.Init(client);
+            socket = new MySocket(client);
             socket.On(PacketType.CONNECT, OnConnect);
             socket.On(PacketType.DISCONNECT, OnDisconnect);
-            socket.Listen();
+            socket.Listen(false);
             socket.Emit(PacketType.CONNECT);
             socketReady = true;
         }

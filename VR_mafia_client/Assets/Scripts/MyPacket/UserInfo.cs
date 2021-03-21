@@ -25,17 +25,16 @@ namespace MyPacket
         }
         public byte[] ToBytes()
         {
-            byte[] bytes = new byte[Size];
-            Array.Copy(BitConverter.GetBytes(Size), 0, bytes, 0, 4);
-            Array.Copy(BitConverter.GetBytes(Id), 0, bytes, 4, 4);
-            var encoded = Encoding.UTF8.GetBytes(Name);
-            Array.Copy(encoded, 0, bytes, 8, encoded.Length);
-            return bytes;
+            return new ByteBuilder(Size)
+                   .Append(Size)
+                   .Append(Id)
+                   .Append(Name)
+                   .Get();
         }
         public void FromBytes(byte[] bytes)
         {
             Id = BitConverter.ToInt32(bytes, 0);
-            Name = Encoding.UTF8.GetString(bytes, 4, bytes.Length - 8);
+            Name = Encoding.UTF8.GetString(bytes, 4, bytes.Length - 4);
         }
     }
 }

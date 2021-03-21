@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    struct RoomListResData : IPacketData
+    public struct RoomListResData : IPacketData
     {
         public List<GameRoomInfo> Rooms { get; set; }
 
@@ -25,14 +25,12 @@ namespace MyPacket
 
         public byte[] ToBytes()
         {
-            var bytes = new byte[Size];
-            int idx = 0;
+            var bb = new ByteBuilder(Size);
             foreach (var room in Rooms)
             {
-                Array.Copy(room.ToBytes(), 0, bytes, idx, room.Size);
-                idx += room.Size;
+                bb.Append(room.ToBytes());
             }
-            return bytes;
+            return bb.Get();
         }
 
         public void FromBytes(byte[] bytes)
