@@ -12,8 +12,8 @@ namespace MyPacket
     public class GameServer
     {
         private TcpListener server;
-        private Dictionary<int, User> users = new Dictionary<int, User>();
-        private Dictionary<int, GameRoom> rooms = new Dictionary<int, GameRoom>();
+        public Dictionary<int, User> Users { get; private set; } = new Dictionary<int, User>();
+        public Dictionary<int, GameRoom> Rooms { get; private set; } = new Dictionary<int, GameRoom>();
         public GameServer(TcpListener server)
         {
             this.server = server;
@@ -30,7 +30,7 @@ namespace MyPacket
             {
                 var client = server.AcceptTcpClient();
                 var user = new User(client);
-                users[user.Id] = user;
+                Users[user.Id] = user;
                 UserInit(user);
             }
         }
@@ -48,9 +48,8 @@ namespace MyPacket
             var user = socket as User;
             Console.WriteLine($"disconnect : {user.Id}");
             user.LeaveRoom();
-            users.Remove(user.Id);
             user.Close();
-            users.Remove(user.Id);
+            Users.Remove(user.Id);
 
         }
         #endregion
@@ -71,7 +70,7 @@ namespace MyPacket
         }
         private void OnRoomListReq(MySocket socket, Packet packet)
         {
-            var roominfos = (from r in rooms.Values select r.GetInfo()).ToList();
+            var roominfos = (from r in Rooms.Values select r.GetInfo()).ToList();
             socket.Emit(PacketType.ROOM_LIST_RES, new RoomListResData(roominfos).ToBytes());
             Console.WriteLine($"room list req");
         }
@@ -80,8 +79,8 @@ namespace MyPacket
             var user = socket as User;
             var data = new CreateRoomReqData();
             data.FromBytes(packet.Bytes);
-            var room = new GameRoom(user, data.RoomName);
-            rooms[room.Id] = room;
+            var room = new GameRoom(this, user, data.RoomName);
+            Rooms[room.Id] = room;
             user.JoinRoom(room);
             OutLobby(user);
             EnterWaitingRoom(user);
@@ -93,7 +92,12 @@ namespace MyPacket
             var user = socket as User;
             var data = new JoinRoomReqData();
             data.FromBytes(packet.Bytes);
-            var room = rooms[data.RoomId];
+            if (!Users.ContainsKey(data.RoomId))
+            {
+                Console.WriteLine($"room not exist: {data.RoomId}");
+                return;
+            }
+            var room = Rooms[data.RoomId];
 
             Console.WriteLine($"join room : {user.Id}");
             if (user.JoinRoom(room))

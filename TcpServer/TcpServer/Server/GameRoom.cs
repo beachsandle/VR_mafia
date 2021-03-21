@@ -19,9 +19,11 @@ namespace MyPacket
         public static int Maximum = 10;
         public string Name { get; set; }
         public bool IsStarted { get; private set; } = false;
+        public GameServer Server { get; private set; }
         #endregion
-        public GameRoom(User host = null, string name = "")
+        public GameRoom(GameServer server, User host = null, string name = "")
         {
+            Server = server;
             Id = roomId++;
             users = new Dictionary<int, User>();
             if (host != null)
@@ -42,10 +44,22 @@ namespace MyPacket
         {
             --Participants;
             users.Remove(user.Id);
+            if (!IsStarted && HostId == user.Id)
+            {
+                foreach (var u in users.Values.ToArray())
+                {
+                    u.Emit(PacketType.LEAVE_EVENT, new LeaveEventData(u.Id).ToBytes());
+                    u.LeaveRoom();
+                    --Participants;
+                    users.Remove(u.Id);
+                }
+            }
+            if (Participants == 0)
+                Server.Rooms.Remove(Id);
         }
         public void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
         {
-            foreach (var p in users)
+            foreach (var p in users.ToArray())
             {
                 if (sender?.Id == p.Value.Id)
                     continue;

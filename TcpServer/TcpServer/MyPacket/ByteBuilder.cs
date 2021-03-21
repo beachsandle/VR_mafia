@@ -28,8 +28,8 @@ namespace MyPacket
         }
         public ByteBuilder Append(bool val)
         {
-            Array.Copy(BitConverter.GetBytes(val), 0, bytes, cursor, 4);
-            cursor += 4;
+            Array.Copy(BitConverter.GetBytes(val), 0, bytes, cursor, 1);
+            cursor += 1;
             return this;
         }
         public ByteBuilder Append(string val)
