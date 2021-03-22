@@ -90,6 +90,8 @@ public class TestClientManager : MonoBehaviour
         socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
         socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
         socket.On(PacketType.GAME_START, OnGameStart);
+        socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
+        socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
     private void OnDisconnect(MySocket socket, Packet packet)
@@ -165,6 +167,22 @@ public class TestClientManager : MonoBehaviour
         //Debug.Log("Join : " + data.Info.Name);
 
         WaitingRoomManager.instance.AddPlayer(data.Info);
+    }
+    private void OnLeaveEvent(MySocket socket, Packet packet)
+    {
+        var data = new LeaveEventData();
+        data.FromBytes(packet.Bytes);
+
+        WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
+    }
+
+    public void EmitLeaveRoomReq()
+    {
+        socket.Emit(PacketType.LEAVE_ROOM_REQ);
+    }
+    private void OnLeaveRoomRes(MySocket socket, Packet packet)
+    {
+        SceneManager.LoadScene("Lobby");
     }
 
     public void EmitGameStartReq()
