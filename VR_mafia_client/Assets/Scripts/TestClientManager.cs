@@ -70,10 +70,17 @@ public class TestClientManager : MonoBehaviour
             socket.Listen(false);
             socket.Emit(PacketType.CONNECT);
             socketReady = true;
+
+            SceneManager.LoadScene("Lobby");
         }
         catch (Exception e)
         {
             Debug.Log("Socket Error" + e.Message);
+
+            if (IntroManager.instance)
+            {
+                IntroManager.instance.DisplayText("서버와 연결에 실패했습니다.");
+            }
         }
     }
 
