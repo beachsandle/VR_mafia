@@ -9,8 +9,7 @@ namespace MyPacket
     public class MoveData : IPacketData
     {
         public int player_id;
-        public float[] position;
-        public float[] rotation;
+        public Location location;
         public int Size
         {
             get
@@ -22,35 +21,24 @@ namespace MyPacket
         public MoveData()
         {
             player_id = 0;
-            position = new float[3] { 0, 0, 0 };
-            rotation = new float[3] { 0, 0, 0 };
+            location = new Location();
         }
 
-        public MoveData(int pid, float[] pos, float[] rot)
+        public MoveData(int pid, Location trans)
         {
             player_id = pid;
-            position = pos;
-            rotation = rot;
+            location = trans;
         }
 
         public void FromBytes(byte[] bytes)
         {
             player_id = BitConverter.ToInt32(bytes, 0);
-            for (int i = 0; i < 3; ++i)
-                position[i] = BitConverter.ToSingle(bytes, 4 + i * 4);
-            for (int i = 0; i < 3; ++i)
-                rotation[i] = BitConverter.ToSingle(bytes, 16 + i * 4);
+            location.FromBytes(bytes.Skip(4).ToArray());
         }
 
         public byte[] ToBytes()
         {
-            var bb = new ByteBuilder(28);
-            bb.Append(player_id);
-            for (int i = 0; i < 3; ++i)
-                bb.Append(position[i]);
-            for (int i = 0; i < 3; ++i)
-                bb.Append(rotation[i]);
-            return bb.Get();
+            return new ByteBuilder(28).Append(player_id).Append(location.ToBytes()).Get();
         }
     }
 }
