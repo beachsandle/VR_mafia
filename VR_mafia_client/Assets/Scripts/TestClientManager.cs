@@ -41,15 +41,6 @@ public class TestClientManager : MonoBehaviour
             socket.Handle();
     }
 
-    private float[] Vector3ToFloatArr(Vector3 v)
-    {
-        return new float[] { v.x, v.y, v.z };
-    }
-    private Vector3 FloatArrToVector3(float[] f)
-    {
-        return new Vector3(f[0], f[1], f[2]);
-    }
-
     private void OnApplicationQuit()
     {
         CloseSocket();
@@ -215,16 +206,21 @@ public class TestClientManager : MonoBehaviour
     {
         var data = new MoveData();
         data.FromBytes(packet.Bytes);
-        Debug.Log(FloatArrToVector3(data.position));
+        //Debug.Log(FloatArrToVector3(data.position));
     }
     public void EmitMove(Vector3 pos, Quaternion rot)
     {
         if (!socketReady) return;
 
-        socket.Emit(PacketType.MOVE, new MoveData(playerID, Vector3ToFloatArr(pos), Vector3ToFloatArr(rot.eulerAngles)).ToBytes());
+        socket.Emit(PacketType.MOVE, new MoveData(playerID, MakeLocation(pos, rot)).ToBytes());
+    }
+    private Location MakeLocation(Vector3 pos, Quaternion rot)
+    {
+        var position = new V3(pos.x, pos.y, pos.z);
+        var rotation = new V3(rot.eulerAngles.x, rot.eulerAngles.y, rot.eulerAngles.z);
+        return new Location(position, rotation);
     }
     #endregion
-
     private void CloseSocket()
     {
         if (!socketReady) return;
