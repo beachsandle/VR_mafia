@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 using System;
 using System.Text;
 using System.Net.Sockets;
@@ -176,8 +177,15 @@ public class TestClientManager : MonoBehaviour
     {
         var data = new LeaveEventData();
         data.FromBytes(packet.Bytes);
-
-        WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
+        if (data.PlayerId == playerID)
+        {
+            SceneManager.LoadScene("Lobby");
+        }
+        else
+        {
+            users.Remove((from u in users where u.Id == data.PlayerId select u).First());
+            WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
+        }
     }
 
     public void EmitLeaveRoomReq()

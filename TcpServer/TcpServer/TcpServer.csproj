@@ -47,7 +47,7 @@
     <Compile Include="MyPacket\PacketData\Lobby\LeaveEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinRoomResData.cs" />
-    <Compile Include="MyPacket\Type\Transform.cs" />
+    <Compile Include="MyPacket\Type\Location.cs" />
     <Compile Include="MyPacket\Type\UserInfo.cs" />
     <Compile Include="MyPacket\Type\GameRoomInfo.cs" />
     <Compile Include="MyPacket\Type\MySocket.cs" />

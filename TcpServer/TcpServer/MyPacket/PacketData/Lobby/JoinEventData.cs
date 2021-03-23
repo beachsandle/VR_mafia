@@ -27,7 +27,7 @@ namespace MyPacket
         public void FromBytes(byte[] bytes)
         {
             Info = new UserInfo();
-            Info.FromBytes(bytes);
+            Info.FromBytes(bytes.Skip(4).ToArray());
         }
     }
 }

@@ -42,12 +42,11 @@ namespace MyPacket
         }
         public void FromBytes(byte[] bytes)
         {
-            //size 4칸 무시
-            Id = BitConverter.ToInt32(bytes, 4);
-            HostId = BitConverter.ToInt32(bytes, 8);
-            Participants = BitConverter.ToInt32(bytes, 12);
-            IsStarted = BitConverter.ToBoolean(bytes, 16);
-            Name = Encoding.UTF8.GetString(bytes, 17, bytes.Length - 17);
+            Id = BitConverter.ToInt32(bytes, 0);
+            HostId = BitConverter.ToInt32(bytes, 4);
+            Participants = BitConverter.ToInt32(bytes, 8);
+            IsStarted = BitConverter.ToBoolean(bytes, 12);
+            Name = Encoding.UTF8.GetString(bytes, 13, bytes.Length - 13);
         }
     }
 }

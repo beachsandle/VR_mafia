@@ -92,7 +92,7 @@ namespace MyPacket
             var user = socket as User;
             var data = new JoinRoomReqData();
             data.FromBytes(packet.Bytes);
-            if (!Users.ContainsKey(data.RoomId))
+            if (!Rooms.ContainsKey(data.RoomId))
             {
                 Console.WriteLine($"room not exist: {data.RoomId}");
                 return;
