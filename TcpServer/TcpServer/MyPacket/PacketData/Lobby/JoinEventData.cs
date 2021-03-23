@@ -12,7 +12,7 @@ namespace MyPacket
         {
             get
             {
-                return 4;
+                return Info.Size;
             }
         }
         public UserInfo Info { get; set; }

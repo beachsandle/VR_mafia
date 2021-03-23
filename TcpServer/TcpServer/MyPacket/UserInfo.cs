@@ -33,8 +33,9 @@ namespace MyPacket
         }
         public void FromBytes(byte[] bytes)
         {
-            Id = BitConverter.ToInt32(bytes, 0);
-            Name = Encoding.UTF8.GetString(bytes, 4, bytes.Length - 4);
+            //size 4칸 무시
+            Id = BitConverter.ToInt32(bytes, 4);
+            Name = Encoding.UTF8.GetString(bytes, 8, bytes.Length - 8);
         }
     }
 }
