@@ -9,6 +9,9 @@ public class RoomList : MonoBehaviour
     private GameObject roomObject;
 
     private GameObject content;
+    
+    public int select;
+
     void Start()
     {
         content = transform.GetChild(0).GetChild(0).gameObject;

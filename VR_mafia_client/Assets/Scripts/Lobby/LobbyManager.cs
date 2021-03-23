@@ -11,7 +11,8 @@ public class LobbyManager : MonoBehaviour
         instance = this;
     }
 
-    [SerializeField] private RoomList roomList;
+    public RoomList roomList;
+
     [Header("UI")]
     [SerializeField] private Text playerName;
 
@@ -48,7 +49,7 @@ public class LobbyManager : MonoBehaviour
 
     void OnJoinButton()
     {
-        TestClientManager.instance.EmitJoinRoomReq(1);
+        TestClientManager.instance.EmitJoinRoomReq(roomList.select);
     }
 
     void OnRefreshButton()

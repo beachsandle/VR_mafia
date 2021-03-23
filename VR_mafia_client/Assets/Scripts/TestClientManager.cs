@@ -141,7 +141,7 @@ public class TestClientManager : MonoBehaviour
         var data = new JoinRoomResData();
         data.FromBytes(packet.Bytes);
         users = data.Users;
-        Debug.Log("join res");
+
         SceneManager.LoadScene("WaitingRoom");
     }
     public void EmitJoinRoomReq(int roomId)
@@ -153,7 +153,6 @@ public class TestClientManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "InGame") return;
 
-        Debug.Log("OnRoomListRes");
         var data = new RoomListResData();
         data.FromBytes(packet.Bytes);
 

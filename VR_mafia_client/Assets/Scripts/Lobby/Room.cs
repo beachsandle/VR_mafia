@@ -17,7 +17,12 @@ public class Room : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData pointerEventData)
     {
         if (Time.time - last < interval)
-            Debug.Log(name + " DoubleClicked!");
+        {
+            TestClientManager.instance.EmitJoinRoomReq(roomId);
+        }
+        LobbyManager.instance.roomList.select = roomId;
+
+        Debug.Log(name + "Selected");
 
         last = Time.time;
     }
