@@ -36,6 +36,8 @@ public class LobbyManager : MonoBehaviour
         refreshButton.onClick.AddListener(OnRefreshButton);
         changeNameButton.onClick.AddListener(OnChangeNameButton);
 
+        playerName.text = TestClientManager.instance.userName;
+
         InitChangeNamePanel();
         InitCreateRoomPanel();
     }
@@ -101,7 +103,7 @@ public class LobbyManager : MonoBehaviour
     void OnChangeNameOKButton()
     {
         TestClientManager.instance.userName = nameInputField.text;
-        TestClientManager.instance.socket.Emit(MyPacket.PacketType.SET_NAME, new MyPacket.SetNameData(nameInputField.text).ToBytes());
+        TestClientManager.instance.EmitSetName(nameInputField.text);
         playerName.text = nameInputField.text;
         changeNamePanel.SetActive(false);
     }

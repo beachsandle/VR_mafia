@@ -112,9 +112,16 @@ public class TestClientManager : MonoBehaviour
     {
         var data = new SetNameData();
         data.FromBytes(packet.Bytes);
-        Debug.Log("OnSetName");
+
+        Debug.Log("OnSetName : " + data.UserName);
 
         userName = data.UserName;
+    }
+    public void EmitSetName(string userName)
+    {
+        if (!socketReady) return;
+
+        socket.Emit(PacketType.SET_NAME, new SetNameData(userName).ToBytes());
     }
 
     private void OnCreateRoomRes(MySocket socket, Packet packet)
