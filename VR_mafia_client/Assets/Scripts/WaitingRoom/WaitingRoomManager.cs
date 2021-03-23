@@ -51,13 +51,14 @@ public class WaitingRoomManager : MonoBehaviour
 
     public void RemovePlayer(int playerId)
     {
-        for(int i = 0; i < TestClientManager.instance.users.Count; i++)
+        for (int i = 0; i < TestClientManager.instance.users.Count; i++)
         {
-            if(TestClientManager.instance.users[i].Id == playerId)
-            {
-                playerTRs[i].Find("Name").GetComponent<Text>().text = "P" + (i + 1);
-                playerTRs[i].Find("Image").GetComponent<Image>().color = Color.white;
-            }
+            SetPlayerInfo(i);
+        }
+        for(int i = TestClientManager.instance.users.Count; i < HEAD_COUNT; i++)
+        {
+            playerTRs[i].Find("Name").GetComponent<Text>().text = "P" + (i + 1);
+            playerTRs[i].Find("Image").GetComponent<Image>().color = Color.white;
         }
     }
 
