@@ -23,7 +23,7 @@ public class InGameManager : MonoBehaviour
     private GameObject playerObj;
     private int interval = 0;
 
-    public List<UserInfo> players;
+    public Dictionary<int, GameObject> players;
 
 
     private void Awake()
@@ -40,7 +40,7 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
-        players = TestClientManager.instance.users;
+        players = new Dictionary<int, GameObject>();
 
         SpawnPlayers();
     }
@@ -50,9 +50,9 @@ public class InGameManager : MonoBehaviour
         
     }
 
-    void SpawnPlayers()
+    private void SpawnPlayers()
     {
-        foreach(UserInfo u in players)
+        foreach(UserInfo u in TestClientManager.instance.users)
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
@@ -67,6 +67,18 @@ public class InGameManager : MonoBehaviour
                 // TODO: 카메라 추가하는 방식 변경
                 p.transform.Find("Head").Find("Main Camera").gameObject.SetActive(false);
             }
+
+            players.Add(u.Id, p);
         }
+    }
+
+    public void UpdatePlayerTransform(MoveData data)
+    {
+        V3 pos = data.location.position;
+        V3 rot = data.location.rotation;
+
+        Transform TR = players[data.player_id].transform;
+        TR.position = new Vector3(pos.x, pos.y, pos.z);
+        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
 }
