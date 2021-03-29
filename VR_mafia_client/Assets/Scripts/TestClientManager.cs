@@ -91,6 +91,7 @@ public class TestClientManager : MonoBehaviour
         socket.On(PacketType.GAME_START, OnGameStart);
         socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
         socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
+        socket.On(PacketType.MOVE, OnMove);
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
     private void OnDisconnect(MySocket socket, Packet packet)
@@ -214,7 +215,8 @@ public class TestClientManager : MonoBehaviour
     {
         var data = new MoveData();
         data.FromBytes(packet.Bytes);
-        //Debug.Log(FloatArrToVector3(data.position));
+        
+        Debug.Log(data.location.position + ", " + data.location.position);
     }
     public void EmitMove(Vector3 pos, Quaternion rot)
     {
