@@ -172,6 +172,7 @@ public class TestClientManager : MonoBehaviour
         //TODO: Name 값이 비어있음
         //Debug.Log("Join : " + data.Info.Name);
 
+        users.Add(data.Info);
         WaitingRoomManager.instance.AddPlayer(data.Info);
     }
     private void OnLeaveEvent(MySocket socket, Packet packet)

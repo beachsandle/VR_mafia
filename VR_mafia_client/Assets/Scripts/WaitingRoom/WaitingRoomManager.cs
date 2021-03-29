@@ -45,8 +45,8 @@ public class WaitingRoomManager : MonoBehaviour
         //TODO: SetPlayerInfo()로 교체, user Name이 비어있음
         //SetPlayerInfo(TestClientManager.instance.users.Count);
 
-        playerTRs[TestClientManager.instance.users.Count].Find("Name").GetComponent<Text>().text = user.Name;
-        playerTRs[TestClientManager.instance.users.Count].Find("Image").GetComponent<Image>().color = colors[TestClientManager.instance.users.Count];
+        playerTRs[TestClientManager.instance.users.Count - 1].Find("Name").GetComponent<Text>().text = user.Name;
+        playerTRs[TestClientManager.instance.users.Count - 1].Find("Image").GetComponent<Image>().color = colors[TestClientManager.instance.users.Count - 1];
     }
 
     public void RemovePlayer(int playerId)

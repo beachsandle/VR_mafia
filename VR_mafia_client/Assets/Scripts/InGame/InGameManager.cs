@@ -21,8 +21,10 @@ public class InGameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject playerObj;
+    private int interval = 0;
 
     public List<UserInfo> players;
+
 
     private void Awake()
     {
@@ -54,6 +56,7 @@ public class InGameManager : MonoBehaviour
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
+            p.transform.position += new Vector3(interval++, 0, 0);
 
             if(u.Id == TestClientManager.instance.playerID)
             {
@@ -61,6 +64,7 @@ public class InGameManager : MonoBehaviour
             }
             else
             {
+                // TODO: 카메라 추가하는 방식 변경
                 p.transform.Find("Head").Find("Main Camera").gameObject.SetActive(false);
             }
         }
