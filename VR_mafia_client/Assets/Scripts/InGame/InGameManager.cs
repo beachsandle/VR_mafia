@@ -61,11 +61,9 @@ public class InGameManager : MonoBehaviour
             if(u.Id == TestClientManager.instance.playerID)
             {
                 p.AddComponent<Player>();
-            }
-            else
-            {
-                // TODO: 카메라 추가하는 방식 변경
-                p.transform.Find("Head").Find("Main Camera").gameObject.SetActive(false);
+
+                Camera.main.transform.parent = p.transform.Find("Head");
+                Camera.main.transform.localPosition = new Vector3(0, 0, 0);
             }
 
             players.Add(u.Id, p);
