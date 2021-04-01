@@ -57,6 +57,7 @@ namespace MyPacket
         {
             user.On(PacketType.CONNECT, OnConnect);
             user.On(PacketType.DISCONNECT, OnDisconnect);
+            user.On(PacketType.MOVE, OnMove);
             user.Listen(true);
         }
         #region lobby handler
@@ -70,7 +71,7 @@ namespace MyPacket
         }
         private void OnRoomListReq(MySocket socket, Packet packet)
         {
-            var roominfos = (from r in Rooms.Values select r.GetInfo()).ToList();
+            var roominfos = (from r in Rooms.Values where !r.IsStarted select r.GetInfo()).ToList();
             socket.Emit(PacketType.ROOM_LIST_RES, new RoomListResData(roominfos).ToBytes());
             Console.WriteLine($"room list req");
         }

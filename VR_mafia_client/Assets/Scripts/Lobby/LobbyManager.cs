@@ -5,10 +5,17 @@ using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
-    public static LobbyManager instance;
-    void Awake()
+    private static LobbyManager _instance = null;
+    public static LobbyManager instance
     {
-        instance = this;
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<LobbyManager>();
+            }
+            return _instance;
+        }
     }
 
     public RoomList roomList;

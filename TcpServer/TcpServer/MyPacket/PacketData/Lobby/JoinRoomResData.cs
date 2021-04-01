@@ -44,7 +44,7 @@ namespace MyPacket
             while (idx < bytes.Length)
             {
                 var size = BitConverter.ToInt32(bytes, idx);
-                var temp = new byte[size];
+                var temp = new byte[size - 4];
                 Array.Copy(bytes, idx + 4, temp, 0, size - 4);
                 var user = new UserInfo();
                 user.FromBytes(temp);
