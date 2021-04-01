@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     {
         Rotate();
         Move();
-        TestClientManager.instance.EmitMove(transform.position, transform.rotation);
+        //TestClientManager.instance.EmitMove(transform.position, transform.rotation);
 
         FindTarget();
 
@@ -51,11 +51,19 @@ public class Player : MonoBehaviour
         {
             Kill();
         }
+        else if (
+            Input.GetKey(KeyCode.W) ||
+            Input.GetKey(KeyCode.A) ||
+            Input.GetKey(KeyCode.S) ||
+            Input.GetKey(KeyCode.D))
+        {
+            TestClientManager.instance.EmitMove(transform.position, transform.rotation);
+        }
     }
 
     void FindTarget()
     {
-        if(Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
+        if (Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
         {
             //Debug.Log("Hit Player");
             Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
@@ -72,7 +80,7 @@ public class Player : MonoBehaviour
 
     void Kill()
     {
-        if(hit.transform)
+        if (hit.transform)
             Destroy(hit.transform.gameObject);
     }
 
