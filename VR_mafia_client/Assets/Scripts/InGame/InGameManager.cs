@@ -23,6 +23,8 @@ public class InGameManager : MonoBehaviour
     private GameObject playerObj;
     private int interval = 0;
 
+    static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black }; // 임시
+
     public Dictionary<int, GameObject> players;
 
 
@@ -56,6 +58,8 @@ public class InGameManager : MonoBehaviour
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
+            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = colors[interval]; // 임시
+            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = colors[interval]; // 임시
             p.transform.position += new Vector3(interval++, 0, 0);
 
             if(u.Id == TestClientManager.instance.playerID)
