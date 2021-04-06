@@ -22,6 +22,13 @@ public class IntroManager : MonoBehaviour
     [SerializeField]
     private Text Text;
 
+    [SerializeField]
+    private Button connectButton;
+    [SerializeField]
+    private InputField hostIpInputField;
+    [SerializeField]
+    private InputField portInputField;
+
     void Awake()
     {
         if (_instance == null)
@@ -33,9 +40,23 @@ public class IntroManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
+    void Start()
+    {
+        connectButton.onClick.AddListener(OnConnectButton);
+    }
+
     public void DisplayText(string s)
     {
         Text.text = s;
+    }
+
+    public void OnConnectButton()
+    {
+        FindObjectOfType<TestClientManager>().gameObject.SetActive(true);
+
+        TestClientManager.instance.hostIp = hostIpInputField.text;
+        TestClientManager.instance.port = (hostIpInputField.text == "") ? 0 : int.Parse(hostIpInputField.text);
+
+        TestClientManager.instance.ConnectToServer();
     }
 }
