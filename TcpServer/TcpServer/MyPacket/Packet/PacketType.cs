@@ -14,6 +14,7 @@ namespace MyPacket
         CONNECT,
         DISCONNECT,
         MOVE,
+        KILL,
         //lobby
         SET_NAME,
         ROOM_LIST_REQ,
