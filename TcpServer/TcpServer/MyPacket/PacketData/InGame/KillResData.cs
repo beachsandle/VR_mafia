@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class KillRes : IPacketData
+    public class KillResDada : IPacketData
     {
         public bool Result;
         public int Size
@@ -17,13 +17,13 @@ namespace MyPacket
             }
         }
 
-        public KillRes()
+        public KillResDada()
         {
-            Result = 0;
+            Result = true;
 
         }
 
-        public KillRes(int result)
+        public KillResDada(bool result)
         {
             Result = result;
   

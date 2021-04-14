@@ -166,5 +166,15 @@ namespace MyPacket
             var room = user.Room;
             room.Broadcast(PacketType.MOVE, packet.Bytes, user);
         }
+        private void OnKillReq(MySocket socket, Packet packet)
+        {
+            var user = socket as User;
+            var room = user.Room;
+            var data = new KillReqDada();
+            data.FromBytes(packet.Bytes);
+            Users[data.Target_id].Alive = false;
+            user.Emit(PacketType.KILL_RES, new KillResDada(true).ToBytes());
+            room.Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id).ToBytes());
+        }
     }
 }

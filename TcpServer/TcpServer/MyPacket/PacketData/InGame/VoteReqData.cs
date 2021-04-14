@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class VoteReq : IPacketData
+    public class VoteReqData : IPacketData
     {
         public int Target_id;
         public int Size
@@ -17,12 +17,12 @@ namespace MyPacket
             }
         }
 
-        public VoteReq()
+        public VoteReqData()
         {
             Target_id = 0;
         }
 
-        public VoteReq(int target_id)
+        public VoteReqData(int target_id)
         {
             Target_id = target_id;
         }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class KillReq : IPacketData
+    public class KillReqDada : IPacketData
     {
         public int Target_id;
         public int Size
@@ -17,13 +17,13 @@ namespace MyPacket
             }
         }
 
-        public KillReq()
+        public KillReqDada()
         {
             Target_id = 0;
 
         }
 
-        public KillReq(int target_id)
+        public KillReqDada(int target_id)
         {
             Target_id = target_id;
   
