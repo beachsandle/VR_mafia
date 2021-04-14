@@ -12,7 +12,7 @@ namespace MyPacket
         {
             get
             {
-                return 4;
+                return Info.Size;
             }
         }
         public UserInfo Info { get; set; }
@@ -27,7 +27,7 @@ namespace MyPacket
         public void FromBytes(byte[] bytes)
         {
             Info = new UserInfo();
-            Info.FromBytes(bytes);
+            Info.FromBytes(bytes.Skip(4).ToArray());
         }
     }
 }

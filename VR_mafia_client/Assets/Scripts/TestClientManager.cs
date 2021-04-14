@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 using System;
 using System.Text;
 using System.Net.Sockets;
@@ -41,15 +42,6 @@ public class TestClientManager : MonoBehaviour
             socket.Handle();
     }
 
-    private float[] Vector3ToFloatArr(Vector3 v)
-    {
-        return new float[] { v.x, v.y, v.z };
-    }
-    private Vector3 FloatArrToVector3(float[] f)
-    {
-        return new Vector3(f[0], f[1], f[2]);
-    }
-
     private void OnApplicationQuit()
     {
         CloseSocket();
@@ -70,10 +62,17 @@ public class TestClientManager : MonoBehaviour
             socket.Listen(false);
             socket.Emit(PacketType.CONNECT);
             socketReady = true;
+
+            SceneManager.LoadScene("Lobby");
         }
         catch (Exception e)
         {
             Debug.Log("Socket Error" + e.Message);
+
+            if (IntroManager.instance)
+            {
+                IntroManager.instance.DisplayText("서버와 연결에 실패했습니다.");
+            }
         }
     }
 
@@ -90,6 +89,9 @@ public class TestClientManager : MonoBehaviour
         socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
         socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
         socket.On(PacketType.GAME_START, OnGameStart);
+        socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
+        socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
+        socket.On(PacketType.MOVE, OnMove);
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
     private void OnDisconnect(MySocket socket, Packet packet)
@@ -103,9 +105,16 @@ public class TestClientManager : MonoBehaviour
     {
         var data = new SetNameData();
         data.FromBytes(packet.Bytes);
-        Debug.Log("OnSetName");
+
+        Debug.Log("OnSetName : " + data.UserName);
 
         userName = data.UserName;
+    }
+    public void EmitSetName(string userName)
+    {
+        if (!socketReady) return;
+
+        socket.Emit(PacketType.SET_NAME, new SetNameData(userName).ToBytes());
     }
 
     private void OnCreateRoomRes(MySocket socket, Packet packet)
@@ -125,7 +134,7 @@ public class TestClientManager : MonoBehaviour
         var data = new JoinRoomResData();
         data.FromBytes(packet.Bytes);
         users = data.Users;
-        Debug.Log("join res");
+
         SceneManager.LoadScene("WaitingRoom");
     }
     public void EmitJoinRoomReq(int roomId)
@@ -137,7 +146,6 @@ public class TestClientManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "InGame") return;
 
-        Debug.Log("OnRoomListRes");
         var data = new RoomListResData();
         data.FromBytes(packet.Bytes);
 
@@ -164,7 +172,31 @@ public class TestClientManager : MonoBehaviour
         //TODO: Name 값이 비어있음
         //Debug.Log("Join : " + data.Info.Name);
 
+        users.Add(data.Info);
         WaitingRoomManager.instance.AddPlayer(data.Info);
+    }
+    private void OnLeaveEvent(MySocket socket, Packet packet)
+    {
+        var data = new LeaveEventData();
+        data.FromBytes(packet.Bytes);
+        if (data.PlayerId == playerID)
+        {
+            SceneManager.LoadScene("Lobby");
+        }
+        else
+        {
+            users.Remove((from u in users where u.Id == data.PlayerId select u).First());
+            WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
+        }
+    }
+
+    public void EmitLeaveRoomReq()
+    {
+        socket.Emit(PacketType.LEAVE_ROOM_REQ);
+    }
+    private void OnLeaveRoomRes(MySocket socket, Packet packet)
+    {
+        SceneManager.LoadScene("Lobby");
     }
 
     public void EmitGameStartReq()
@@ -184,16 +216,23 @@ public class TestClientManager : MonoBehaviour
     {
         var data = new MoveData();
         data.FromBytes(packet.Bytes);
-        Debug.Log(FloatArrToVector3(data.position));
+
+        //Debug.Log(data.location.position + ", " + data.location.position);
+        InGameManager.instance.UpdatePlayerTransform(data);
     }
     public void EmitMove(Vector3 pos, Quaternion rot)
     {
         if (!socketReady) return;
 
-        socket.Emit(PacketType.MOVE, new MoveData(playerID, Vector3ToFloatArr(pos), Vector3ToFloatArr(rot.eulerAngles)).ToBytes());
+        socket.Emit(PacketType.MOVE, new MoveData(playerID, MakeLocation(pos, rot)).ToBytes());
+    }
+    private Location MakeLocation(Vector3 pos, Quaternion rot)
+    {
+        var position = new V3(pos.x, pos.y, pos.z);
+        var rotation = new V3(rot.eulerAngles.x, rot.eulerAngles.y, rot.eulerAngles.z);
+        return new Location(position, rotation);
     }
     #endregion
-
     private void CloseSocket()
     {
         if (!socketReady) return;

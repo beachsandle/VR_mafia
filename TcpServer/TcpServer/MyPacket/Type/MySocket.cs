@@ -18,7 +18,8 @@ namespace MyPacket
         protected PacketHeader header;
         protected byte[] buffer;
         protected Dictionary<PacketType, MessageHandler> handler;
-        protected Queue<Packet> messageQueue;
+        protected Queue<Packet> messageQueue = new Queue<Packet>();
+        protected Queue<Packet> writeQueue = new Queue<Packet>();
         #endregion
         #region property
         public int MessageCount
@@ -35,7 +36,6 @@ namespace MyPacket
             this.client = client;
             stream = client.GetStream();
             buffer = new byte[1024];
-            messageQueue = new Queue<Packet>();
             HandlerInit();
         }
         #endregion
@@ -45,7 +45,8 @@ namespace MyPacket
         /// </summary>
         public void Disconnect()
         {
-            Emit(PacketType.DISCONNECT);
+            var packet = new Packet(PacketType.DISCONNECT);
+            stream.Write(packet.ToBytes(), 0, packet.Size);
             Close();
         }
         /// <summary>
@@ -89,19 +90,7 @@ namespace MyPacket
         /// <param name="data"></param>
         public void Emit(PacketType type, byte[] bytes = null)
         {
-            var packet = new Packet(type, bytes);
-            try
-            {
-                lock (stream)
-                {
-                    stream.Write(packet.ToBytes(), 0, packet.Size);
-                }
-            }
-            //클라이언트 강제 종료시 연결 해제
-            catch(System.IO.IOException)
-            {
-                handler[PacketType.DISCONNECT](this, new Packet());
-            }
+            writeQueue.Enqueue(new Packet(type, bytes));
         }
         /// <summary>
         /// 가장 먼저 들어온 패킷 처리
@@ -119,8 +108,10 @@ namespace MyPacket
         /// </summary>
         public void Listen(bool isAsync)
         {
-            var thread = new Thread(isAsync ? new ThreadStart(ListenMessageAsync) : new ThreadStart(ListenMessage));
-            thread.Start();
+            var readThread = new Thread(isAsync ? new ThreadStart(ListenMessageAsync) : new ThreadStart(ListenMessage));
+            var writeThread = new Thread(WriteMessageAsync);
+            readThread.Start();
+            writeThread.Start();
         }
         #endregion
         #region private method
@@ -144,14 +135,21 @@ namespace MyPacket
             {
                 if (stream.CanRead && stream.DataAvailable)
                 {
-                    lock (stream)
-                    {
-                        ReadPacket();
-                        handler[header.Type](this, new Packet(header, buffer));
-                    }
+                    ReadPacket();
+                    handler[header.Type](this, new Packet(header, buffer));
                 }
             }
             Console.WriteLine("disconnect");
+        }
+        private void WriteMessageAsync()
+        {
+            while (client.Connected)
+            {
+                if (writeQueue.Count != 0)
+                {
+                    WritePacket();
+                }
+            }
         }
         /// <summary>
         /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 저장
@@ -181,6 +179,20 @@ namespace MyPacket
                 buffer = new byte[buffer.Length * 2];
             if (header.Size != 0)
                 stream.Read(buffer, 0, header.Size);
+        }
+        private void WritePacket()
+        {
+
+            var packet = writeQueue.Dequeue();
+            try
+            {
+                stream.Write(packet.ToBytes(), 0, packet.Size);
+            }
+            //클라이언트 강제 종료시 연결 해제
+            catch (System.IO.IOException)
+            {
+                handler[PacketType.DISCONNECT](this, new Packet());
+            }
         }
         /// <summary>
         /// 공백 핸들러

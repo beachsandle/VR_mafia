@@ -11,6 +11,7 @@ namespace MyPacket
         public int Id { get; private set; }
         public string Name { get; set; }
         public GameRoom Room { get; private set; }
+        public bool Alive { get; set; } = true;
         public User(TcpClient client) : base(client)
         {
             Id = playerId++;

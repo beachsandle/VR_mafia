@@ -1,24 +1,28 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class IntroManager : MonoBehaviour
 {
-    private static GameManager _instance;
-    public static GameManager instance
+    private static IntroManager _instance;
+    public static IntroManager instance
     {
         get
         {
             if (!_instance)
             {
-                _instance = FindObjectOfType(typeof(GameManager)) as GameManager;
+                _instance = FindObjectOfType(typeof(IntroManager)) as IntroManager;
             }
 
             return _instance;
         }
     }
 
-    private void Awake()
+    [SerializeField]
+    private Text Text;
+
+    void Awake()
     {
         if (_instance == null)
         {
@@ -28,12 +32,10 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        DontDestroyOnLoad(gameObject);
     }
-
-    void Start()
+    
+    public void DisplayText(string s)
     {
-
+        Text.text = s;
     }
 }

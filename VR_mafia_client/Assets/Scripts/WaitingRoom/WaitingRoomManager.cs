@@ -42,11 +42,24 @@ public class WaitingRoomManager : MonoBehaviour
 
     public void AddPlayer(UserInfo user)
     {
-        //TODO: SetPlayerInfo()로 교체
+        //TODO: SetPlayerInfo()로 교체, user Name이 비어있음
         //SetPlayerInfo(TestClientManager.instance.users.Count);
 
-        playerTRs[TestClientManager.instance.users.Count].Find("Name").GetComponent<Text>().text = user.Name;
-        playerTRs[TestClientManager.instance.users.Count].Find("Image").GetComponent<Image>().color = colors[TestClientManager.instance.users.Count];
+        playerTRs[TestClientManager.instance.users.Count - 1].Find("Name").GetComponent<Text>().text = user.Name;
+        playerTRs[TestClientManager.instance.users.Count - 1].Find("Image").GetComponent<Image>().color = colors[TestClientManager.instance.users.Count - 1];
+    }
+
+    public void RemovePlayer(int playerId)
+    {
+        for (int i = 0; i < TestClientManager.instance.users.Count; i++)
+        {
+            SetPlayerInfo(i);
+        }
+        for(int i = TestClientManager.instance.users.Count; i < HEAD_COUNT; i++)
+        {
+            playerTRs[i].Find("Name").GetComponent<Text>().text = "P" + (i + 1);
+            playerTRs[i].Find("Image").GetComponent<Image>().color = Color.white;
+        }
     }
 
     private void SetPlayerInfo(int playerNum)
@@ -66,6 +79,6 @@ public class WaitingRoomManager : MonoBehaviour
     }
     void OnLeaveButton()
     {
-        //TODO: 로비로 돌아가는 코드 추가
+        TestClientManager.instance.EmitLeaveRoomReq();
     }
 }

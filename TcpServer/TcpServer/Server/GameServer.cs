@@ -57,6 +57,7 @@ namespace MyPacket
         {
             user.On(PacketType.CONNECT, OnConnect);
             user.On(PacketType.DISCONNECT, OnDisconnect);
+            user.On(PacketType.MOVE, OnMove);
             user.Listen(true);
         }
         #region lobby handler
@@ -70,7 +71,7 @@ namespace MyPacket
         }
         private void OnRoomListReq(MySocket socket, Packet packet)
         {
-            var roominfos = (from r in Rooms.Values select r.GetInfo()).ToList();
+            var roominfos = (from r in Rooms.Values where !r.IsStarted select r.GetInfo()).ToList();
             socket.Emit(PacketType.ROOM_LIST_RES, new RoomListResData(roominfos).ToBytes());
             Console.WriteLine($"room list req");
         }
@@ -92,7 +93,7 @@ namespace MyPacket
             var user = socket as User;
             var data = new JoinRoomReqData();
             data.FromBytes(packet.Bytes);
-            if (!Users.ContainsKey(data.RoomId))
+            if (!Rooms.ContainsKey(data.RoomId))
             {
                 Console.WriteLine($"room not exist: {data.RoomId}");
                 return;
@@ -164,6 +165,16 @@ namespace MyPacket
             var user = socket as User;
             var room = user.Room;
             room.Broadcast(PacketType.MOVE, packet.Bytes, user);
+        }
+        private void OnKillReq(MySocket socket, Packet packet)
+        {
+            var user = socket as User;
+            var room = user.Room;
+            var data = new KillReqDada();
+            data.FromBytes(packet.Bytes);
+            Users[data.Target_id].Alive = false;
+            user.Emit(PacketType.KILL_RES, new KillResDada(true).ToBytes());
+            room.Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id).ToBytes());
         }
     }
 }

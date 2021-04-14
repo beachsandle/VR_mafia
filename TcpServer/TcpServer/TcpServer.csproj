@@ -43,15 +43,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyPacket\PacketData\InGame\CallEmergencyMeetingData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\DeadReportData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\DieEventData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\FinishMissionData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\KillReqData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\KillResData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\MoveData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\ProgressMissionData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\RegisterMission.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\StartVotingData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\VoteEventData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\VoteReqData.cs" />
     <Compile Include="MyPacket\Type\ByteBuilder.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\LeaveEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinRoomResData.cs" />
-    <Compile Include="MyPacket\Type\Transform.cs" />
+    <Compile Include="MyPacket\Type\Location.cs" />
     <Compile Include="MyPacket\Type\UserInfo.cs" />
     <Compile Include="MyPacket\Type\GameRoomInfo.cs" />
     <Compile Include="MyPacket\Type\MySocket.cs" />
-    <Compile Include="MyPacket\PacketData\MoveData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\CreateRoomReqData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinRoomReqData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\RoomListResData.cs" />

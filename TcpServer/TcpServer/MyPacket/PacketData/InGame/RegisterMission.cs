@@ -4,21 +4,23 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct RoomListResData : IPacketData
+    public struct RegisterMission : IPacketData
     {
-        public List<GameRoomInfo> Rooms { get; set; }
+ 
+        public List<MissionInfo> Missions { get; set; }
 
-        public RoomListResData(List<GameRoomInfo> rooms = null)
+        public RegisterMission(List<MissionInfo> missions = null)
         {
-            Rooms = rooms;
+
+            Missions = missions;
         }
+
         public int Size
         {
             get
             {
-                int size = 0;
-                foreach (var r in Rooms)
-                    size += r.Size;
+                foreach (var u in Missions)
+                    size += u.Size;
                 return size;
             }
         }
@@ -26,27 +28,29 @@ namespace MyPacket
         public byte[] ToBytes()
         {
             var bb = new ByteBuilder(Size);
-            foreach (var room in Rooms)
+            foreach (var mission in Missions)
             {
-                bb.Append(room.ToBytes());
+                bb.Append(mission.ToBytes());
             }
             return bb.Get();
         }
 
+
         public void FromBytes(byte[] bytes)
         {
             int idx = 0;
-            Rooms = new List<GameRoomInfo>();
+            Missions = new List<MissionInfo>();
             while (idx < bytes.Length)
             {
                 var size = BitConverter.ToInt32(bytes, idx);
                 var temp = new byte[size - 4];
                 Array.Copy(bytes, idx + 4, temp, 0, size - 4);
-                var room = new GameRoomInfo();
+                var mission = new MissionInfo();
                 room.FromBytes(temp);
                 idx += size;
-                Rooms.Add(room);
+                Missions.Add(mission);
             }
         }
+    }
     }
 }

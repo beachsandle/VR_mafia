@@ -5,13 +5,21 @@ using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
-    public static LobbyManager instance;
-    void Awake()
+    private static LobbyManager _instance = null;
+    public static LobbyManager instance
     {
-        instance = this;
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<LobbyManager>();
+            }
+            return _instance;
+        }
     }
 
-    [SerializeField] private RoomList roomList;
+    public RoomList roomList;
+
     [Header("UI")]
     [SerializeField] private Text playerName;
 
@@ -36,6 +44,8 @@ public class LobbyManager : MonoBehaviour
         refreshButton.onClick.AddListener(OnRefreshButton);
         changeNameButton.onClick.AddListener(OnChangeNameButton);
 
+        playerName.text = TestClientManager.instance.userName;
+
         InitChangeNamePanel();
         InitCreateRoomPanel();
     }
@@ -46,7 +56,7 @@ public class LobbyManager : MonoBehaviour
 
     void OnJoinButton()
     {
-        TestClientManager.instance.EmitJoinRoomReq(1);
+        TestClientManager.instance.EmitJoinRoomReq(roomList.select);
     }
 
     void OnRefreshButton()
@@ -101,7 +111,7 @@ public class LobbyManager : MonoBehaviour
     void OnChangeNameOKButton()
     {
         TestClientManager.instance.userName = nameInputField.text;
-        TestClientManager.instance.socket.Emit(MyPacket.PacketType.SET_NAME, new MyPacket.SetNameData(nameInputField.text).ToBytes());
+        TestClientManager.instance.EmitSetName(nameInputField.text);
         playerName.text = nameInputField.text;
         changeNamePanel.SetActive(false);
     }
