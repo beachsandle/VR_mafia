@@ -112,7 +112,7 @@ public class InGameManager : MonoBehaviour
         if (state)
         {
             menuPanel.SetActive(true);
-            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
         else
