@@ -98,6 +98,7 @@ public class InGameManager : MonoBehaviour
         TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
 
+    #region MenuPanel
     private void InitMenuPanel()
     {
         menuPanel.SetActive(true);
@@ -126,4 +127,5 @@ public class InGameManager : MonoBehaviour
         menuState = false;
         SetActiveMenuPanel(menuState);
     }
+    #endregion
 }
