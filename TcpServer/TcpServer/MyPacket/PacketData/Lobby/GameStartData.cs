@@ -12,7 +12,7 @@ namespace MyPacket
         {
             get
             {
-                if (IsMafia)
+                if (!IsMafia)
                     return 1;
                 return 1 + Mafias.Length * 4;
             }
@@ -28,8 +28,11 @@ namespace MyPacket
         {
             var bb = new ByteBuilder(Size);
             bb.Append(IsMafia);
-            foreach (int i in Mafias)
-                bb.Append(i);
+            if (IsMafia)
+            {
+                foreach (int i in Mafias)
+                    bb.Append(i);
+            }
             return bb.Get();
         }
         public void FromBytes(byte[] bytes)

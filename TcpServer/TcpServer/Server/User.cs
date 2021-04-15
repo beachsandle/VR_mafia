@@ -30,6 +30,7 @@ namespace MyPacket
         {
             if (Status == UserStatus.CONNECT)
             {
+                Status = UserStatus.LOBBY;
                 Emit(PacketType.CONNECT, new ConnectData(Id).ToBytes());
                 Emit(PacketType.SET_NAME_RES, new SetNameResData(true, Name).ToBytes());
             }
@@ -103,7 +104,7 @@ namespace MyPacket
                 Emit(PacketType.JOIN_ROOM_RES, data.ToBytes());
                 return false;
             }
-            if (Room.Join(this))
+            if (room.Join(this))
             {
                 Room = room;
                 data.Users = room.GetUserInfos();

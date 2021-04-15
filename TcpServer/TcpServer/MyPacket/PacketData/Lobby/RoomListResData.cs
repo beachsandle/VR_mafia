@@ -19,8 +19,11 @@ namespace MyPacket
             get
             {
                 int size = 1;
-                foreach (var r in Rooms)
-                    size += r.Size;
+                if (Rooms != null)
+                {
+                    foreach (var r in Rooms)
+                        size += r.Size;
+                }
                 return size;
             }
         }
@@ -28,9 +31,12 @@ namespace MyPacket
         public byte[] ToBytes()
         {
             var bb = new ByteBuilder(Size).Append(Result);
-            foreach (var room in Rooms)
+            if (Rooms != null)
             {
-                bb.Append(room.ToBytes());
+                foreach (var room in Rooms)
+                {
+                    bb.Append(room.ToBytes());
+                }
             }
             return bb.Get();
         }

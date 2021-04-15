@@ -85,7 +85,7 @@ public class TestClientManager : MonoBehaviour
         Debug.Log("OnConnect : " + data.PlayerId);
         playerID = data.PlayerId;
         socket.Clear(PacketType.CONNECT);
-        socket.On(PacketType.SET_NAME, OnSetName);
+        socket.On(PacketType.SET_NAME_RES, OnSetNameRes);
         socket.On(PacketType.ROOM_LIST_RES, OnRoomListRes);
         socket.On(PacketType.CREATE_ROOM_RES, OnCreateRoomRes);
         socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
@@ -103,9 +103,9 @@ public class TestClientManager : MonoBehaviour
     }
 
     #region Lobby
-    private void OnSetName(MySocket socket, Packet packet)
+    private void OnSetNameRes(MySocket socket, Packet packet)
     {
-        var data = new SetNameData();
+        var data = new SetNameResData();
         data.FromBytes(packet.Bytes);
 
         Debug.Log("OnSetName : " + data.UserName);
@@ -116,7 +116,7 @@ public class TestClientManager : MonoBehaviour
     {
         if (!socketReady) return;
 
-        socket.Emit(PacketType.SET_NAME, new SetNameData(userName).ToBytes());
+        socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
     }
 
     private void OnCreateRoomRes(MySocket socket, Packet packet)

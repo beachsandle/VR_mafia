@@ -189,7 +189,7 @@ namespace MyPacket
                 stream.Write(packet.ToBytes(), 0, packet.Size);
             }
             //클라이언트 강제 종료시 연결 해제
-            catch (System.IO.IOException)
+            catch (Exception)
             {
                 handler[PacketType.DISCONNECT](this, new Packet());
             }
