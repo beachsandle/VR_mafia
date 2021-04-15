@@ -34,13 +34,13 @@ public class Player : MonoBehaviour
         HEAD = transform.GetChild(0);
         BODY = transform.GetChild(1);
 
-        Cursor.lockState = CursorLockMode.Locked;
-
         layermask = (1 << 10);
     }
 
     void Update()
     {
+        if (InGameManager.instance.menuState) return;
+
         Rotate();
         Move();
         //TestClientManager.instance.EmitMove(transform.position, transform.rotation);
