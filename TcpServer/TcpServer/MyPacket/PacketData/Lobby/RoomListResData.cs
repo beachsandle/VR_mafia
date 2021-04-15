@@ -6,17 +6,19 @@ namespace MyPacket
 {
     public struct RoomListResData : IPacketData
     {
+        public bool Result { get; set; }
         public List<GameRoomInfo> Rooms { get; set; }
 
-        public RoomListResData(List<GameRoomInfo> rooms = null)
+        public RoomListResData(bool result = true, List<GameRoomInfo> rooms = null)
         {
+            Result = result;
             Rooms = rooms;
         }
         public int Size
         {
             get
             {
-                int size = 0;
+                int size = 1;
                 foreach (var r in Rooms)
                     size += r.Size;
                 return size;
@@ -25,7 +27,7 @@ namespace MyPacket
 
         public byte[] ToBytes()
         {
-            var bb = new ByteBuilder(Size);
+            var bb = new ByteBuilder(Size).Append(Result);
             foreach (var room in Rooms)
             {
                 bb.Append(room.ToBytes());
@@ -35,7 +37,8 @@ namespace MyPacket
 
         public void FromBytes(byte[] bytes)
         {
-            int idx = 0;
+            int idx = 1;
+            Result = BitConverter.ToBoolean(bytes, 0);
             Rooms = new List<GameRoomInfo>();
             while (idx < bytes.Length)
             {

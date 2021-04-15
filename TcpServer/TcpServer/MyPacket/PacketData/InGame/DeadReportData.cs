@@ -27,7 +27,7 @@ namespace MyPacket
         public DeadReportData(int dead_id, int reporter_id)
         {
             Dead_id = dead_id;
-            Reporter_id = reporter_id
+            Reporter_id = reporter_id;
   
         }
 

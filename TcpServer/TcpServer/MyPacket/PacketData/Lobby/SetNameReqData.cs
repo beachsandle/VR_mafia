@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct SetNameData : IPacketData
+    public struct SetNameReqData : IPacketData
     {
         public int Size
         {
@@ -14,7 +14,7 @@ namespace MyPacket
             }
         }
         public string UserName { get; set; }
-        public SetNameData(string userName = "")
+        public SetNameReqData(string userName = "")
         {
             UserName = userName;
         }

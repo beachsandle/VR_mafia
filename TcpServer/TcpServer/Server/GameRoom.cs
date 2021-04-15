@@ -38,24 +38,34 @@ namespace MyPacket
                 return false;
             users[user.Id] = user;
             ++Participants;
+            var data = new JoinEventData(user.GetInfo());
+            Broadcast(PacketType.JOIN_EVENT, data.ToBytes(), user);
             return true;
         }
-        public void Leave(User user)
+        public void RemoveUser(int userId)
         {
             --Participants;
-            users.Remove(user.Id);
+            users.Remove(userId);
+        }
+        public bool Leave(User user)
+        {
+            if (!user.LeaveRoom())
+                return false;
+            RemoveUser(user.Id);
             if (!IsStarted && HostId == user.Id)
             {
                 foreach (var u in users.Values.ToArray())
                 {
-                    u.Emit(PacketType.LEAVE_EVENT, new LeaveEventData(u.Id).ToBytes());
-                    u.LeaveRoom();
-                    --Participants;
-                    users.Remove(u.Id);
+                    if (u.LeaveRoom())
+                    {
+                        RemoveUser(u.Id);
+                    }
                 }
             }
+            Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
             if (Participants == 0)
-                Server.Rooms.Remove(Id);
+                Server.RemoveRoom(Id);
+            return true;
         }
         public void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
         {
@@ -88,10 +98,17 @@ namespace MyPacket
         {
             return (from u in users.Values select u.GetInfo()).ToList();
         }
-        public void GameStart()
+        public bool GameStart(User user)
         {
+
+            if (user.Status != UserStatus.WAITTING || HostId != user.Id)
+                return false;
             IsStarted = true;
-            Broadcast(PacketType.GAME_START);
+            foreach (var u in users.Values)
+            {
+                u.GameStart(false, null);
+            }
+            return true;
         }
     }
 }

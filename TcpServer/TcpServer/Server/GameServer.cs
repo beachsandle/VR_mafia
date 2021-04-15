@@ -9,19 +9,21 @@ using MyPacket;
 
 namespace MyPacket
 {
-    public class GameServer
+    public partial class GameServer
     {
+        #region field
         private TcpListener server;
-        public Dictionary<int, User> Users { get; private set; } = new Dictionary<int, User>();
-        public Dictionary<int, GameRoom> Rooms { get; private set; } = new Dictionary<int, GameRoom>();
+        private Dictionary<int, User> userMap = new Dictionary<int, User>();
+        private Dictionary<int, GameRoom> roomMap = new Dictionary<int, GameRoom>();
+        #endregion
+        #region constructor
         public GameServer(TcpListener server)
         {
             this.server = server;
         }
-        /// <summary>
-        /// 서버 시작
-        /// </summary>
-        /// <exception cref="SocketException"></exception>
+        #endregion
+        #region public method
+        //서버를 시작하고 접속한 클라이언트들을 user로 추가
         public void Start()
         {
             server.Start();
@@ -29,152 +31,38 @@ namespace MyPacket
             while (true)
             {
                 var client = server.AcceptTcpClient();
-                var user = new User(client);
-                Users[user.Id] = user;
-                UserInit(user);
+                UserInit(new User(client, this));
             }
         }
-        #region connect handler
-        private void OnConnect(MySocket socket, Packet packet)
+        public GameRoom CreateRoom(User user, string roomName)
         {
-            var user = socket as User;
-            Console.WriteLine($"connect : {user.Id}");
-            EnterLobby(user);
-            user.Emit(PacketType.CONNECT, new ConnectData(user.Id).ToBytes());
-            user.Emit(PacketType.SET_NAME, new SetNameData(user.Name).ToBytes());
+            var room = new GameRoom(this, user, roomName);
+            roomMap[room.Id] = room;
+            return room;
         }
-        private void OnDisconnect(MySocket socket, Packet packet)
+        public void RemoveUser(int userId)
         {
-            var user = socket as User;
-            Console.WriteLine($"disconnect : {user.Id}");
-            user.LeaveRoom();
-            user.Close();
-            Users.Remove(user.Id);
-
+            userMap.Remove(userId);
+        }
+        public void RemoveRoom(int roomId)
+        {
+            roomMap.Remove(roomId);
         }
         #endregion
+        #region private method
         private void UserInit(User user)
         {
-            user.On(PacketType.CONNECT, OnConnect);
-            user.On(PacketType.DISCONNECT, OnDisconnect);
-            user.On(PacketType.MOVE, OnMove);
+            userMap[user.Id] = user;
+            EnrollConnectHandler(user);
+            EnrollLobbyHandler(user);
+            EnrollWatingHandler(user);
+            EnrollPlayingHandler(user);
             user.Listen(true);
         }
-        #region lobby handler
-        private void OnSetName(MySocket socket, Packet packet)
+        private List<GameRoomInfo> GetRoomInfos()
         {
-            var user = socket as User;
-            var data = new SetNameData();
-            data.FromBytes(packet.Bytes);
-            user.Name = data.UserName;
-            Console.WriteLine($"setname : {user.Id}");
-        }
-        private void OnRoomListReq(MySocket socket, Packet packet)
-        {
-            var roominfos = (from r in Rooms.Values where !r.IsStarted select r.GetInfo()).ToList();
-            socket.Emit(PacketType.ROOM_LIST_RES, new RoomListResData(roominfos).ToBytes());
-            Console.WriteLine($"room list req");
-        }
-        private void OnCreateRoomReq(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var data = new CreateRoomReqData();
-            data.FromBytes(packet.Bytes);
-            var room = new GameRoom(this, user, data.RoomName);
-            Rooms[room.Id] = room;
-            user.JoinRoom(room);
-            OutLobby(user);
-            EnterWaitingRoom(user);
-            user.Emit(PacketType.CREATE_ROOM_RES);
-            Console.WriteLine($"create room req : {user.Id}");
-        }
-        private void OnJoinRoomReq(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var data = new JoinRoomReqData();
-            data.FromBytes(packet.Bytes);
-            if (!Rooms.ContainsKey(data.RoomId))
-            {
-                Console.WriteLine($"room not exist: {data.RoomId}");
-                return;
-            }
-            var room = Rooms[data.RoomId];
-
-            Console.WriteLine($"join room : {user.Id}");
-            if (user.JoinRoom(room))
-            {
-                OutLobby(user);
-                EnterWaitingRoom(user);
-                user.Emit(PacketType.JOIN_ROOM_RES, new JoinRoomResData(true, room.GetUserInfos()).ToBytes());
-                room.Broadcast(PacketType.JOIN_EVENT, new JoinEventData(user.GetInfo()).ToBytes(), user);
-            }
-            else
-                user.Emit(PacketType.JOIN_ROOM_RES, new JoinRoomResData(false).ToBytes());
+            return (from r in roomMap.Values where !r.IsStarted select r.GetInfo()).ToList();
         }
         #endregion
-        private void EnterLobby(User user)
-        {
-            user.Clear(PacketType.CONNECT);
-            user.On(PacketType.SET_NAME, OnSetName);
-            user.On(PacketType.ROOM_LIST_REQ, OnRoomListReq);
-            user.On(PacketType.CREATE_ROOM_REQ, OnCreateRoomReq);
-            user.On(PacketType.JOIN_ROOM_REQ, OnJoinRoomReq);
-
-        }
-        private void OutLobby(User user)
-        {
-            user.Clear(PacketType.SET_NAME);
-            user.Clear(PacketType.ROOM_LIST_REQ);
-            user.Clear(PacketType.CREATE_ROOM_REQ);
-            user.Clear(PacketType.JOIN_ROOM_REQ);
-        }
-        #region waiting handler
-        private void OnLeaveRoomReq(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var room = user.Room;
-            if (!room.IsStarted)
-            {
-                user.LeaveRoom();
-                OutWaitingRoom(user);
-                EnterLobby(user);
-                user.Emit(PacketType.LEAVE_ROOM_RES);
-                room.Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes(), user);
-            }
-        }
-        private void OnGameStartReq(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var room = user.Room;
-            room.GameStart();
-            Console.WriteLine($"start : {user.Id}");
-        }
-        #endregion
-        private void EnterWaitingRoom(User user)
-        {
-            user.On(PacketType.LEAVE_ROOM_REQ, OnLeaveRoomReq);
-            user.On(PacketType.GAME_START_REQ, OnGameStartReq);
-        }
-        private void OutWaitingRoom(User user)
-        {
-            user.Clear(PacketType.LEAVE_ROOM_REQ);
-            user.Clear(PacketType.GAME_START_REQ);
-        }
-        private void OnMove(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var room = user.Room;
-            room.Broadcast(PacketType.MOVE, packet.Bytes, user);
-        }
-        private void OnKillReq(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var room = user.Room;
-            var data = new KillReqDada();
-            data.FromBytes(packet.Bytes);
-            Users[data.Target_id].Alive = false;
-            user.Emit(PacketType.KILL_RES, new KillResDada(true).ToBytes());
-            room.Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id).ToBytes());
-        }
     }
 }
