@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using MyPacket;
 
 public class InGameManager : MonoBehaviour
@@ -23,6 +24,11 @@ public class InGameManager : MonoBehaviour
     private GameObject playerObj;
     private int interval = 0;
 
+    [Header("Menu Panel")]
+    [SerializeField] private GameObject menuPanel;
+    [SerializeField] private Button backButton;
+    [HideInInspector] public bool menuState = false;
+
     static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black }; // 임시
 
     public Dictionary<int, GameObject> players;
@@ -44,12 +50,20 @@ public class InGameManager : MonoBehaviour
     {
         players = new Dictionary<int, GameObject>();
 
+        InitMenuPanel();
         SpawnPlayers();
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            menuState = !menuState;
+            SetActiveMenuPanel(menuState);
+        }
     }
 
     private void SpawnPlayers()
@@ -83,4 +97,35 @@ public class InGameManager : MonoBehaviour
         TR.position = new Vector3(pos.x, pos.y, pos.z);
         TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
+
+    #region MenuPanel
+    private void InitMenuPanel()
+    {
+        menuPanel.SetActive(true);
+
+        menuPanel.transform.GetChild(0).Find("Back Button").GetComponent<Button>().onClick.AddListener(OnBackButton);
+
+        menuPanel.SetActive(false);
+    }
+    private void SetActiveMenuPanel(bool state)
+    {
+        if (state)
+        {
+            menuPanel.SetActive(true);
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            menuPanel.SetActive(false);
+        }
+    }
+    private void OnBackButton()
+    {
+        menuState = false;
+        SetActiveMenuPanel(menuState);
+    }
+    #endregion
 }

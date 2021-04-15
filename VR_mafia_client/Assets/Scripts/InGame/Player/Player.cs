@@ -15,14 +15,12 @@ public class Player : MonoBehaviour
     private RaycastHit hit;
     private int layermask;
 
-    [Header("속도 및 중력")]
+    [Header("Status")]
     public float moveSpeed = 4.0F;
     public float jumpSpeed = 8.0F;
     public float rotateSpeed = 100.0F;
     public float gravity = 20.0F;
-
     public float range = 5.0F;
-
 
     void Start()
     {
@@ -31,19 +29,19 @@ public class Player : MonoBehaviour
         {
             Debug.Log("CC is empty..!");
         }
+
         HEAD = transform.GetChild(0);
         BODY = transform.GetChild(1);
-
-        Cursor.lockState = CursorLockMode.Locked;
 
         layermask = (1 << 10);
     }
 
     void Update()
     {
+        if (InGameManager.instance.menuState) return;
+
         Rotate();
         Move();
-        //TestClientManager.instance.EmitMove(transform.position, transform.rotation);
 
         FindTarget();
 
@@ -65,7 +63,6 @@ public class Player : MonoBehaviour
     {
         if (Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
         {
-            //Debug.Log("Hit Player");
             Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
 
             UIManager.instance.CanKill(true);
@@ -81,7 +78,9 @@ public class Player : MonoBehaviour
     void Kill()
     {
         if (hit.transform)
+        {
             Destroy(hit.transform.gameObject);
+        }
     }
 
     #region 움직임 관련
@@ -92,11 +91,13 @@ public class Player : MonoBehaviour
             moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
+
             if (Input.GetButton("Jump"))
             {
                 moveDirection.y = jumpSpeed;
             }
         }
+
         moveDirection.y -= gravity * Time.deltaTime;
         CC.Move(moveDirection * Time.deltaTime);
     }
