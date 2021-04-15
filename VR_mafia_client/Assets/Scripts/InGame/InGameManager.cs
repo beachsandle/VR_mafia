@@ -54,6 +54,7 @@ public class InGameManager : MonoBehaviour
         SpawnPlayers();
 
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
@@ -111,10 +112,12 @@ public class InGameManager : MonoBehaviour
         {
             menuPanel.SetActive(true);
             Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
         }
         else
         {
             Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             menuPanel.SetActive(false);
         }
     }
