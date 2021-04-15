@@ -11,11 +11,12 @@ namespace MyPacket
     public enum PacketType
     {
         NONE,
+        //connect
         CONNECT,
         DISCONNECT,
-        MOVE,
         //lobby
-        SET_NAME,
+        SET_NAME_REQ,
+        SET_NAME_RES,
         ROOM_LIST_REQ,
         ROOM_LIST_RES,
         CREATE_ROOM_REQ,
@@ -29,6 +30,15 @@ namespace MyPacket
         LEAVE_EVENT,
         GAME_START_REQ,
         GAME_START,
+        //ingame
+        MOVE,
+        KILL_REQ,
+        KILL_RES,
+        DIE_EVENT,
+        DEAD_REPORT,
+        START_VOTING,
+        VOTE_REQ,
+        VOTE_EVENT,
         END
     }
 }

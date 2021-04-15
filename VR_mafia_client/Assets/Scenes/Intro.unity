@@ -563,8 +563,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce78c076a88ccea4aa0b0f019e23d75c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hostIp: 
-  port: 0
+  hostIp: 15.164.217.28
+  port: 55759
   playerID: 0
   userName: 
 --- !u!4 &1629618744

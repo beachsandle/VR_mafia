@@ -4,15 +4,19 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct JoinRoomResData : IPacketData
+    public class JoinRoomResData : IPacketData
     {
-        public bool Result { get; set; }
-        public List<UserInfo> Users { get; set; }
+        public bool Result { get; set; } = true;
+        public List<UserInfo> Users { get; set; } = null;
 
         public JoinRoomResData(bool result = true, List<UserInfo> users = null)
         {
             Result = result;
             Users = users;
+        }
+        public JoinRoomResData(byte[] bytes)
+        {
+            FromBytes(bytes);
         }
         public int Size
         {
