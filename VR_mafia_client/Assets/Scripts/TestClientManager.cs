@@ -15,7 +15,9 @@ public class TestClientManager : MonoBehaviour
     public MySocket socket;
     private bool socketReady;
 
+    [HideInInspector]
     public string hostIp;
+    [HideInInspector]
     public int port;
 
     public int playerID;
@@ -32,13 +34,13 @@ public class TestClientManager : MonoBehaviour
     }
     private void Start()
     {
-        ConnectToServer();
+        //ConnectToServer();
 
         users = new List<UserInfo>();
     }
     private void Update()
     {
-        while (socket.MessageCount > 0)
+        while (socketReady && 0 < socket.MessageCount)
             socket.Handle();
     }
 
