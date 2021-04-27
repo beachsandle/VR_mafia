@@ -22,7 +22,6 @@ public class InGameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject playerObj;
-    private int interval = 0;
 
     [Header("Menu Panel")]
     [SerializeField] private GameObject menuPanel;
@@ -68,13 +67,16 @@ public class InGameManager : MonoBehaviour
 
     private void SpawnPlayers()
     {
-        foreach(UserInfo u in TestClientManager.instance.users)
+        Transform spawnPos = GameObject.Find("SpawnPosition").transform;
+        int idx = 0;
+
+        foreach (UserInfo u in TestClientManager.instance.users)
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
-            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = colors[interval]; // 임시
-            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = colors[interval]; // 임시
-            p.transform.position += new Vector3(interval++, 0, 0);
+            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = colors[idx]; // 임시
+            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = colors[idx]; // 임시
+            p.transform.position = spawnPos.GetChild(idx++).position;
 
             if(u.Id == TestClientManager.instance.playerID)
             {
