@@ -22,6 +22,11 @@ public class InGameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject playerObj;
+    
+    [Header("UI")]
+    [SerializeField]
+    private Text informationText;
+    private float fadeTime = 3f;
 
     [Header("Menu Panel")]
     [SerializeField] private GameObject menuPanel;
@@ -31,7 +36,6 @@ public class InGameManager : MonoBehaviour
     static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black }; // 임시
 
     public Dictionary<int, GameObject> players;
-
 
     private void Awake()
     {
@@ -82,6 +86,8 @@ public class InGameManager : MonoBehaviour
             {
                 p.AddComponent<Player>();
 
+                StartInformation(string.Format("당신은 {0}입니다", "마피아"));
+                
                 Camera.main.transform.parent = p.transform.Find("Head");
                 Camera.main.transform.localPosition = new Vector3(0, 0, 0);
             }
@@ -98,6 +104,32 @@ public class InGameManager : MonoBehaviour
         Transform TR = players[data.player_id].transform;
         TR.position = new Vector3(pos.x, pos.y, pos.z);
         TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+    }
+
+    public void StartInformation(string s)
+    {
+        informationText.gameObject.SetActive(true);
+        informationText.text = s;
+
+        StartCoroutine(FadeOutInformationText());
+    }
+    private IEnumerator FadeOutInformationText()
+    {
+        Color orginColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 1);
+        Color clearColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 0);
+        float time = 0f;
+
+        while(informationText.color.a > 0.0f)
+        {
+            informationText.color = Color.Lerp(orginColor, clearColor, time / fadeTime);
+            time += Time.deltaTime;
+
+            yield return null;
+        }
+        informationText.color = clearColor;
+
+        informationText.text = "";
+        informationText.gameObject.SetActive(false);
     }
 
     #region MenuPanel
