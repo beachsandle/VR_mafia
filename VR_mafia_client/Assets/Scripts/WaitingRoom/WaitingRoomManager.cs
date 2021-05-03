@@ -14,7 +14,6 @@ public class WaitingRoomManager : MonoBehaviour
     [SerializeField] private Text roomNameText;
 
     private Transform[] playerTRs;
-    static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black };
     const int HEAD_COUNT = 10;
 
     public static WaitingRoomManager instance;
@@ -42,11 +41,11 @@ public class WaitingRoomManager : MonoBehaviour
 
     public void AddPlayer(UserInfo user)
     {
-        //TODO: SetPlayerInfo()로 교체, user Name이 비어있음
+        //TODO: SetPlayerInfo()로 교체
         //SetPlayerInfo(TestClientManager.instance.users.Count);
 
         playerTRs[TestClientManager.instance.users.Count - 1].Find("Name").GetComponent<Text>().text = user.Name;
-        playerTRs[TestClientManager.instance.users.Count - 1].Find("Image").GetComponent<Image>().color = colors[TestClientManager.instance.users.Count - 1];
+        playerTRs[TestClientManager.instance.users.Count - 1].Find("Image").GetComponent<Image>().color = Global.colors[TestClientManager.instance.users.Count - 1];
     }
 
     public void RemovePlayer(int playerId)
@@ -65,7 +64,7 @@ public class WaitingRoomManager : MonoBehaviour
     private void SetPlayerInfo(int playerNum)
     {
         playerTRs[playerNum].Find("Name").GetComponent<Text>().text = TestClientManager.instance.users[playerNum].Name;
-        playerTRs[playerNum].Find("Image").GetComponent<Image>().color = colors[playerNum];
+        playerTRs[playerNum].Find("Image").GetComponent<Image>().color = Global.colors[playerNum];
     }
 
     private void SetRoomName(string roomName)
