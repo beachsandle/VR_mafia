@@ -24,6 +24,7 @@ public class TestClientManager : MonoBehaviour
     public string userName;
 
     public List<UserInfo> users;
+    public bool isMafia;
 
     public static TestClientManager instance;
     void Awake()
@@ -207,6 +208,10 @@ public class TestClientManager : MonoBehaviour
     }
     private void OnGameStart(MySocket socket, Packet packet)
     {
+        var data = new GameStartData();
+        data.FromBytes(packet.Bytes);
+        isMafia = data.IsMafia;
+
         Debug.Log("Start");
 
         SceneManager.LoadScene("InGame");

@@ -22,8 +22,12 @@ public class InGameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject playerObj;
-    
+
+    private bool isMafia;
+
     [Header("UI")]
+    [SerializeField]
+    private Text roleText;
     [SerializeField]
     private Text informationText;
     private float fadeTime = 3f;
@@ -52,6 +56,7 @@ public class InGameManager : MonoBehaviour
     void Start()
     {
         players = new Dictionary<int, GameObject>();
+        isMafia = TestClientManager.instance.isMafia;
 
         InitMenuPanel();
         SpawnPlayers();
@@ -86,7 +91,8 @@ public class InGameManager : MonoBehaviour
             {
                 p.AddComponent<Player>();
 
-                StartInformation(string.Format("당신은 {0}입니다", "마피아"));
+                roleText.text = isMafia ? "마피아" : "시민";
+                StartInformation(string.Format("당신은 {0}입니다", roleText.text));
                 
                 Camera.main.transform.parent = p.transform.Find("Head");
                 Camera.main.transform.localPosition = new Vector3(0, 0, 0);
