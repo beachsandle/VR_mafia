@@ -37,8 +37,6 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Button backButton;
     [HideInInspector] public bool menuState = false;
 
-    static Color[] colors = { Color.red, Color.green, Color.blue, Color.cyan, Color.magenta, Color.yellow, Color.gray, Color.black }; // 임시
-
     public Dictionary<int, GameObject> players;
 
     private void Awake()
@@ -83,8 +81,8 @@ public class InGameManager : MonoBehaviour
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
-            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = colors[idx]; // 임시
-            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = colors[idx]; // 임시
+            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
+            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
             p.transform.position = spawnPos.GetChild(idx++).position;
 
             if(u.Id == TestClientManager.instance.playerID)
