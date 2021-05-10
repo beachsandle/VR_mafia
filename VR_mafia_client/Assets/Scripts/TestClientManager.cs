@@ -236,6 +236,15 @@ public class TestClientManager : MonoBehaviour
         var rotation = new V3(rot.eulerAngles.x, rot.eulerAngles.y, rot.eulerAngles.z);
         return new Location(position, rotation);
     }
+
+    private void OnDayStart()
+    {
+        InGameManager.instance.StartDay();
+    }
+    private void OnNightStart()
+    {
+        InGameManager.instance.StartNight();
+    }
     #endregion
     private void CloseSocket()
     {

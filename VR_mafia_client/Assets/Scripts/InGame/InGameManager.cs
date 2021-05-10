@@ -37,7 +37,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Button backButton;
     [HideInInspector] public bool menuState = false;
 
-    public Dictionary<int, GameObject> players;
+    public Dictionary<int, GameObject> players; // id, object
 
     private void Awake()
     {
@@ -100,6 +100,29 @@ public class InGameManager : MonoBehaviour
         }
     }
 
+    private void GatherPlayers()
+    {
+        Transform spawnPos = GameObject.Find("SpawnPosition").transform;
+        int idx = 0;
+
+        foreach(GameObject p in players.Values)
+        {
+            p.transform.position = spawnPos.GetChild(idx++).position;
+        }
+    }
+
+    public void StartDay()
+    {
+        StartInformation("낮이 되었습니다.");
+    }
+
+    public void StartNight()
+    {
+        StartInformation("밤이 되었습니다.");
+
+        GatherPlayers();
+    }
+
     public void UpdatePlayerTransform(MoveData data)
     {
         V3 pos = data.location.position;
@@ -112,6 +135,7 @@ public class InGameManager : MonoBehaviour
 
     public void StartInformation(string s)
     {
+        Debug.Log("Info : " + s);
         informationText.gameObject.SetActive(true);
         informationText.text = s;
 
@@ -130,9 +154,9 @@ public class InGameManager : MonoBehaviour
 
             yield return null;
         }
-        informationText.color = clearColor;
 
         informationText.text = "";
+        informationText.color = orginColor;
         informationText.gameObject.SetActive(false);
     }
 
