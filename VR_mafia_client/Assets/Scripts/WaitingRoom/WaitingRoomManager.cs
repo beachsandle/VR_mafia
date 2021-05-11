@@ -33,7 +33,7 @@ public class WaitingRoomManager : MonoBehaviour
         startButton.onClick.AddListener(OnStartButton);
         leaveButton.onClick.AddListener(OnLeaveButton);
 
-        for (int i = 0; i < TestClientManager.instance.users.Count; i++)
+        for (int i = 0; i < ClientManager.instance.users.Count; i++)
         {
             SetPlayerInfo(i);
         }
@@ -42,19 +42,19 @@ public class WaitingRoomManager : MonoBehaviour
     public void AddPlayer(UserInfo user)
     {
         //TODO: SetPlayerInfo()로 교체
-        //SetPlayerInfo(TestClientManager.instance.users.Count);
+        //SetPlayerInfo(ClientManager.instance.users.Count);
 
-        playerTRs[TestClientManager.instance.users.Count - 1].Find("Name").GetComponent<Text>().text = user.Name;
-        playerTRs[TestClientManager.instance.users.Count - 1].Find("Image").GetComponent<Image>().color = Global.colors[TestClientManager.instance.users.Count - 1];
+        playerTRs[ClientManager.instance.users.Count - 1].Find("Name").GetComponent<Text>().text = user.Name;
+        playerTRs[ClientManager.instance.users.Count - 1].Find("Image").GetComponent<Image>().color = Global.colors[ClientManager.instance.users.Count - 1];
     }
 
     public void RemovePlayer(int playerId)
     {
-        for (int i = 0; i < TestClientManager.instance.users.Count; i++)
+        for (int i = 0; i < ClientManager.instance.users.Count; i++)
         {
             SetPlayerInfo(i);
         }
-        for(int i = TestClientManager.instance.users.Count; i < HEAD_COUNT; i++)
+        for(int i = ClientManager.instance.users.Count; i < HEAD_COUNT; i++)
         {
             playerTRs[i].Find("Name").GetComponent<Text>().text = "P" + (i + 1);
             playerTRs[i].Find("Image").GetComponent<Image>().color = Color.white;
@@ -63,7 +63,7 @@ public class WaitingRoomManager : MonoBehaviour
 
     private void SetPlayerInfo(int playerNum)
     {
-        playerTRs[playerNum].Find("Name").GetComponent<Text>().text = TestClientManager.instance.users[playerNum].Name;
+        playerTRs[playerNum].Find("Name").GetComponent<Text>().text = ClientManager.instance.users[playerNum].Name;
         playerTRs[playerNum].Find("Image").GetComponent<Image>().color = Global.colors[playerNum];
     }
 
@@ -74,10 +74,10 @@ public class WaitingRoomManager : MonoBehaviour
 
     void OnStartButton()
     {
-        TestClientManager.instance.EmitGameStartReq();
+        ClientManager.instance.EmitGameStartReq();
     }
     void OnLeaveButton()
     {
-        TestClientManager.instance.EmitLeaveRoomReq();
+        ClientManager.instance.EmitLeaveRoomReq();
     }
 }

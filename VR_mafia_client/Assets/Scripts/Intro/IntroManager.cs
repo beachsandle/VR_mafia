@@ -52,11 +52,11 @@ public class IntroManager : MonoBehaviour
 
     public void OnConnectButton()
     {
-        FindObjectOfType<TestClientManager>().gameObject.SetActive(true);
+        FindObjectOfType<ClientManager>().gameObject.SetActive(true);
 
-        TestClientManager.instance.hostIp = hostIpInputField.text;
-        TestClientManager.instance.port = (hostIpInputField.text == "") ? 0 : int.Parse(hostIpInputField.text);
+        ClientManager.instance.hostIp = hostIpInputField.text;
+        ClientManager.instance.port = (hostIpInputField.text == "") ? 0 : int.Parse(hostIpInputField.text);
 
-        TestClientManager.instance.ConnectToServer();
+        ClientManager.instance.ConnectToServer();
     }
 }

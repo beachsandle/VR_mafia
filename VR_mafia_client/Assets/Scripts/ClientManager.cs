@@ -9,7 +9,7 @@ using System.Net.Sockets;
 using System.Threading;
 using MyPacket;
 
-public class TestClientManager : MonoBehaviour
+public class ClientManager : MonoBehaviour
 {
     private TcpClient client;
     public MySocket socket;
@@ -26,7 +26,7 @@ public class TestClientManager : MonoBehaviour
     public List<UserInfo> users;
     public bool isMafia;
 
-    public static TestClientManager instance;
+    public static ClientManager instance;
     void Awake()
     {
         instance = this;

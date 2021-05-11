@@ -96,7 +96,7 @@ public class Player : MonoBehaviour
         if(moveDirection != Vector3.zero)
         {
             CC.Move(moveDirection * Time.deltaTime);
-            TestClientManager.instance.EmitMove(transform.position, transform.rotation);
+            ClientManager.instance.EmitMove(transform.position, transform.rotation);
         }
     }
 

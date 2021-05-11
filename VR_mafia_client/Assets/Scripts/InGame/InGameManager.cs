@@ -55,7 +55,7 @@ public class InGameManager : MonoBehaviour
     void Start()
     {
         players = new Dictionary<int, GameObject>();
-        isMafia = TestClientManager.instance.isMafia;
+        isMafia = ClientManager.instance.isMafia;
 
         InitMenuPanel();
         SpawnPlayers();
@@ -78,7 +78,7 @@ public class InGameManager : MonoBehaviour
         Transform spawnPos = GameObject.Find("SpawnPosition").transform;
         int idx = 0;
 
-        foreach (UserInfo u in TestClientManager.instance.users)
+        foreach (UserInfo u in ClientManager.instance.users)
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
@@ -86,7 +86,7 @@ public class InGameManager : MonoBehaviour
             p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
             p.transform.position = spawnPos.GetChild(idx++).position;
 
-            if(u.Id == TestClientManager.instance.playerID)
+            if(u.Id == ClientManager.instance.playerID)
             {
                 p.AddComponent<Player>();
 
@@ -163,7 +163,6 @@ public class InGameManager : MonoBehaviour
 
     public void StartInformation(string s)
     {
-        Debug.Log("Info : " + s);
         informationText.gameObject.SetActive(true);
         informationText.text = s;
 

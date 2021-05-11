@@ -1487,7 +1487,7 @@ GameObject:
   - component: {fileID: 1629618744}
   - component: {fileID: 1629618743}
   m_Layer: 0
-  m_Name: TestClientManager
+  m_Name: ClientManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1509,6 +1509,7 @@ MonoBehaviour:
   port: 55759
   playerID: 0
   userName: 
+  isMafia: 0
 --- !u!4 &1629618744
 Transform:
   m_ObjectHideFlags: 0

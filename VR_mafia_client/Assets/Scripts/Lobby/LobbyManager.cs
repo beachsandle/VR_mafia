@@ -44,7 +44,7 @@ public class LobbyManager : MonoBehaviour
         refreshButton.onClick.AddListener(OnRefreshButton);
         changeNameButton.onClick.AddListener(OnChangeNameButton);
 
-        playerName.text = TestClientManager.instance.userName;
+        playerName.text = ClientManager.instance.userName;
 
         InitChangeNamePanel();
         InitCreateRoomPanel();
@@ -56,13 +56,13 @@ public class LobbyManager : MonoBehaviour
 
     void OnJoinButton()
     {
-        TestClientManager.instance.EmitJoinRoomReq(roomList.select);
+        ClientManager.instance.EmitJoinRoomReq(roomList.select);
     }
 
     void OnRefreshButton()
     {
         roomList.Clear();
-        TestClientManager.instance.EmitRoomListReq();
+        ClientManager.instance.EmitRoomListReq();
     }
 
     #region CreateRoomPanel
@@ -83,7 +83,7 @@ public class LobbyManager : MonoBehaviour
     }
     void OnCreateRoomOKButton()
     {
-        TestClientManager.instance.EmitCreateRoomReq(roomNameInputField.text);
+        ClientManager.instance.EmitCreateRoomReq(roomNameInputField.text);
         createRoomPanel.SetActive(false);
     }
     void OnCreateRoomNOButton()
@@ -110,8 +110,8 @@ public class LobbyManager : MonoBehaviour
     }
     void OnChangeNameOKButton()
     {
-        TestClientManager.instance.userName = nameInputField.text;
-        TestClientManager.instance.EmitSetName(nameInputField.text);
+        ClientManager.instance.userName = nameInputField.text;
+        ClientManager.instance.EmitSetName(nameInputField.text);
         playerName.text = nameInputField.text;
         changeNamePanel.SetActive(false);
     }
