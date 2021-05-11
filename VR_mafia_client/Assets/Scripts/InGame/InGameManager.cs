@@ -112,10 +112,9 @@ public class InGameManager : MonoBehaviour
             p.transform.position = spawnPos.GetChild(idx++).position;
             p.GetComponent<Player>().CC.enabled = true;
         }
-
-        phaseChange = false;
     }
 
+    #region Phase
     public void StartDay()
     {
         StartInformation("낮이 되었습니다.");
@@ -123,9 +122,12 @@ public class InGameManager : MonoBehaviour
 
     public void StartNight()
     {
-        StartInformation("밤이 되었습니다.");
+        phaseChange = true;
 
+        StartInformation("밤이 되었습니다.");
         GatherPlayers();
+
+        phaseChange = false;
     }
 
     public void StartPhaseChange()
@@ -147,6 +149,7 @@ public class InGameManager : MonoBehaviour
         GatherPlayers();
         phaseChange = false;
     }
+    #endregion
 
     public void UpdatePlayerTransform(MoveData data)
     {
