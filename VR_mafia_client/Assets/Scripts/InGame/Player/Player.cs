@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private CharacterController CC;
+    public CharacterController CC;
     private Transform HEAD;
     private Transform BODY;
     private Vector3 moveDirection = Vector3.zero;
@@ -38,24 +38,23 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (InGameManager.instance.phaseChange) return;
+        
+        Move();
+
         if (InGameManager.instance.menuState) return;
 
         Rotate();
-        Move();
-
         FindTarget();
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Kill();
         }
-        else if (
-            Input.GetKey(KeyCode.W) ||
-            Input.GetKey(KeyCode.A) ||
-            Input.GetKey(KeyCode.S) ||
-            Input.GetKey(KeyCode.D))
+
+        if (Input.GetKeyDown(KeyCode.N))
         {
-            TestClientManager.instance.EmitMove(transform.position, transform.rotation);
+            InGameManager.instance.StartNight();
         }
     }
 
@@ -97,10 +96,15 @@ public class Player : MonoBehaviour
                 moveDirection.y = jumpSpeed;
             }
         }
-
         moveDirection.y -= gravity * Time.deltaTime;
-        CC.Move(moveDirection * Time.deltaTime);
+
+        if(moveDirection != Vector3.zero)
+        {
+            CC.Move(moveDirection * Time.deltaTime);
+            TestClientManager.instance.EmitMove(transform.position, transform.rotation);
+        }
     }
+
     void Rotate()
     {
         rotX += Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;

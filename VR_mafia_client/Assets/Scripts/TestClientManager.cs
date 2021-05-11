@@ -95,6 +95,8 @@ public class TestClientManager : MonoBehaviour
         socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
         socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
         socket.On(PacketType.MOVE, OnMove);
+        socket.On(PacketType.DAY_START, OnDayStart);
+        socket.On(PacketType.NIGHT_START, OnNightStart);
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
     private void OnDisconnect(MySocket socket, Packet packet)
@@ -237,11 +239,11 @@ public class TestClientManager : MonoBehaviour
         return new Location(position, rotation);
     }
 
-    private void OnDayStart()
+    private void OnDayStart(MySocket socket, Packet packet)
     {
         InGameManager.instance.StartDay();
     }
-    private void OnNightStart()
+    private void OnNightStart(MySocket socket, Packet packet)
     {
         InGameManager.instance.StartNight();
     }

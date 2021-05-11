@@ -24,6 +24,7 @@ public class InGameManager : MonoBehaviour
     private GameObject playerObj;
 
     private bool isMafia;
+    public bool phaseChange;
 
     [Header("UI")]
     [SerializeField]
@@ -107,8 +108,12 @@ public class InGameManager : MonoBehaviour
 
         foreach(GameObject p in players.Values)
         {
+            p.GetComponent<Player>().CC.enabled = false;
             p.transform.position = spawnPos.GetChild(idx++).position;
+            p.GetComponent<Player>().CC.enabled = true;
         }
+
+        phaseChange = false;
     }
 
     public void StartDay()
@@ -121,6 +126,26 @@ public class InGameManager : MonoBehaviour
         StartInformation("밤이 되었습니다.");
 
         GatherPlayers();
+    }
+
+    public void StartPhaseChange()
+    {
+        StartCoroutine(PhaseChange());
+    }
+    private IEnumerator PhaseChange()
+    {
+        phaseChange = true;
+
+        float time = 1f;
+        while(0f < time)
+        {
+            time -= Time.deltaTime;
+
+            yield return null;
+        }
+
+        GatherPlayers();
+        phaseChange = false;
     }
 
     public void UpdatePlayerTransform(MoveData data)

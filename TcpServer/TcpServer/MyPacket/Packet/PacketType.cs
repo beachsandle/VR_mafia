@@ -39,6 +39,8 @@ namespace MyPacket
         START_VOTING,
         VOTE_REQ,
         VOTE_EVENT,
+        DAY_START,
+        NIGHT_START,
         END
     }
 }
