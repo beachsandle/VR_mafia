@@ -86,21 +86,37 @@ public class TestClientManager : MonoBehaviour
         Debug.Log("OnConnect : " + data.PlayerId);
         playerID = data.PlayerId;
         socket.Clear(PacketType.CONNECT);
+
         socket.On(PacketType.SET_NAME_RES, OnSetNameRes);
         socket.On(PacketType.ROOM_LIST_RES, OnRoomListRes);
         socket.On(PacketType.CREATE_ROOM_RES, OnCreateRoomRes);
+
         socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
         socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
-        socket.On(PacketType.GAME_START, OnGameStart);
         socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
         socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
+        socket.On(PacketType.GAME_START, OnGameStart);
+
         socket.On(PacketType.MOVE, OnMove);
+        socket.On(PacketType.DAY_START, OnDayStart);
+        socket.On(PacketType.NIGHT_START, OnNightStart);
+
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
     private void OnDisconnect(MySocket socket, Packet packet)
     {
         socket.Disconnect();
+
         Debug.Log("Disconnect");
+    }
+    private void CloseSocket()
+    {
+        if (!socketReady) return;
+
+        socket.Emit(PacketType.DISCONNECT);
+        socket.Disconnect();
+
+        socketReady = false;
     }
 
     #region Lobby
@@ -236,14 +252,14 @@ public class TestClientManager : MonoBehaviour
         var rotation = new V3(rot.eulerAngles.x, rot.eulerAngles.y, rot.eulerAngles.z);
         return new Location(position, rotation);
     }
-    #endregion
-    private void CloseSocket()
+
+    private void OnDayStart(MySocket socket, Packet packet)
     {
-        if (!socketReady) return;
-
-        socket.Emit(PacketType.DISCONNECT);
-        socket.Disconnect();
-
-        socketReady = false;
+        InGameManager.instance.StartDay();
     }
+    private void OnNightStart(MySocket socket, Packet packet)
+    {
+        InGameManager.instance.StartNight();
+    }
+    #endregion
 }
