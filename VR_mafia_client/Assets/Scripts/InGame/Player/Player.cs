@@ -51,11 +51,6 @@ public class Player : MonoBehaviour
         {
             Kill();
         }
-
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            InGameManager.instance.StartNight();
-        }
     }
 
     void FindTarget()
