@@ -255,7 +255,6 @@ public class InGameManager : MonoBehaviour
     private void OnVoteButton(int pNum)
     {
         string s = playerObjects.transform.GetChild(pNum - 1).name;
-        Debug.Log(s);
 
         ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
     }

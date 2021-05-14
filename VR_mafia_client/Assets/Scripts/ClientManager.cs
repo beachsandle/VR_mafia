@@ -272,7 +272,6 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitVoteReq(int targetID)
     {
-        Debug.Log(targetID);
         socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
     }
     #endregion
