@@ -1201,6 +1201,7 @@ MonoBehaviour:
   menuPanel: {fileID: 865664230}
   backButton: {fileID: 1739346337}
   menuState: 0
+  votingPanel: {fileID: 851271952}
 --- !u!4 &415983047
 Transform:
   m_ObjectHideFlags: 0
@@ -1777,7 +1778,7 @@ GameObject:
   - component: {fileID: 621290196}
   - component: {fileID: 621290195}
   m_Layer: 5
-  m_Name: Image
+  m_Name: BG Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1826,7 +1827,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.4360714, g: 0.735849, b: 0.4130473, a: 1}
+  m_Color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2167,7 +2168,7 @@ GameObject:
   - component: {fileID: 715302825}
   - component: {fileID: 715302824}
   m_Layer: 5
-  m_Name: Image
+  m_Name: BG Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2784,7 +2785,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &851271953
 RectTransform:
   m_ObjectHideFlags: 0

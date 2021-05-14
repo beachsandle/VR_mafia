@@ -38,6 +38,9 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Button backButton;
     [HideInInspector] public bool menuState = false;
 
+    [Header("Voting Panel")]
+    [SerializeField] private GameObject votingPanel;
+
     public Dictionary<int, GameObject> players; // id, object
 
     private void Awake()
@@ -57,8 +60,10 @@ public class InGameManager : MonoBehaviour
         players = new Dictionary<int, GameObject>();
         isMafia = ClientManager.instance.isMafia;
 
-        InitMenuPanel();
         SpawnPlayers();
+
+        InitMenuPanel();
+        InitVotingPanel();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -215,6 +220,36 @@ public class InGameManager : MonoBehaviour
     {
         menuState = false;
         SetActiveMenuPanel(menuState);
+    }
+    #endregion
+
+    #region VotingPanel
+    private void InitVotingPanel()
+    {
+        votingPanel.SetActive(true);
+
+        var childs = votingPanel.transform.GetChild(0);
+        for (int i = 0; i < 10; i++)
+        {
+            int pNum = i + 1;
+
+            Transform buttonTR = childs.GetChild(pNum);
+            if (pNum <= players.Count)
+            {
+                buttonTR.Find("Image").GetComponent<Image>().color = Global.colors[i];
+                buttonTR.GetComponent<Button>().onClick.AddListener(() => { OnVoteButton(pNum); }); // local 변수 써야함 건들지 말 것
+            }
+            else
+            {
+                Destroy(buttonTR.gameObject);
+            }
+        }
+
+        votingPanel.SetActive(false);
+    }
+    private void OnVoteButton(int pNum)
+    {
+        Debug.Log(pNum);
     }
     #endregion
 }
