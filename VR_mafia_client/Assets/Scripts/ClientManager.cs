@@ -100,6 +100,7 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.MOVE, OnMove);
         socket.On(PacketType.DAY_START, OnDayStart);
         socket.On(PacketType.NIGHT_START, OnNightStart);
+        socket.On(PacketType.START_VOTING, OnStartVoting);
 
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
@@ -260,6 +261,14 @@ public class ClientManager : MonoBehaviour
     private void OnNightStart(MySocket socket, Packet packet)
     {
         InGameManager.instance.StartNight();
+    }
+
+    private void OnStartVoting(MySocket socket, Packet packet)
+    {
+        var data = new StartVotingData();
+        data.FromBytes(packet.Bytes);
+
+        InGameManager.instance.OnVotingPanel(data.Voting_time);
     }
     #endregion
 }

@@ -40,6 +40,7 @@ public class InGameManager : MonoBehaviour
 
     [Header("Voting Panel")]
     [SerializeField] private GameObject votingPanel;
+    [SerializeField] private Text timeText;
 
     public Dictionary<int, GameObject> players; // id, object
 
@@ -250,6 +251,28 @@ public class InGameManager : MonoBehaviour
     private void OnVoteButton(int pNum)
     {
         Debug.Log(pNum);
+    }
+
+    public void OnVotingPanel(int time)
+    {
+        votingPanel.SetActive(true);
+        StartCoroutine(UpdateVotingTime(time));
+    }
+    IEnumerator UpdateVotingTime(int time)
+    {
+        while (0 < time)
+        {
+            timeText.text = time.ToString();
+
+            time--;
+            yield return new WaitForSeconds(1f);
+        }
+
+        OffVotingPanel();
+    }
+    private void OffVotingPanel()
+    {
+        votingPanel.SetActive(false);
     }
     #endregion
 }
