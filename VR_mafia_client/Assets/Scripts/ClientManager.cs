@@ -270,5 +270,10 @@ public class ClientManager : MonoBehaviour
 
         InGameManager.instance.OnVotingPanel(data.Voting_time);
     }
+    public void EmitVoteReq(int targetID)
+    {
+        Debug.Log(targetID);
+        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
+    }
     #endregion
 }

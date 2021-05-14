@@ -43,6 +43,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Text timeText;
 
     public Dictionary<int, GameObject> players; // id, object
+    private GameObject playerObjects; // 임시
 
     private void Awake()
     {
@@ -58,6 +59,8 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
+        playerObjects = GameObject.Find("PlayerObjects");
+
         players = new Dictionary<int, GameObject>();
         isMafia = ClientManager.instance.isMafia;
 
@@ -103,6 +106,7 @@ public class InGameManager : MonoBehaviour
                 Camera.main.transform.localPosition = new Vector3(0, 0, 0);
             }
 
+            p.transform.parent = GameObject.Find("PlayerObjects").transform;
             players.Add(u.Id, p);
         }
     }
@@ -250,12 +254,16 @@ public class InGameManager : MonoBehaviour
     }
     private void OnVoteButton(int pNum)
     {
-        Debug.Log(pNum);
+        string s = playerObjects.transform.GetChild(pNum - 1).name;
+        Debug.Log(s);
+
+        ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
     }
 
     public void OnVotingPanel(int time)
     {
         votingPanel.SetActive(true);
+
         StartCoroutine(UpdateVotingTime(time));
     }
     IEnumerator UpdateVotingTime(int time)
