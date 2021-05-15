@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -15,18 +13,19 @@ namespace MyPacket
         #region field
         protected TcpClient client;
         protected NetworkStream stream;
+        protected Dictionary<PacketType, MessageHandler> handlerMap = new Dictionary<PacketType, MessageHandler>();
+        protected Queue<Packet> readQueue = new Queue<Packet>();
+        protected Queue<Packet> writeQueue = new Queue<Packet>();
         protected PacketHeader header;
         protected byte[] buffer;
-        protected Dictionary<PacketType, MessageHandler> handler;
-        protected Queue<Packet> messageQueue = new Queue<Packet>();
-        protected Queue<Packet> writeQueue = new Queue<Packet>();
         #endregion
         #region property
-        public int MessageCount
+        public bool IsAsync { get; set; }
+        public int PacketCount
         {
             get
             {
-                return messageQueue.Count;
+                return readQueue.Count;
             }
         }
         #endregion
@@ -35,171 +34,127 @@ namespace MyPacket
         {
             this.client = client;
             stream = client.GetStream();
+            stream.Flush();
             buffer = new byte[1024];
-            HandlerInit();
+            InitHandlerMap();
         }
         #endregion
         #region public method
-        /// <summary>
-        /// 클라이언트와 연결 해제
-        /// </summary>
-        public void Disconnect()
-        {
-            var packet = new Packet(PacketType.DISCONNECT);
-            stream.Write(packet.ToBytes(), 0, packet.Size);
-            Close();
-        }
-        /// <summary>
-        /// 소켓 연결 해제
-        /// </summary>
+        //클라이언트와 스트림의 연결을 해제
         public void Close()
         {
             stream.Close();
             client.Close();
         }
-        /// <summary>
-        /// 이벤트 핸들러 등록
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="handler"></param>
+        //이벤트 핸들러 등록
         public void On(PacketType type, MessageHandler handler)
         {
-            this.handler[type] += handler;
+            handlerMap[type] += handler;
         }
-        /// <summary>
-        /// 특정 종류 패킷의 핸들러 제거
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="handler"></param>
+        //이벤트 핸들러 제거
         public void Off(PacketType type, MessageHandler handler)
         {
-            this.handler[type] -= handler;
+            handlerMap[type] -= handler;
         }
-        /// <summary>
-        /// 특정 종류 패킷의 핸들러 초기화
-        /// </summary>
-        /// <param name="type"></param>
+        //이벤트 핸들러 초기화
         public void Clear(PacketType type)
         {
-            this.handler[type] = EmptyHandler;
+            handlerMap[type] = EmptyHandler;
         }
-        /// <summary>
-        /// 특정 종류의 패킷과 해당하는 데이터를 소켓에 전송
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="data"></param>
+        //메시지 전송
         public void Emit(PacketType type, byte[] bytes = null)
         {
             writeQueue.Enqueue(new Packet(type, bytes));
         }
-        /// <summary>
-        /// 가장 먼저 들어온 패킷 처리
-        /// </summary>
+        //readQueue에서 메시지 하나를 읽고 처리
         public void Handle()
         {
-            if (messageQueue.Count != 0)
+            if (readQueue.Count != 0)
             {
-                var packet = messageQueue.Dequeue();
-                handler[packet.Header.Type](this, packet);
+                var packet = readQueue.Dequeue();
+                handlerMap[packet.Header.Type](this, packet);
             }
         }
-        /// <summary>
-        /// 비동기 방식으로 메시지 처리 시작
-        /// </summary>
+        //메시지 처리 시작
         public void Listen(bool isAsync)
         {
-            var readThread = new Thread(isAsync ? new ThreadStart(ListenMessageAsync) : new ThreadStart(ListenMessage));
-            var writeThread = new Thread(WriteMessageAsync);
+            IsAsync = isAsync;
+            var readThread = new Thread(ReadMessage);
+            var writeThread = new Thread(WriteMessage);
             readThread.Start();
             writeThread.Start();
         }
         #endregion
         #region private method
-        /// <summary>
-        /// 모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
-        /// </summary>
-        private void HandlerInit()
+        //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
+        private void InitHandlerMap()
         {
-            handler = new Dictionary<PacketType, MessageHandler>();
             foreach (PacketType type in Enum.GetValues(typeof(PacketType)))
             {
-                handler[type] = EmptyHandler;
+                handlerMap[type] = EmptyHandler;
             }
         }
-        /// <summary>
-        /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 처리
-        /// </summary>
-        private void ListenMessageAsync()
+        //클라이언트와 연결이 종료되기 전까지 패킷을 읽고 처리 또는 저장
+        private void ReadMessage()
         {
-            while (client.Connected)
+            try
             {
-                if (stream.CanRead && stream.DataAvailable)
+                while (stream.CanRead)
                 {
                     ReadPacket();
-                    handler[header.Type](this, new Packet(header, buffer));
                 }
             }
-            Console.WriteLine("disconnect");
-        }
-        private void WriteMessageAsync()
-        {
-            while (client.Connected)
+            //연결이 종료될 경우 disconnect 핸들러 호출
+            catch (System.IO.IOException)
             {
-                if (writeQueue.Count != 0)
+                handlerMap[PacketType.DISCONNECT](this, new Packet());
+            }
+        }
+        //클라이언트와 연결이 종료되기 전까지 writeQueue에 저장된 메시지 송신
+        private void WriteMessage()
+        {
+            try
+            {
+                while (stream.CanWrite)
                 {
                     WritePacket();
                 }
             }
-        }
-        /// <summary>
-        /// 클라이언트가 연결되어 있는 동안 패킷을 읽고 저장
-        /// </summary>
-        private void ListenMessage()
-        {
-            while (client.Connected)
+            //연결이 종료될 경우 disconnect 핸들러 호출
+            catch (System.IO.IOException)
             {
-                if (stream.CanRead && stream.DataAvailable)
-                {
-                    lock (stream)
-                    {
-                        ReadPacket();
-                        messageQueue.Enqueue(new Packet(header, buffer));
-                    }
-                }
+                handlerMap[PacketType.DISCONNECT](this, new Packet());
             }
         }
-        /// <summary>
-        /// 스트림에서 패킷을 읽고 버퍼에 저장
-        /// </summary>
+        //스트림에서 패킷을 읽고 버퍼에 저장
         private void ReadPacket()
         {
+            //먼저 헤더 크기만큼 읽고 버퍼에 저장
             stream.Read(buffer, 0, PacketHeader.SIZE);
             header.FromBytes(buffer);
+            //버퍼의 크기가 데이터의 크기보다 작으면 확장
             if (buffer.Length < header.Size)
                 buffer = new byte[buffer.Length * 2];
+            //데이터 크기만큼 읽고 버퍼에 저장
             if (header.Size != 0)
                 stream.Read(buffer, 0, header.Size);
+            //비동기 중인 경우 바로 핸들러를 호출하고 아닐 경우 큐에 저장
+            var packet = new Packet(header, buffer);
+            if (IsAsync)
+                handlerMap[header.Type](this, packet);
+            else
+                readQueue.Enqueue(packet);
         }
+        //writeQueue에서 데이터를 꺼내 송신
         private void WritePacket()
         {
-
-            var packet = writeQueue.Dequeue();
-            try
+            if (writeQueue.Count > 0)
             {
+                var packet = writeQueue.Dequeue();
                 stream.Write(packet.ToBytes(), 0, packet.Size);
             }
-            //클라이언트 강제 종료시 연결 해제
-            catch (Exception)
-            {
-                handler[PacketType.DISCONNECT](this, new Packet());
-            }
         }
-        /// <summary>
-        /// 공백 핸들러
-        /// </summary>
-        /// <param name="socket"></param>
-        /// <param name="data"></param>
-        /// 
+        //공백 핸들러
         private void EmptyHandler(MySocket socket, Packet packet) { }
         #endregion
     }
