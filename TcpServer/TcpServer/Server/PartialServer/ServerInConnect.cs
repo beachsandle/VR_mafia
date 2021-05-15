@@ -23,9 +23,7 @@ namespace MyPacket
         {
             var user = socket as User;
             Console.WriteLine($"disconnect : {user.Id}");
-            user.LeaveRoom();
-            user.Close();
-            userMap.Remove(user.Id);
+            user.Disconnect();
         }
     }
 }

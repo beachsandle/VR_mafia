@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Threading;
 
 namespace MyPacket
 {
@@ -11,6 +10,9 @@ namespace MyPacket
         #region field
         private static int roomId = 1;
         private Dictionary<int, User> users;
+        private const float DAY_TIME = 30;
+        private const float NIGHT_TIME = 30;
+        private GameStatus status = GameStatus.DAY;
         #endregion
         #region property
         public int Id { get; private set; }
@@ -32,6 +34,7 @@ namespace MyPacket
                 Name = name;
             }
         }
+        //TODO: 게임룸 내에 큐를 만들고 동기적으로 하고싶음
         public bool Join(User user)
         {
             if (Participants == Maximum)
@@ -101,14 +104,49 @@ namespace MyPacket
         public bool GameStart(User user)
         {
 
-            if (user.Status != UserStatus.WAITTING || HostId != user.Id)
+            if (user.Status != GameStatus.WAITTING || HostId != user.Id)
                 return false;
             IsStarted = true;
             foreach (var u in users.Values)
             {
                 u.GameStart(false, null);
             }
+            var thread = new Thread(GameLogic);
+            thread.Start();
             return true;
+        }
+        private void GameLogic()
+        {
+            var sw = new Stopwatch();
+            float timer = DAY_TIME;
+            long prev = sw.ElapsedMilliseconds, current = 0;
+            sw.Start();
+            while (true)
+            {
+                current = sw.ElapsedMilliseconds;
+                timer -= (current - prev) / 1000;
+                prev = current;
+                if (timer < 0)
+                {
+                    switch (status)
+                    {
+                        case GameStatus.DAY:
+                            timer = NIGHT_TIME;
+                            status = GameStatus.NIGHT;
+                            Broadcast(PacketType.NIGHT_START);
+                            break;
+                        case GameStatus.NIGHT:
+                            timer = DAY_TIME;
+                            status = GameStatus.DAY;
+                            Broadcast(PacketType.DAY_START);
+                            break;
+                        case GameStatus.VOTE1: break;
+                        case GameStatus.DEFENSE: break;
+                        case GameStatus.VOTE2: break;
+                        default: break;
+                    }
+                }
+            }
         }
     }
 }

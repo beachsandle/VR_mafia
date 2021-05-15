@@ -15,7 +15,7 @@ namespace MyPacket
         public GameRoom Room { get; private set; }
         public bool Alive { get; private set; } = true;
         public bool IsMafia { get; private set; } = false;
-        public UserStatus Status { get; private set; } = UserStatus.CONNECT;
+        public GameStatus Status { get; private set; } = GameStatus.CONNECT;
         #endregion
         #region constructor
         public User(TcpClient client, GameServer server) : base(client)
@@ -28,24 +28,27 @@ namespace MyPacket
         #region public method
         public void Connect()
         {
-            if (Status == UserStatus.CONNECT)
+            if (Status == GameStatus.CONNECT)
             {
-                Status = UserStatus.LOBBY;
+                Status = GameStatus.LOBBY;
                 Emit(PacketType.CONNECT, new ConnectData(Id).ToBytes());
                 Emit(PacketType.SET_NAME_RES, new SetNameResData(true, Name).ToBytes());
             }
         }
-        new public void Disconnect()
+        public void Disconnect()
         {
             Close();
             switch (Status)
             {
-                case UserStatus.WAITTING:
-                    Status = UserStatus.NONE;
+                case GameStatus.WAITTING:
+                    Status = GameStatus.NONE;
                     Room.Leave(this);
                     break;
-                case UserStatus.PLAYING:
-                case UserStatus.VOTING:
+                case GameStatus.DAY:
+                case GameStatus.NIGHT:
+                case GameStatus.VOTE1:
+                case GameStatus.DEFENSE:
+                case GameStatus.VOTE2:
                     Room.RemoveUser(Id);
                     break;
             }
@@ -55,7 +58,7 @@ namespace MyPacket
         {
             var data = new SetNameResData();
             //로비가 아닐 경우 실패
-            if (Status != UserStatus.LOBBY)
+            if (Status != GameStatus.LOBBY)
             {
                 data.Result = false;
                 Emit(PacketType.SET_NAME_RES, data.ToBytes());
@@ -70,7 +73,7 @@ namespace MyPacket
         public bool SendRoomList(List<GameRoomInfo> roomInfos)
         {
             var data = new RoomListResData();
-            if (Status != UserStatus.LOBBY)
+            if (Status != GameStatus.LOBBY)
             {
                 data.Result = false;
                 Emit(PacketType.ROOM_LIST_RES, data.ToBytes());
@@ -83,7 +86,7 @@ namespace MyPacket
         public bool CreateRoom(string roomName)
         {
             var data = new CreateRoomResData();
-            if (Status != UserStatus.LOBBY)
+            if (Status != GameStatus.LOBBY)
             {
                 data.Result = false;
                 Emit(PacketType.CREATE_ROOM_RES, data.ToBytes());
@@ -91,14 +94,14 @@ namespace MyPacket
             }
             Room = server.CreateRoom(this, roomName);
             Room.Join(this);
-            Status = UserStatus.WAITTING;
+            Status = GameStatus.WAITTING;
             Emit(PacketType.CREATE_ROOM_RES, data.ToBytes());
             return true;
         }
         public bool JoinRoom(GameRoom room)
         {
             var data = new JoinRoomResData();
-            if (Status != UserStatus.LOBBY || room == null)
+            if (Status != GameStatus.LOBBY || room == null)
             {
                 data.Result = false;
                 Emit(PacketType.JOIN_ROOM_RES, data.ToBytes());
@@ -108,7 +111,7 @@ namespace MyPacket
             {
                 Room = room;
                 data.Users = room.GetUserInfos();
-                Status = UserStatus.WAITTING;
+                Status = GameStatus.WAITTING;
                 Emit(PacketType.JOIN_ROOM_RES, data.ToBytes());
                 return true;
             }
@@ -119,25 +122,25 @@ namespace MyPacket
         public bool LeaveRoom()
         {
             var data = new LeaveResData();
-            if (Status != UserStatus.WAITTING || Room == null)
+            if (Status != GameStatus.WAITTING || Room == null)
             {
                 data.Result = false;
                 Emit(PacketType.LEAVE_ROOM_RES, data.ToBytes());
                 return false;
             }
             Room = null;
-            Status = UserStatus.LOBBY;
+            Status = GameStatus.LOBBY;
             Emit(PacketType.LEAVE_ROOM_RES, data.ToBytes());
             return true;
         }
         public void GameStart(bool isMafia, List<User> team)
         {
-            if (Status != UserStatus.WAITTING)
+            if (Status != GameStatus.WAITTING)
                 return;
             var data = new GameStartData(isMafia);
             if (isMafia)
                 data.Mafias = (from u in team select u.Id).ToArray();
-            Status = UserStatus.PLAYING;
+            Status = GameStatus.DAY;
             Emit(PacketType.GAME_START, data.ToBytes());
         }
         public UserInfo GetInfo()

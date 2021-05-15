@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public enum UserStatus
+    public enum GameStatus
     {
         NONE,
         CONNECT,
         LOBBY,
         WAITTING,
-        PLAYING,
-        VOTING
+        DAY,
+        NIGHT,
+        VOTE1,
+        DEFENSE,
+        VOTE2
     }
 }

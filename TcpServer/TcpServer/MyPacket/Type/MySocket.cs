@@ -39,52 +39,6 @@ namespace MyPacket
             InitHandlerMap();
         }
         #endregion
-        #region public method
-        //클라이언트와 스트림의 연결을 해제
-        public void Close()
-        {
-            stream.Close();
-            client.Close();
-        }
-        //이벤트 핸들러 등록
-        public void On(PacketType type, MessageHandler handler)
-        {
-            handlerMap[type] += handler;
-        }
-        //이벤트 핸들러 제거
-        public void Off(PacketType type, MessageHandler handler)
-        {
-            handlerMap[type] -= handler;
-        }
-        //이벤트 핸들러 초기화
-        public void Clear(PacketType type)
-        {
-            handlerMap[type] = EmptyHandler;
-        }
-        //메시지 전송
-        public void Emit(PacketType type, byte[] bytes = null)
-        {
-            writeQueue.Enqueue(new Packet(type, bytes));
-        }
-        //readQueue에서 메시지 하나를 읽고 처리
-        public void Handle()
-        {
-            if (readQueue.Count != 0)
-            {
-                var packet = readQueue.Dequeue();
-                handlerMap[packet.Header.Type](this, packet);
-            }
-        }
-        //메시지 처리 시작
-        public void Listen(bool isAsync)
-        {
-            IsAsync = isAsync;
-            var readThread = new Thread(ReadMessage);
-            var writeThread = new Thread(WriteMessage);
-            readThread.Start();
-            writeThread.Start();
-        }
-        #endregion
         #region private method
         //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
         private void InitHandlerMap()
@@ -156,6 +110,52 @@ namespace MyPacket
         }
         //공백 핸들러
         private void EmptyHandler(MySocket socket, Packet packet) { }
+        #endregion
+        #region public method
+        //클라이언트와 스트림의 연결을 해제
+        public void Close()
+        {
+            stream.Close();
+            client.Close();
+        }
+        //이벤트 핸들러 등록
+        public void On(PacketType type, MessageHandler handler)
+        {
+            handlerMap[type] += handler;
+        }
+        //이벤트 핸들러 제거
+        public void Off(PacketType type, MessageHandler handler)
+        {
+            handlerMap[type] -= handler;
+        }
+        //이벤트 핸들러 초기화
+        public void Clear(PacketType type)
+        {
+            handlerMap[type] = EmptyHandler;
+        }
+        //메시지 전송
+        public void Emit(PacketType type, byte[] bytes = null)
+        {
+            writeQueue.Enqueue(new Packet(type, bytes));
+        }
+        //readQueue에서 메시지 하나를 읽고 처리
+        public void Handle()
+        {
+            if (readQueue.Count != 0)
+            {
+                var packet = readQueue.Dequeue();
+                handlerMap[packet.Header.Type](this, packet);
+            }
+        }
+        //메시지 처리 시작
+        public void Listen(bool isAsync)
+        {
+            IsAsync = isAsync;
+            var readThread = new Thread(ReadMessage);
+            var writeThread = new Thread(WriteMessage);
+            readThread.Start();
+            writeThread.Start();
+        }
         #endregion
     }
 }
