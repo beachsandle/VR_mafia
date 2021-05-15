@@ -10,8 +10,8 @@ namespace MyPacket
         #region field
         private static int roomId = 1;
         private Dictionary<int, User> users;
-        private const float DAY_TIME = 30;
-        private const float NIGHT_TIME = 30;
+        private const float DAY_TIME = 5;
+        private const float NIGHT_TIME = 5;
         private GameStatus status = GameStatus.DAY;
         #endregion
         #region property
@@ -119,12 +119,13 @@ namespace MyPacket
         {
             var sw = new Stopwatch();
             float timer = DAY_TIME;
-            long prev = sw.ElapsedMilliseconds, current = 0;
+            long prev = 0, current = 0;
             sw.Start();
             while (true)
             {
+                Thread.Sleep(30);
                 current = sw.ElapsedMilliseconds;
-                timer -= (current - prev) / 1000;
+                timer -= (float)(current - prev) / 1000;
                 prev = current;
                 if (timer < 0)
                 {
@@ -145,6 +146,9 @@ namespace MyPacket
                         case GameStatus.VOTE2: break;
                         default: break;
                     }
+                    current = 0;
+                    prev = 0;
+                    sw.Restart();
                 }
             }
         }

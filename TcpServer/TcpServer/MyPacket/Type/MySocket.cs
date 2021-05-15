@@ -55,6 +55,7 @@ namespace MyPacket
             {
                 while (stream.CanRead)
                 {
+                    Thread.Sleep(30);
                     ReadPacket();
                 }
             }
@@ -71,6 +72,7 @@ namespace MyPacket
             {
                 while (stream.CanWrite)
                 {
+                    Thread.Sleep(30);
                     WritePacket();
                 }
             }
