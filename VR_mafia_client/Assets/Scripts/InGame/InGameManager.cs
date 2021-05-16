@@ -25,7 +25,7 @@ public class InGameManager : MonoBehaviour
 
     private bool isMafia;
     public bool phaseChange;
-    private bool suffrage;
+    public bool suffrage;
 
     [Header("UI")]
     [SerializeField]
@@ -242,12 +242,12 @@ public class InGameManager : MonoBehaviour
     {
         votingPanel.SetActive(true);
 
-        var childs = votingPanel.transform.GetChild(0);
+        var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < 10; i++)
         {
             int pNum = i + 1;
 
-            Transform buttonTR = childs.GetChild(pNum);
+            Transform buttonTR = votingContent.GetChild(pNum);
             if (pNum <= players.Count)
             {
                 buttonTR.Find("Image").GetComponent<Image>().color = Global.colors[i];
@@ -265,7 +265,7 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage)
         {
-            suffrage = false;
+            suffrage = false; // TODO: OnVoteRes() 에서 처리하도록 변경
 
             string s = playerObjects.transform.GetChild(pNum - 1).name;
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
@@ -295,6 +295,31 @@ public class InGameManager : MonoBehaviour
     private void OffVotingPanel()
     {
         votingPanel.SetActive(false);
+    }
+
+    public void DisplayVotingResult((int pid, int count)[] result)
+    {
+        var votingContent = votingPanel.transform.GetChild(0);
+        for(int i = 0; i < players.Count; i++)
+        {
+            votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
+        }
+
+        for(int i = 0; i < result.Length; i++)
+        {
+            int id = result[i].pid;
+
+            for(int j = 0; j < result.Length; j++)
+            {
+                if(id == playerOrder[j])
+                {
+                    Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
+                    countText.text = result[i].count.ToString();
+
+                    break;
+                }
+            }
+        }
     }
     #endregion
 }

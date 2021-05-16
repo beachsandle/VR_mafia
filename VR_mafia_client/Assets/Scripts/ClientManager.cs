@@ -274,5 +274,19 @@ public class ClientManager : MonoBehaviour
     {
         socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
     }
+    private void OnVoteRes(MySocket socket, Packet packet)
+    {
+        //var data = new VoteResData();
+        //data.FromBytes(packet.Bytes);
+
+        //InGameManager.instance.suffrage = false;
+    }
+    private void OnVotingResult(MySocket socket, Packet packet)
+    {
+        //var data = new VotingResultData();
+        //data.FromBytes(packet.Bytes);
+
+        //InGameManager.instance.DisplayVotingResult(data);
+    }
     #endregion
 }
