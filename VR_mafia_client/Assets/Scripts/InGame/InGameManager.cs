@@ -25,6 +25,7 @@ public class InGameManager : MonoBehaviour
 
     private bool isMafia;
     public bool phaseChange;
+    private bool suffrage;
 
     [Header("UI")]
     [SerializeField]
@@ -38,7 +39,12 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Button backButton;
     [HideInInspector] public bool menuState = false;
 
+    [Header("Voting Panel")]
+    [SerializeField] private GameObject votingPanel;
+    [SerializeField] private Text timeText;
+
     public Dictionary<int, GameObject> players; // id, object
+    private GameObject playerObjects; // 임시
 
     private void Awake()
     {
@@ -54,11 +60,15 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
+        playerObjects = GameObject.Find("PlayerObjects");
+
         players = new Dictionary<int, GameObject>();
         isMafia = ClientManager.instance.isMafia;
 
-        InitMenuPanel();
         SpawnPlayers();
+
+        InitMenuPanel();
+        InitVotingPanel();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -97,6 +107,7 @@ public class InGameManager : MonoBehaviour
                 Camera.main.transform.localPosition = new Vector3(0, 0, 0);
             }
 
+            p.transform.parent = GameObject.Find("PlayerObjects").transform;
             players.Add(u.Id, p);
         }
     }
@@ -215,6 +226,67 @@ public class InGameManager : MonoBehaviour
     {
         menuState = false;
         SetActiveMenuPanel(menuState);
+    }
+    #endregion
+
+    #region VotingPanel
+    private void InitVotingPanel()
+    {
+        votingPanel.SetActive(true);
+
+        var childs = votingPanel.transform.GetChild(0);
+        for (int i = 0; i < 10; i++)
+        {
+            int pNum = i + 1;
+
+            Transform buttonTR = childs.GetChild(pNum);
+            if (pNum <= players.Count)
+            {
+                buttonTR.Find("Image").GetComponent<Image>().color = Global.colors[i];
+                buttonTR.GetComponent<Button>().onClick.AddListener(() => { OnVoteButton(pNum); }); // local 변수 써야함 건들지 말 것
+            }
+            else
+            {
+                Destroy(buttonTR.gameObject);
+            }
+        }
+
+        votingPanel.SetActive(false);
+    }
+    private void OnVoteButton(int pNum)
+    {
+        if (suffrage)
+        {
+            suffrage = false;
+
+            string s = playerObjects.transform.GetChild(pNum - 1).name;
+            ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
+        }
+    }
+
+    public void OnVotingPanel(int time)
+    {
+        suffrage = true;
+
+        votingPanel.SetActive(true);
+
+        StartCoroutine(UpdateVotingTime(time));
+    }
+    IEnumerator UpdateVotingTime(int time)
+    {
+        while (0 < time)
+        {
+            timeText.text = time.ToString();
+
+            time--;
+            yield return new WaitForSeconds(1f);
+        }
+
+        OffVotingPanel();
+    }
+    private void OffVotingPanel()
+    {
+        votingPanel.SetActive(false);
     }
     #endregion
 }
