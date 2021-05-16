@@ -25,6 +25,7 @@ public class InGameManager : MonoBehaviour
 
     private bool isMafia;
     public bool phaseChange;
+    private bool suffrage;
 
     [Header("UI")]
     [SerializeField]
@@ -254,13 +255,19 @@ public class InGameManager : MonoBehaviour
     }
     private void OnVoteButton(int pNum)
     {
-        string s = playerObjects.transform.GetChild(pNum - 1).name;
+        if (suffrage)
+        {
+            suffrage = false;
 
-        ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
+            string s = playerObjects.transform.GetChild(pNum - 1).name;
+            ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
+        }
     }
 
     public void OnVotingPanel(int time)
     {
+        suffrage = true;
+
         votingPanel.SetActive(true);
 
         StartCoroutine(UpdateVotingTime(time));
