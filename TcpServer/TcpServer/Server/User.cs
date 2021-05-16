@@ -26,6 +26,8 @@ namespace MyPacket
         }
         #endregion
         #region public method
+        #region connect
+        //status가 connect일 경우 로비로 이동하고 connect, set name res 전송
         public void Connect()
         {
             if (Status == GameStatus.CONNECT)
@@ -34,7 +36,9 @@ namespace MyPacket
                 Emit(PacketType.CONNECT, new ConnectData(Id).ToBytes());
                 Emit(PacketType.SET_NAME_RES, new SetNameResData(true, Name).ToBytes());
             }
+            Console.WriteLine($"connect : {Id}");
         }
+        //
         public void Disconnect()
         {
             Close();
@@ -53,7 +57,9 @@ namespace MyPacket
                     break;
             }
             server.RemoveUser(Id);
+            Console.WriteLine($"disconnect : {Id}, {Name}");
         }
+        #endregion
         public bool SetName(string name)
         {
             var data = new SetNameResData();
@@ -146,6 +152,10 @@ namespace MyPacket
         public UserInfo GetInfo()
         {
             return new UserInfo(Id, Name);
+        }
+        public void SetMafia()
+        {
+            IsMafia = true;
         }
         #endregion
     }

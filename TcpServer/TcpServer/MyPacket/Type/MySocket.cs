@@ -55,25 +55,7 @@ namespace MyPacket
             {
                 while (stream.CanRead)
                 {
-                    Thread.Sleep(30);
                     ReadPacket();
-                }
-            }
-            //연결이 종료될 경우 disconnect 핸들러 호출
-            catch (System.IO.IOException)
-            {
-                handlerMap[PacketType.DISCONNECT](this, new Packet());
-            }
-        }
-        //클라이언트와 연결이 종료되기 전까지 writeQueue에 저장된 메시지 송신
-        private void WriteMessage()
-        {
-            try
-            {
-                while (stream.CanWrite)
-                {
-                    Thread.Sleep(30);
-                    WritePacket();
                 }
             }
             //연결이 종료될 경우 disconnect 핸들러 호출
@@ -88,27 +70,21 @@ namespace MyPacket
             //먼저 헤더 크기만큼 읽고 버퍼에 저장
             stream.Read(buffer, 0, PacketHeader.SIZE);
             header.FromBytes(buffer);
+
             //버퍼의 크기가 데이터의 크기보다 작으면 확장
             if (buffer.Length < header.Size)
                 buffer = new byte[buffer.Length * 2];
+
             //데이터 크기만큼 읽고 버퍼에 저장
             if (header.Size != 0)
                 stream.Read(buffer, 0, header.Size);
+
             //비동기 중인 경우 바로 핸들러를 호출하고 아닐 경우 큐에 저장
             var packet = new Packet(header, buffer);
             if (IsAsync)
                 handlerMap[header.Type](this, packet);
             else
                 readQueue.Enqueue(packet);
-        }
-        //writeQueue에서 데이터를 꺼내 송신
-        private void WritePacket()
-        {
-            if (writeQueue.Count > 0)
-            {
-                var packet = writeQueue.Dequeue();
-                stream.Write(packet.ToBytes(), 0, packet.Size);
-            }
         }
         //공백 핸들러
         private void EmptyHandler(MySocket socket, Packet packet) { }
@@ -138,7 +114,8 @@ namespace MyPacket
         //메시지 전송
         public void Emit(PacketType type, byte[] bytes = null)
         {
-            writeQueue.Enqueue(new Packet(type, bytes));
+            var packet = new Packet(type, bytes);
+            stream.Write(packet.ToBytes(), 0, packet.Size);
         }
         //readQueue에서 메시지 하나를 읽고 처리
         public void Handle()
@@ -154,9 +131,7 @@ namespace MyPacket
         {
             IsAsync = isAsync;
             var readThread = new Thread(ReadMessage);
-            var writeThread = new Thread(WriteMessage);
             readThread.Start();
-            writeThread.Start();
         }
         #endregion
     }
