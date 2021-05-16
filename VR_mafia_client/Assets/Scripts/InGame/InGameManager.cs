@@ -44,6 +44,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Text timeText;
 
     public Dictionary<int, GameObject> players; // id, object
+    public List<int> playerOrder;
     private GameObject playerObjects; // 임시
 
     private void Awake()
@@ -63,6 +64,7 @@ public class InGameManager : MonoBehaviour
         playerObjects = GameObject.Find("PlayerObjects");
 
         players = new Dictionary<int, GameObject>();
+        playerOrder = new List<int>();
         isMafia = ClientManager.instance.isMafia;
 
         SpawnPlayers();
@@ -92,6 +94,7 @@ public class InGameManager : MonoBehaviour
         {
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
+            playerOrder.Add(u.Id);
             p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
             p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
             p.transform.position = spawnPos.GetChild(idx++).position;
@@ -115,14 +118,19 @@ public class InGameManager : MonoBehaviour
     private void GatherPlayers()
     {
         Transform spawnPos = GameObject.Find("SpawnPosition").transform;
-        int idx = 0;
 
-        foreach(GameObject p in players.Values)
+        for(int i = 0; i < playerOrder.Count; i++)
         {
-            p.GetComponent<Player>().CC.enabled = false;
-            p.transform.position = spawnPos.GetChild(idx++).position;
-            p.GetComponent<Player>().CC.enabled = true;
+            if (playerOrder[i] == ClientManager.instance.playerID)
+            {
+                GameObject myObject = players[playerOrder[i]];
+                myObject.GetComponent<Player>().CC.enabled = false;
+                myObject.transform.position = spawnPos.GetChild(i).position;
+                myObject.GetComponent<Player>().CC.enabled = true;
+                ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
+            }
         }
+
     }
 
     #region Phase

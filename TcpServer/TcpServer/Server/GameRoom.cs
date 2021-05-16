@@ -134,7 +134,7 @@ namespace MyPacket
             sw.Start();
             while (true)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(1);
                 current = sw.ElapsedMilliseconds;
                 timer -= (float)(current - prev) / 1000;
                 prev = current;

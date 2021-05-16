@@ -41,7 +41,7 @@ public class ClientManager : MonoBehaviour
     }
     private void Update()
     {
-        while (socketReady && 0 < socket.MessageCount)
+        while (socketReady && 0 < socket.PacketCount)
             socket.Handle();
     }
 
@@ -106,7 +106,7 @@ public class ClientManager : MonoBehaviour
     }
     private void OnDisconnect(MySocket socket, Packet packet)
     {
-        socket.Disconnect();
+        socket.Close();
 
         Debug.Log("Disconnect");
     }
@@ -115,7 +115,7 @@ public class ClientManager : MonoBehaviour
         if (!socketReady) return;
 
         socket.Emit(PacketType.DISCONNECT);
-        socket.Disconnect();
+        socket.Close();
 
         socketReady = false;
     }

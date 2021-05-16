@@ -55,7 +55,7 @@ public class IntroManager : MonoBehaviour
         FindObjectOfType<ClientManager>().gameObject.SetActive(true);
 
         ClientManager.instance.hostIp = hostIpInputField.text;
-        ClientManager.instance.port = (hostIpInputField.text == "") ? 0 : int.Parse(hostIpInputField.text);
+        ClientManager.instance.port = (portInputField.text == "") ? 0 : int.Parse(portInputField.text);
 
         ClientManager.instance.ConnectToServer();
     }
