@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace MyPacket
 {
@@ -11,6 +11,8 @@ namespace MyPacket
         #region field
         private static int roomId = 1;
         private Dictionary<int, User> users;
+        private const float DAY_TIME = 5;
+        private const float NIGHT_TIME = 5;
         #endregion
         #region property
         public int Id { get; private set; }
@@ -18,7 +20,7 @@ namespace MyPacket
         public int Participants { get; private set; } = 0;
         public static int Maximum = 10;
         public string Name { get; set; }
-        public bool IsStarted { get; private set; } = false;
+        public GameStatus Status { get; private set; } = GameStatus.WAITTING;
         public GameServer Server { get; private set; }
         #endregion
         public GameRoom(GameServer server, User host = null, string name = "")
@@ -32,6 +34,7 @@ namespace MyPacket
                 Name = name;
             }
         }
+        //TODO: 게임룸 내에 큐를 만들고 동기적으로 하고싶음
         public bool Join(User user)
         {
             if (Participants == Maximum)
@@ -52,7 +55,7 @@ namespace MyPacket
             if (!user.LeaveRoom())
                 return false;
             RemoveUser(user.Id);
-            if (!IsStarted && HostId == user.Id)
+            if (Status == GameStatus.WAITTING && HostId == user.Id)
             {
                 foreach (var u in users.Values.ToArray())
                 {
@@ -78,7 +81,7 @@ namespace MyPacket
         }
         public GameRoomInfo GetInfo()
         {
-            return new GameRoomInfo(Id, HostId, Participants, IsStarted, Name);
+            return new GameRoomInfo(Id, HostId, Participants, Name);
         }
         public void On(PacketType type, MySocket.MessageHandler handler)
         {
@@ -98,17 +101,66 @@ namespace MyPacket
         {
             return (from u in users.Values select u.GetInfo()).ToList();
         }
+        private List<User> DesideMafia()
+        {
+            var mafias = users.Values
+                        .OrderBy(a => Guid.NewGuid())
+                        .Take(Participants > 6 ? 2 : 1);
+            foreach (var u in mafias)
+                u.SetMafia();
+            return mafias.ToList();
+        }
         public bool GameStart(User user)
         {
-
-            if (user.Status != UserStatus.WAITTING || HostId != user.Id)
+            //대기실이고, 방장일 경우에만 게임 시작 가능
+            if (user.Status != GameStatus.WAITTING || HostId != user.Id)
                 return false;
-            IsStarted = true;
+            Status = GameStatus.DAY;
+            var mafias = DesideMafia();
             foreach (var u in users.Values)
             {
-                u.GameStart(false, null);
+                u.GameStart(u.IsMafia, mafias);
             }
+            var thread = new Thread(GameLogic);
+            thread.Start();
+            Console.WriteLine($"start : {user.Id}");
             return true;
+        }
+        private void GameLogic()
+        {
+            var sw = new Stopwatch();
+            float timer = DAY_TIME;
+            long prev = 0, current;
+            sw.Start();
+            while (true)
+            {
+                Thread.Sleep(10);
+                current = sw.ElapsedMilliseconds;
+                timer -= (float)(current - prev) / 1000;
+                prev = current;
+                if (timer < 0)
+                {
+                    switch (Status)
+                    {
+                        case GameStatus.DAY:
+                            timer = NIGHT_TIME;
+                            Status = GameStatus.NIGHT;
+                            Broadcast(PacketType.NIGHT_START);
+                            break;
+                        case GameStatus.NIGHT:
+                            timer = DAY_TIME;
+                            Status = GameStatus.DAY;
+                            Broadcast(PacketType.DAY_START);
+                            break;
+                        case GameStatus.VOTE1: break;
+                        case GameStatus.DEFENSE: break;
+                        case GameStatus.VOTE2: break;
+                        default: break;
+                    }
+                    prev = 0;
+                    sw.Restart();
+                }
+            }
         }
     }
 }

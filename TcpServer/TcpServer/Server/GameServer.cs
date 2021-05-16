@@ -52,7 +52,7 @@ namespace MyPacket
         #region private method
         private void UserInit(TcpClient client)
         {
-            
+
             var user = new User(client, this);
             userMap[user.Id] = user;
             EnrollConnectHandler(user);
@@ -63,7 +63,9 @@ namespace MyPacket
         }
         private List<GameRoomInfo> GetRoomInfos()
         {
-            return (from r in roomMap.Values where !r.IsStarted select r.GetInfo()).ToList();
+            return (from r in roomMap.Values 
+                    where r.Status == GameStatus.WAITTING 
+                    select r.GetInfo()).ToList();
         }
         #endregion
     }

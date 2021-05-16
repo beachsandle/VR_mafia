@@ -15,17 +15,11 @@ namespace MyPacket
         }
         private void OnConnect(MySocket socket, Packet packet)
         {
-            var user = socket as User;
-            user.Connect();
-            Console.WriteLine($"connect : {user.Id}");
+            (socket as User).Connect();
         }
         private void OnDisconnect(MySocket socket, Packet packet)
         {
-            var user = socket as User;
-            Console.WriteLine($"disconnect : {user.Id}");
-            user.LeaveRoom();
-            user.Close();
-            userMap.Remove(user.Id);
+            (socket as User).Disconnect();
         }
     }
 }

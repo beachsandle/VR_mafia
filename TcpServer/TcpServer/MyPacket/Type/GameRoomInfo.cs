@@ -11,7 +11,6 @@ namespace MyPacket
         public int Id { get; set; }
         public int HostId { get; set; }
         public int Participants { get; set; }
-        public bool IsStarted { get; set; } = false;
         public string Name { get; set; } = "";
         public int Size
         {
@@ -21,13 +20,12 @@ namespace MyPacket
             }
         }
         public GameRoomInfo() { }
-        public GameRoomInfo(int id, int hostId, int num, bool started, string name)
+        public GameRoomInfo(int id, int hostId, int num, string name)
         {
             Id = id;
             HostId = hostId;
             Participants = num;
             Name = name;
-            IsStarted = started;
         }
         public byte[] ToBytes()
         {
@@ -36,7 +34,6 @@ namespace MyPacket
                 .Append(Id)
                 .Append(HostId)
                 .Append(Participants)
-                .Append(IsStarted)
                 .Append(Name)
                 .Get();
         }
@@ -45,8 +42,7 @@ namespace MyPacket
             Id = BitConverter.ToInt32(bytes, 0);
             HostId = BitConverter.ToInt32(bytes, 4);
             Participants = BitConverter.ToInt32(bytes, 8);
-            IsStarted = BitConverter.ToBoolean(bytes, 12);
-            Name = Encoding.UTF8.GetString(bytes, 13, bytes.Length - 13);
+            Name = Encoding.UTF8.GetString(bytes, 9, bytes.Length - 9);
         }
     }
 }

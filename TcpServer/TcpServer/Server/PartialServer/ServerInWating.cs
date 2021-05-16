@@ -26,7 +26,6 @@ namespace MyPacket
             var user = socket as User;
             var room = user.Room;
             room.GameStart(user);
-            Console.WriteLine($"start : {user.Id}");
         }
         #endregion
     }

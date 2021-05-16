@@ -86,7 +86,7 @@
     <Compile Include="Server\PartialServer\ServerInWating.cs" />
     <Compile Include="Server\PartialServer\ServerInLobby.cs" />
     <Compile Include="Server\User.cs" />
-    <Compile Include="Server\UserStatus.cs" />
+    <Compile Include="Server\GameStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
