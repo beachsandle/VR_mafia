@@ -31,7 +31,9 @@ namespace MyPacket
         GAME_START_REQ,
         GAME_START,
         //ingame
-        MOVE,
+        INGAME_PACKET,
+        MOVE_REQ,
+        MOVE_EVENT,
         KILL_REQ,
         KILL_RES,
         DIE_EVENT,

@@ -12,6 +12,8 @@ namespace MyPacket
         private static int roomId = 1;
         private Dictionary<int, User> users;
         private Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
+        private delegate void EventHandler((int, Packet) eventData);
+        private Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
         private Stopwatch timer = new Stopwatch();
         private float currentTime = 0;
         private long prevTime = 0;
@@ -37,6 +39,22 @@ namespace MyPacket
                 HostId = host.Id;
                 Name = name;
             }
+            InitHandlerMap();
+        }
+        //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
+        private void InitHandlerMap()
+        {
+            foreach (PacketType type in Enum.GetValues(typeof(PacketType)))
+            {
+                handlerMap[type] = EmptyHandler;
+            }
+        }
+        //공백 핸들러
+        private void EmptyHandler((int, Packet) data) { }
+        //이벤트 핸들러 등록
+        private void On(PacketType type, EventHandler handler)
+        {
+            handlerMap[type] += handler;
         }
         public void Enqueue(int id, Packet packet)
         {
@@ -134,6 +152,10 @@ namespace MyPacket
             Console.WriteLine($"start : {user.Id}");
             return true;
         }
+        private void EnrollHanders()
+        {
+
+        }
         //플레이어들이 이동된 위치를 전송
         private void MoveEvent() { }
         private void TimeFlow()
@@ -144,7 +166,11 @@ namespace MyPacket
         }
         private void EventHandling()
         {
-
+            while (eventQueue.Count > 0)
+            {
+                var data = eventQueue.Dequeue();
+                handlerMap[data.packet.Header.Type](data);
+            }
         }
         //시간이 만료되면 발생하는 이벤트
         private void Timeout()
