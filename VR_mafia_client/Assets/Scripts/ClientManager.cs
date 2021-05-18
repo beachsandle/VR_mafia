@@ -238,7 +238,6 @@ public class ClientManager : MonoBehaviour
         var data = new MoveData();
         data.FromBytes(packet.Bytes);
 
-        //Debug.Log(data.location.position + ", " + data.location.position);
         InGameManager.instance.UpdatePlayerTransform(data);
     }
     public void EmitMove(Vector3 pos, Quaternion rot)
@@ -273,6 +272,42 @@ public class ClientManager : MonoBehaviour
     public void EmitVoteReq(int targetID)
     {
         socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
+    }
+    private void OnVoteRes(MySocket socket, Packet packet)
+    {
+        //var data = new VoteResData();
+        //data.FromBytes(packet.Bytes);
+
+        //InGameManager.instance.suffrage = false;
+    }
+    private void OnVotingResult(MySocket socket, Packet packet)
+    {
+        //var data = new VotingResultData();
+        //data.FromBytes(packet.Bytes);
+
+        //InGameManager.instance.DisplayVotingResult(data);
+    }
+
+    private void OnStartDefense(MySocket socket, Packet packet)
+    {
+        
+    }
+
+    private void OnStartFinalVoting(MySocket socket, Packet packet)
+    {
+
+    }
+    public void EmitFinalVoteReq(bool agree)
+    {
+        
+    }
+    private void OnFinalVoteRes(MySocket socket, Packet packet)
+    {
+
+    }
+    private void OnFinalVotingResult(MySocket socket, Packet packet)
+    {
+
     }
     #endregion
 }
