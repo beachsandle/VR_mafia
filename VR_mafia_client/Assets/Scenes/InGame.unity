@@ -1519,6 +1519,7 @@ MonoBehaviour:
   menuState: 0
   votingPanel: {fileID: 851271952}
   timeText: {fileID: 1070470588}
+  finalVotingPanel: {fileID: 1913033438}
   playerOrder: 
 --- !u!4 &415983047
 Transform:
@@ -6463,7 +6464,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1913033439
 RectTransform:
   m_ObjectHideFlags: 0

@@ -41,7 +41,11 @@ public class InGameManager : MonoBehaviour
 
     [Header("Voting Panel")]
     [SerializeField] private GameObject votingPanel;
-    [SerializeField] private Text timeText;
+    private Text timeText;
+
+    [Header("Final Voting Panel")]
+    [SerializeField] private GameObject finalVotingPanel;
+    private Text finalTimeText;
 
     public Dictionary<int, GameObject> players; // id, object
     public List<int> playerOrder;
@@ -71,6 +75,7 @@ public class InGameManager : MonoBehaviour
 
         InitMenuPanel();
         InitVotingPanel();
+        InitFinalVotingPanel();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -258,6 +263,7 @@ public class InGameManager : MonoBehaviour
                 Destroy(buttonTR.gameObject);
             }
         }
+        timeText = votingContent.Find("Time Text").GetComponent<Text>();
 
         votingPanel.SetActive(false);
     }
@@ -265,10 +271,10 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage)
         {
-            suffrage = false; // TODO: OnVoteRes() 에서 처리하도록 변경
-
             string s = playerObjects.transform.GetChild(pNum - 1).name;
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
+
+            suffrage = false; // TODO: OnVoteRes() 에서 처리하도록 변경
         }
     }
 
@@ -320,6 +326,86 @@ public class InGameManager : MonoBehaviour
                 }
             }
         }
+    }
+    #endregion
+
+    #region FinalVotingPanel
+    private void InitFinalVotingPanel()
+    {
+        finalVotingPanel.SetActive(true);
+
+        var finalVotingContent = finalVotingPanel.transform.GetChild(0);
+        
+        Button btn;
+        btn = finalVotingContent.Find("Pros Button").GetComponent<Button>();
+        btn.onClick.AddListener(() => { OnProsConsButton(true); });
+        btn.gameObject.SetActive(false);
+
+        btn = finalVotingContent.Find("Cons Button").GetComponent<Button>();
+        btn.onClick.AddListener(() => { OnProsConsButton(false); });
+        btn.gameObject.SetActive(false);
+
+        finalTimeText = finalVotingContent.Find("Time Text").GetComponent<Text>();
+
+        finalVotingPanel.SetActive(false);
+    }
+    private void OnProsConsButton(bool isPros)
+    {
+        if (suffrage)
+        {
+            Debug.Log(isPros);
+
+            ClientManager.instance.EmitFinalVoteReq(isPros);
+
+            suffrage = false; // TODO: OnFinalVoteRes() 에서 처리하도록 변경
+        }
+    }
+
+    public void OnFinalVotingPanel()
+    {
+        finalVotingPanel.SetActive(true);
+    }
+    public void StartDefense(int defenseTime)
+    {
+        StartCoroutine(UpdateFinalVotingTime(defenseTime, false));
+    }
+    public void StartFinalVoting(int time)
+    {
+        suffrage = true;
+
+        var finalVotingContent = finalVotingPanel.transform.GetChild(0);
+        finalVotingContent.Find("Pros Button").gameObject.SetActive(true);
+        finalVotingContent.Find("Cons Button").gameObject.SetActive(true);
+
+        StartCoroutine(UpdateFinalVotingTime(time, true));
+    }
+    IEnumerator UpdateFinalVotingTime(int time, bool isFinal)
+    {
+        while (0 < time)
+        {
+            finalTimeText.text = time.ToString();
+
+            time--;
+            yield return new WaitForSeconds(1f);
+        }
+
+        if (isFinal)
+        {
+            var finalVotingContent = finalVotingPanel.transform.GetChild(0);
+            finalVotingContent.Find("Pros Button").gameObject.SetActive(false);
+            finalVotingContent.Find("Cons Button").gameObject.SetActive(false);
+
+            OffFinalVotingPanel();
+        }
+    }
+    private void OffFinalVotingPanel()
+    {
+        finalVotingPanel.SetActive(false);
+    }
+    
+    public void DisplayFinalVotingResult(int id)
+    {
+        Debug.Log(id + "Kicked...");
     }
     #endregion
 }
