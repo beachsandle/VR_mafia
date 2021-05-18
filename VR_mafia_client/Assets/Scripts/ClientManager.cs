@@ -288,5 +288,27 @@ public class ClientManager : MonoBehaviour
 
         //InGameManager.instance.DisplayVotingResult(data);
     }
+
+    private void OnStartDefense(MySocket socket, Packet packet)
+    {
+        
+    }
+
+    private void OnStartFinalVoting(MySocket socket, Packet packet)
+    {
+
+    }
+    public void EmitFinalVoteReq(bool agree)
+    {
+        
+    }
+    private void OnFinalVoteRes(MySocket socket, Packet packet)
+    {
+
+    }
+    private void OnFinalVotingResult(MySocket socket, Packet packet)
+    {
+
+    }
     #endregion
 }
