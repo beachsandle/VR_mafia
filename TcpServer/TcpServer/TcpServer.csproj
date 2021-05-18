@@ -51,9 +51,9 @@
     <Compile Include="MyPacket\PacketData\InGame\KillResData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\MoveData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\ProgressMissionData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\StartVotingData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\VoteEventData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\VoteReqData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\StartVotingData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\VoteEventData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\VoteReqData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\CreateRoomResData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\GameStartData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\LeaveResData.cs" />

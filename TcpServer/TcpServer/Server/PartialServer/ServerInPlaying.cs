@@ -10,13 +10,22 @@ namespace MyPacket
     {
         private void EnrollPlayingHandler(User user)
         {
-            user.On(PacketType.MOVE, OnMove);
+            for (PacketType type = PacketType.INGAME_PACKET + 1; type < PacketType.END; ++type)
+            {
+                user.On(type, IngameHandler);
+            }
+            //user.On(PacketType.MOVE, OnMove);
         }
         private void OnMove(MySocket socket, Packet packet)
         {
             var user = socket as User;
             var room = user.Room;
-            room.Broadcast(PacketType.MOVE, packet.Bytes, user);
+            //room.Broadcast(PacketType.MOVE, packet.Bytes, user);
+        }
+        private void IngameHandler(MySocket socket, Packet packet)
+        {
+            var user = socket as User;
+            user.Room.Enqueue(user.Id, packet);
         }
     }
 }
