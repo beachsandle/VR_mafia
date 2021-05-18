@@ -238,7 +238,6 @@ public class ClientManager : MonoBehaviour
         var data = new MoveData();
         data.FromBytes(packet.Bytes);
 
-        //Debug.Log(data.location.position + ", " + data.location.position);
         InGameManager.instance.UpdatePlayerTransform(data);
     }
     public void EmitMove(Vector3 pos, Quaternion rot)

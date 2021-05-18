@@ -28,10 +28,8 @@ public class InGameManager : MonoBehaviour
     public bool suffrage;
 
     [Header("UI")]
-    [SerializeField]
-    private Text roleText;
-    [SerializeField]
-    private Text informationText;
+    [SerializeField] private Text roleText;
+    [SerializeField] private Text informationText;
     private float fadeTime = 3f;
 
     [Header("Menu Panel")]
@@ -353,8 +351,6 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage)
         {
-            Debug.Log(isPros);
-
             ClientManager.instance.EmitFinalVoteReq(isPros);
 
             suffrage = false; // TODO: OnFinalVoteRes() 에서 처리하도록 변경
