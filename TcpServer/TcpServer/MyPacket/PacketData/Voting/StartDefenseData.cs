@@ -18,13 +18,13 @@ namespace MyPacket
             }
         }
 
-        public DeadReportData()
+        public StartDefenseData()
         {
             Defense_time = 20; // 임의로 20초 초기화
             Elected_id = 0;
         }
 
-        public DeadReportData(int defense_time, int elected_id)
+        public StartDefenseData(int defense_time, int elected_id)
         {
             Defense_time = defense_time;
             Elected_id = elected_id;

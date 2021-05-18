@@ -19,10 +19,10 @@ namespace MyPacket
 
         public FinalVoteReq()
         {
-            Agree = 0;
+            Agree = false;
         }
 
-        public FinalVoteReq(int agree)
+        public FinalVoteReq(bool agree)
         {
             Agree = agree;
   

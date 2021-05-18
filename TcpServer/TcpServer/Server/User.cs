@@ -50,9 +50,9 @@ namespace MyPacket
                     break;
                 case GameStatus.DAY:
                 case GameStatus.NIGHT:
-                case GameStatus.VOTE1:
+                case GameStatus.VOTE:
                 case GameStatus.DEFENSE:
-                case GameStatus.VOTE2:
+                case GameStatus.FINAL_VOTE:
                     Room.RemoveUser(Id);
                     break;
             }

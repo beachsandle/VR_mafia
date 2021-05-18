@@ -173,14 +173,19 @@ public class InGameManager : MonoBehaviour
     }
     #endregion
 
-    public void UpdatePlayerTransform(MoveData data)
+    public void UpdatePlayerTransform(MoveEventData eventData)
     {
-        V3 pos = data.location.position;
-        V3 rot = data.location.rotation;
+        foreach(var data in eventData.movedPlayer)
+        {
+            if (data.player_id == ClientManager.instance.playerID) continue;
 
-        Transform TR = players[data.player_id].transform;
-        TR.position = new Vector3(pos.x, pos.y, pos.z);
-        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+            V3 pos = data.location.position;
+            V3 rot = data.location.rotation;
+
+            Transform TR = players[data.player_id].transform;
+            TR.position = new Vector3(pos.x, pos.y, pos.z);
+            TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+        }
     }
 
     public void StartInformation(string s)
