@@ -31,16 +31,25 @@ namespace MyPacket
         GAME_START_REQ,
         GAME_START,
         //ingame
-        MOVE,
+        INGAME_PACKET,
+        DAY_START,
+        NIGHT_START,
+        MOVE_REQ,
+        MOVE_EVENT,
         KILL_REQ,
         KILL_RES,
         DIE_EVENT,
         DEAD_REPORT,
         START_VOTING,
         VOTE_REQ,
+        VOTE_RES,
         VOTE_EVENT,
-        DAY_START,
-        NIGHT_START,
+        VOTING_RESULT,
+        START_DEFENCE,
+        START_FINAL_VOTING,
+        FINAL_VOTE_RES,
+        FINAL_VOTE_REQ,
+        FINAL_VOTING_RESULT,
         END
     }
 }

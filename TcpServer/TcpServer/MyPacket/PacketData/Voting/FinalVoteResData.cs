@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class VoteEventData : IPacketData
+    public class FinalVoteResData : IPacketData
     {
-        public int Voter_id;
+        public int Result;
         public int Size
         {
             get
@@ -17,24 +17,27 @@ namespace MyPacket
             }
         }
 
-        public VoteEventData()
+        public FinalVoteResData()
         {
-            Voter_id = 0;
+            Result = 0;
+
         }
 
-        public VoteEventData(int voter_id)
+
+        public FinalVoteResData(int result)
         {
-            Voter_id = voter_id;
+            Result = result;
+  
         }
 
         public void FromBytes(byte[] bytes)
         {
-            Voter_id = BitConverter.ToInt32(bytes, 0);
+            Result = BitConverter.ToInt32(bytes, 0);
         }
 
         public byte[] ToBytes()
         {
-            return BitConverter.GetBytes(Voter_id);
+            return BitConverter.GetBytes(Result);
         }
     }
 }

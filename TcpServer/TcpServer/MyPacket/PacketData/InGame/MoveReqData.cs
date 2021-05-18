@@ -6,36 +6,35 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class CallEmergencyMeetingData : IPacketData
+    public class MoveReqData : IPacketData
     {
-        public int User_id;
+        public Location location;
         public int Size
         {
             get
             {
-                return 4;
+                return 24;
             }
         }
 
-        public CallEmergencyMeetingData()
+        public MoveReqData()
         {
-            User_id = 0;
+            location = new Location();
         }
 
-        public CallEmergencyMeetingData(int user_id)
+        public MoveReqData(Location trans)
         {
-            User_id = user_id;
-  
+            location = trans;
         }
 
         public void FromBytes(byte[] bytes)
         {
-            User_id = BitConverter.ToInt32(bytes, 0);
+            location.FromBytes(bytes.ToArray());
         }
 
         public byte[] ToBytes()
         {
-            return BitConverter.GetBytes(User_id);
+            return new ByteBuilder(28).Append(location.ToBytes()).Get();
         }
     }
 }

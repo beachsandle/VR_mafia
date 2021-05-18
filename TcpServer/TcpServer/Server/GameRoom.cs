@@ -11,6 +11,12 @@ namespace MyPacket
         #region field
         private static int roomId = 1;
         private Dictionary<int, User> users;
+        private Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
+        private delegate void EventHandler((int, Packet) eventData);
+        private Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
+        private Stopwatch timer = new Stopwatch();
+        private float currentTime = 0;
+        private long prevTime = 0;
         private const float DAY_TIME = 5;
         private const float NIGHT_TIME = 5;
         #endregion
@@ -33,6 +39,26 @@ namespace MyPacket
                 HostId = host.Id;
                 Name = name;
             }
+            InitHandlerMap();
+        }
+        //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
+        private void InitHandlerMap()
+        {
+            foreach (PacketType type in Enum.GetValues(typeof(PacketType)))
+            {
+                handlerMap[type] = EmptyHandler;
+            }
+        }
+        //공백 핸들러
+        private void EmptyHandler((int, Packet) data) { }
+        //이벤트 핸들러 등록
+        private void On(PacketType type, EventHandler handler)
+        {
+            handlerMap[type] += handler;
+        }
+        public void Enqueue(int id, Packet packet)
+        {
+            eventQueue.Enqueue((id, packet));
         }
         //TODO: 게임룸 내에 큐를 만들고 동기적으로 하고싶음
         public bool Join(User user)
@@ -121,46 +147,69 @@ namespace MyPacket
             {
                 u.GameStart(u.IsMafia, mafias);
             }
-            var thread = new Thread(GameLogic);
+            var thread = new Thread(GameLoof);
             thread.Start();
             Console.WriteLine($"start : {user.Id}");
             return true;
         }
-        private void GameLogic()
+        private void EnrollHanders()
         {
-            var sw = new Stopwatch();
-            float timer = DAY_TIME;
-            long prev = 0, current;
-            sw.Start();
-            while (true)
+
+        }
+        //플레이어들이 이동된 위치를 전송
+        private void MoveEvent() { }
+        private void TimeFlow()
+        {
+            long mill = timer.ElapsedMilliseconds;
+            currentTime -= (float)(mill - prevTime) / 1000;
+            prevTime = mill;
+        }
+        private void EventHandling()
+        {
+            while (eventQueue.Count > 0)
+            {
+                var data = eventQueue.Dequeue();
+                handlerMap[data.packet.Header.Type](data);
+            }
+        }
+        //시간이 만료되면 발생하는 이벤트
+        private void Timeout()
+        {
+            switch (Status)
+            {
+                case GameStatus.DAY:
+                    currentTime = NIGHT_TIME;
+                    Status = GameStatus.NIGHT;
+                    Broadcast(PacketType.NIGHT_START);
+                    break;
+                case GameStatus.NIGHT:
+                    currentTime = DAY_TIME;
+                    Status = GameStatus.DAY;
+                    Broadcast(PacketType.DAY_START);
+                    break;
+                case GameStatus.VOTE: break;
+                case GameStatus.DEFENSE: break;
+                case GameStatus.FINAL_VOTE: break;
+                default: break;
+            }
+            prevTime = 0;
+            timer.Restart();
+        }
+        //게임로직을 담당하는 루프
+        private void GameLoof()
+        {
+            currentTime = DAY_TIME;
+            timer.Start();
+            while (Status != GameStatus.END)
             {
                 Thread.Sleep(1);
-                current = sw.ElapsedMilliseconds;
-                timer -= (float)(current - prev) / 1000;
-                prev = current;
-                if (timer < 0)
-                {
-                    switch (Status)
-                    {
-                        case GameStatus.DAY:
-                            timer = NIGHT_TIME;
-                            Status = GameStatus.NIGHT;
-                            Broadcast(PacketType.NIGHT_START);
-                            break;
-                        case GameStatus.NIGHT:
-                            timer = DAY_TIME;
-                            Status = GameStatus.DAY;
-                            Broadcast(PacketType.DAY_START);
-                            break;
-                        case GameStatus.VOTE1: break;
-                        case GameStatus.DEFENSE: break;
-                        case GameStatus.VOTE2: break;
-                        default: break;
-                    }
-                    prev = 0;
-                    sw.Restart();
-                }
+                EventHandling();
+                MoveEvent();
+                TimeFlow();
+                if (currentTime < 0)
+                    Timeout();
             }
+            timer.Stop();
         }
     }
 }

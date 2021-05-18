@@ -43,17 +43,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyPacket\PacketData\InGame\CallEmergencyMeetingData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\DeadReportData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\DieEventData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\FinalVoteReqData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\FinalVoteResData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\FinalVotingResultData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\FinishMissionData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\KillReqData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\KillResData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\MoveData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\MoveEventData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\MoveReqData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\ProgressMissionData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\StartVotingData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\VoteEventData.cs" />
-    <Compile Include="MyPacket\PacketData\InGame\VoteReqData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\StartDefenseData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\StartFinalVotingData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\VoteResData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\StartVotingData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\VoteReqData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\CreateRoomResData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\GameStartData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\LeaveResData.cs" />
@@ -63,6 +68,7 @@
     <Compile Include="MyPacket\PacketData\Lobby\JoinEventData.cs" />
     <Compile Include="MyPacket\PacketData\Lobby\JoinRoomResData.cs" />
     <Compile Include="MyPacket\Type\Location.cs" />
+    <Compile Include="MyPacket\Type\TimeManager.cs" />
     <Compile Include="MyPacket\Type\UserInfo.cs" />
     <Compile Include="MyPacket\Type\GameRoomInfo.cs" />
     <Compile Include="MyPacket\Type\MySocket.cs" />
@@ -82,7 +88,6 @@
     <Compile Include="Server\GameServer.cs" />
     <Compile Include="Server\PartialServer\ServerInPlaying.cs" />
     <Compile Include="Server\PartialServer\ServerInConnect.cs" />
-    <Compile Include="Server\PartialServer\ServerInVoting.cs" />
     <Compile Include="Server\PartialServer\ServerInWating.cs" />
     <Compile Include="Server\PartialServer\ServerInLobby.cs" />
     <Compile Include="Server\User.cs" />

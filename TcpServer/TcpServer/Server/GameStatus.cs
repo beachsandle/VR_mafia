@@ -14,8 +14,9 @@ namespace MyPacket
         WAITTING,
         DAY,
         NIGHT,
-        VOTE1,
+        VOTE,
         DEFENSE,
-        VOTE2
+        FINAL_VOTE,
+        END
     }
 }
