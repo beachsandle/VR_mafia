@@ -87,19 +87,16 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
-    public void UpdatePlayerTransform(MoveEventData eventData)
+    public void UpdatePlayerTransform(MoveEventData data)
     {
-        foreach(var data in eventData.movedPlayer)
-        {
-            if (data.player_id == ClientManager.instance.playerID) continue;
+            if (data.Player_id == ClientManager.instance.playerID) return;
 
-            V3 pos = data.location.position;
-            V3 rot = data.location.rotation;
+            V3 pos = data.Location.position;
+            V3 rot = data.Location.rotation;
 
-            Transform TR = players[data.player_id].transform;
+            Transform TR = players[data.Player_id].transform;
             TR.position = new Vector3(pos.x, pos.y, pos.z);
             TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
-        }
     }
 
     private void SpawnPlayers()
