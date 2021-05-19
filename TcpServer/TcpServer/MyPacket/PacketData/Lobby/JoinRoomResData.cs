@@ -6,17 +6,18 @@ namespace MyPacket
 {
     public class JoinRoomResData : IPacketData
     {
-        public bool Result { get; set; } = true;
-        public List<UserInfo> Users { get; set; } = null;
+        public bool Result = true;
+        public List<UserInfo> Users = null;
+        public JoinRoomResData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
 
-        public JoinRoomResData(bool result = true, List<UserInfo> users = null)
+        public JoinRoomResData(bool result, List<UserInfo> users = null)
         {
             Result = result;
             Users = users;
-        }
-        public JoinRoomResData(byte[] bytes)
-        {
-            FromBytes(bytes);
         }
         public int Size
         {

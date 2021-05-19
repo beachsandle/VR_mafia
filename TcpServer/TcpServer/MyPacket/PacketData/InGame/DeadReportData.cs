@@ -8,8 +8,8 @@ namespace MyPacket
 {
     public class DeadReportData : IPacketData
     {
-        public int Dead_id;
-        public int Reporter_id;
+        public int Dead_id = 0;
+        public int Reporter_id = 0;
         public int Size
         {
             get
@@ -18,17 +18,17 @@ namespace MyPacket
             }
         }
 
-        public DeadReportData()
+        public DeadReportData(byte[] bytes = null)
         {
-            Dead_id = 0;
-            Reporter_id = 0;
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public DeadReportData(int dead_id, int reporter_id)
         {
             Dead_id = dead_id;
             Reporter_id = reporter_id;
-  
+
         }
 
 

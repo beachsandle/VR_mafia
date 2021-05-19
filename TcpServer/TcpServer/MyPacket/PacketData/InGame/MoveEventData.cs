@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class MoveEventData : IPacketData
     {
-        public (int player_id, Location location)[] movedPlayer;
+        public (int player_id, Location location)[] movedPlayer = null;
         public int Size
         {
             get
@@ -17,8 +17,10 @@ namespace MyPacket
             }
         }
 
-        public MoveEventData()
+        public MoveEventData(byte[] bytes = null)
         {
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public MoveEventData((int player_id, Location location)[] movedPlayer)
@@ -42,9 +44,9 @@ namespace MyPacket
         public byte[] ToBytes()
         {
             var bb = new ByteBuilder(Size);
-            foreach (var t in movedPlayer)
+            foreach (var (player_id, location) in movedPlayer)
             {
-                bb.Append(t.player_id).Append(t.location.ToBytes());
+                bb.Append(player_id).Append(location.ToBytes());
             }
             return bb.Get();
         }

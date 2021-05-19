@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class MoveReqData : IPacketData
     {
-        public Location location;
+        public Location location = new Location();
         public int Size
         {
             get
@@ -17,9 +17,10 @@ namespace MyPacket
             }
         }
 
-        public MoveReqData()
+        public MoveReqData(byte[] bytes = null)
         {
-            location = new Location();
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public MoveReqData(Location trans)

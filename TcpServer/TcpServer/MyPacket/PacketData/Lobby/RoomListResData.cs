@@ -4,16 +4,10 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct RoomListResData : IPacketData
+    public class RoomListResData : IPacketData
     {
-        public bool Result { get; set; }
-        public List<GameRoomInfo> Rooms { get; set; }
-
-        public RoomListResData(bool result = true, List<GameRoomInfo> rooms = null)
-        {
-            Result = result;
-            Rooms = rooms;
-        }
+        public bool Result = true;
+        public List<GameRoomInfo> Rooms = null;
         public int Size
         {
             get
@@ -28,6 +22,17 @@ namespace MyPacket
             }
         }
 
+
+        public RoomListResData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public RoomListResData(bool result, List<GameRoomInfo> rooms = null)
+        {
+            Result = result;
+            Rooms = rooms;
+        }
         public byte[] ToBytes()
         {
             var bb = new ByteBuilder(Size).Append(Result);

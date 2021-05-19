@@ -4,8 +4,9 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct ConnectData : IPacketData
+    public class ConnectData : IPacketData
     {
+        public int PlayerId = -1;
         public int Size
         {
             get
@@ -13,8 +14,12 @@ namespace MyPacket
                 return 4;
             }
         }
-        public int PlayerId { get; set; }
-        public ConnectData(int playerId = -1)
+        public ConnectData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public ConnectData(int playerId)
         {
             PlayerId = playerId;
         }

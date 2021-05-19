@@ -17,9 +17,14 @@ namespace MyPacket
                 return 1 + Mafias.Length * 4;
             }
         }
-        public bool IsMafia { get; set; }
-        public int[] Mafias { get; set; }
-        public GameStartData(bool isMafia = false, int[] mafias = null)
+        public bool IsMafia = false;
+        public int[] Mafias = null;
+        public GameStartData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public GameStartData(bool isMafia, int[] mafias = null)
         {
             IsMafia = isMafia;
             Mafias = mafias;

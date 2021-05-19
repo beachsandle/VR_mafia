@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class KillReqDada : IPacketData
     {
-        public int Target_id;
+        public int Target_id = 0;
         public int Size
         {
             get
@@ -17,16 +17,16 @@ namespace MyPacket
             }
         }
 
-        public KillReqDada()
+        public KillReqDada(byte[] bytes = null)
         {
-            Target_id = 0;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public KillReqDada(int target_id)
         {
             Target_id = target_id;
-  
+
         }
 
         public void FromBytes(byte[] bytes)

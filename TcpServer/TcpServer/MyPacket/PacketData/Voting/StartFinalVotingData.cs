@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class StartFinalVotingData : IPacketData
     {
-        public int Voting_time;
+        public int Voting_time = 0;
         public int Size
         {
             get
@@ -17,10 +17,10 @@ namespace MyPacket
             }
         }
 
-        public StartFinalVotingData()
+        public StartFinalVotingData(byte[] bytes = null)
         {
-            Voting_time = 30;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
 

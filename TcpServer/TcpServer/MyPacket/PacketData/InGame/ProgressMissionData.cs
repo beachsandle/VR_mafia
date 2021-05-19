@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class ProgressMissionData : IPacketData
     {
-        public float Progress;
+        public float Progress = 0;
         public int Size
         {
             get
@@ -17,10 +17,10 @@ namespace MyPacket
             }
         }
 
-        public ProgressMissionData()
+        public ProgressMissionData(byte[] bytes = null)
         {
-            Progress = 0;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public ProgressMissionData(int progress)

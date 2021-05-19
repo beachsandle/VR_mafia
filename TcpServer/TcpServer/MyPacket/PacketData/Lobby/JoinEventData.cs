@@ -8,6 +8,7 @@ namespace MyPacket
 {
     public class JoinEventData : IPacketData
     {
+        public UserInfo Info = null;
         public int Size
         {
             get
@@ -15,8 +16,12 @@ namespace MyPacket
                 return Info.Size;
             }
         }
-        public UserInfo Info { get; set; }
-        public JoinEventData(UserInfo info = null)
+        public JoinEventData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public JoinEventData(UserInfo info)
         {
             Info = info;
         }

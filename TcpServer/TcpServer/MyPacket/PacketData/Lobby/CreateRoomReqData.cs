@@ -4,8 +4,9 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct CreateRoomReqData : IPacketData
+    public class CreateRoomReqData : IPacketData
     {
+        public string RoomName = "";
         public int Size
         {
             get
@@ -13,8 +14,12 @@ namespace MyPacket
                 return Encoding.UTF8.GetBytes(RoomName).Length;
             }
         }
-        public string RoomName { get; set; }
-        public CreateRoomReqData(string roomName = "")
+        public CreateRoomReqData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public CreateRoomReqData(string roomName)
         {
             RoomName = roomName;
         }

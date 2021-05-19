@@ -4,24 +4,21 @@ using System.Text;
 
 namespace MyPacket
 {
-    /// <summary>
     /// 패킷에 저장될 데이터
-    /// </summary>
     interface IPacketData
     {
-        /// <summary>
-        /// 데이터의 크기
-        /// </summary>
+        // 데이터의 크기
         int Size { get; }
-        /// <summary>
-        /// 데이터 직렬화
-        /// </summary>
-        /// <returns>직렬화된 데이터</returns>
+        // 데이터 직렬화
         byte[] ToBytes();
-        /// <summary>
-        /// 직렬화된 데이터를 읽고 저장
-        /// </summary>
-        /// <param name="bytes"></param>
+        // 직렬화된 데이터를 읽고 저장
         void FromBytes(byte[] bytes);
+        /*
+        public packetdata(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+         */
     }
 }

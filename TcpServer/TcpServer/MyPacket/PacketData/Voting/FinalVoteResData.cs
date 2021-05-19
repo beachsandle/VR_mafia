@@ -8,31 +8,31 @@ namespace MyPacket
 {
     public class FinalVoteResData : IPacketData
     {
-        public int Result;
+        public bool Result = true;
         public int Size
         {
             get
             {
-                return 4;
+                return 1;
             }
         }
 
-        public FinalVoteResData()
+        public FinalVoteResData(byte[] bytes = null)
         {
-            Result = 0;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
 
-        public FinalVoteResData(int result)
+        public FinalVoteResData(bool result)
         {
             Result = result;
-  
+
         }
 
         public void FromBytes(byte[] bytes)
         {
-            Result = BitConverter.ToInt32(bytes, 0);
+            Result = BitConverter.ToBoolean(bytes, 0);
         }
 
         public byte[] ToBytes()
