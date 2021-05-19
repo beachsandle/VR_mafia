@@ -39,12 +39,10 @@ public class Player : MonoBehaviour
     void Update()
     {
         if (InGameManager.instance.phaseChange) return;
-        
-        Move();
 
-        if (InGameManager.instance.menuState) return;
+        if (Move() | Rotate())
+            ClientManager.instance.EmitMove(transform.position, transform.rotation);
 
-        Rotate();
         FindTarget();
 
         if (Input.GetKeyDown(KeyCode.Q))
@@ -78,7 +76,7 @@ public class Player : MonoBehaviour
     }
 
     #region 움직임 관련
-    void Move()
+    bool Move()
     {
         if (CC.isGrounded)
         {
@@ -91,17 +89,20 @@ public class Player : MonoBehaviour
                 moveDirection.y = jumpSpeed;
             }
         }
-        moveDirection.y -= gravity * Time.deltaTime;
 
-        if(moveDirection != Vector3.zero)
+        if (moveDirection != Vector3.zero || !CC.isGrounded)
         {
+            moveDirection.y -= gravity * Time.deltaTime;
             CC.Move(moveDirection * Time.deltaTime);
-            ClientManager.instance.EmitMove(transform.position, transform.rotation);
+            return true;
         }
+        return false;
     }
 
-    void Rotate()
+    bool Rotate()
     {
+        if (InGameManager.instance.menuState)
+            return false;
         rotX += Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
         rotY += Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
 
@@ -109,9 +110,13 @@ public class Player : MonoBehaviour
         else if (90f <= rotX) rotX = 90f;
         //if (90f <= rotY) rotY = 90f;
         //if (rotY <= -90f) rotY = -90f;
-
-        transform.eulerAngles = new Vector3(0f, rotY, 0);
-        HEAD.transform.eulerAngles = new Vector3(-rotX, rotY, 0f);
+        if (HEAD.transform.eulerAngles.x != -rotX || HEAD.transform.eulerAngles.y != rotY)
+        {
+            transform.eulerAngles = new Vector3(0f, rotY, 0);
+            HEAD.transform.eulerAngles = new Vector3(-rotX, rotY, 0f);
+            return true;
+        }
+        return false;
     }
     #endregion
 }

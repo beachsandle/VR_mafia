@@ -36,7 +36,13 @@ namespace MyPacket
 
         public bool Equals(V3 v3)
         {
-            return x == v3.x && y == v3.y && z == v3.z;
+            return Math.Abs(x - v3.x) < 0.0001f &&
+                Math.Abs(y - v3.y) < 0.0001f &&
+                Math.Abs(z - v3.z) < 0.0001f;
+        }
+        public override string ToString()
+        {
+            return $"({x}, {y}, {z})";
         }
     }
 }

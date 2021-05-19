@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class StartVotingData : IPacketData
     {
-        public int Voting_time;
+        public int Voting_time = 0;
         public int Size
         {
             get
@@ -17,15 +17,16 @@ namespace MyPacket
             }
         }
 
-        public StartVotingData()
+        public StartVotingData(byte[] bytes = null)
         {
-            Voting_time = 60;//그냥 임의로 60초로 둠
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public StartVotingData(int voting_time)
         {
             Voting_time = voting_time;
-  
+
         }
 
         public void FromBytes(byte[] bytes)

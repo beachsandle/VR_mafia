@@ -213,7 +213,7 @@ namespace MyPacket
         private void GameLoof()
         {
             currentTime = DAY_TIME;
-            timer.Start();
+            //timer.Start();
             while (Status != GameStatus.END)
             {
                 Thread.Sleep(1);
@@ -228,6 +228,8 @@ namespace MyPacket
         private void OnMoveReq((int, Packet) eventdata)
         {
             (var id, var packet) = eventdata;
+            if (!users.ContainsKey(id))
+                return;
             var data = new MoveReqData(packet.Bytes);
             users[id].Transform = data.location;
         }

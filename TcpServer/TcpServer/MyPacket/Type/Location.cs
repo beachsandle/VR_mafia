@@ -27,5 +27,9 @@ namespace MyPacket
         {
             return position.Equals(loc.position) && rotation.Equals(loc.rotation);
         }
+        public override string ToString()
+        {
+            return $"pos : {position}, rot : {rotation}";
+        }
     }
 }
