@@ -14,13 +14,6 @@ namespace MyPacket
             {
                 user.On(type, IngameHandler);
             }
-            //user.On(PacketType.MOVE, OnMove);
-        }
-        private void OnMove(MySocket socket, Packet packet)
-        {
-            var user = socket as User;
-            var room = user.Room;
-            //room.Broadcast(PacketType.MOVE, packet.Bytes, user);
         }
         private void IngameHandler(MySocket socket, Packet packet)
         {

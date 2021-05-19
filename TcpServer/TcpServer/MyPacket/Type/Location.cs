@@ -23,5 +23,9 @@ namespace MyPacket
             position.FromBytes(bytes.Take(12).ToArray());
             rotation.FromBytes(bytes.Skip(12).ToArray());
         }
+        public bool Equals(Location loc)
+        {
+            return position.Equals(loc.position) && rotation.Equals(loc.rotation);
+        }
     }
 }

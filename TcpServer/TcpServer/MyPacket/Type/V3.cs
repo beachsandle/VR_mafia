@@ -33,5 +33,10 @@ namespace MyPacket
             y = BitConverter.ToSingle(bytes, 4);
             z = BitConverter.ToSingle(bytes, 8);
         }
+
+        public bool Equals(V3 v3)
+        {
+            return x == v3.x && y == v3.y && z == v3.z;
+        }
     }
 }

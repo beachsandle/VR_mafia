@@ -8,8 +8,27 @@ namespace MyPacket
     public class User : MySocket
     {
         private static int playerId = 1;
-        private GameServer server;
+        private readonly GameServer server;
+        private Location prevTransform = new Location();
+        private Location transform = new Location();
         #region property
+        public Location Transform
+        {
+            get
+            {
+                return transform;
+            }
+            set
+            {
+                if (value.Equals(prevTransform))
+                    Moved = false;
+                else
+                    Moved = true;
+                prevTransform = transform;
+                transform = value;
+            }
+        }
+        public bool Moved { get; set; } = false;
         public int Id { get; private set; }
         public string Name { get; private set; }
         public GameRoom Room { get; private set; }
@@ -21,7 +40,7 @@ namespace MyPacket
         public User(TcpClient client, GameServer server) : base(client)
         {
             Id = playerId++;
-            Name = $"Player{Id.ToString("X")}";
+            Name = $"Player{Id:X}";
             this.server = server;
         }
         #endregion

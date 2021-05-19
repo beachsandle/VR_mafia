@@ -10,11 +10,11 @@ namespace MyPacket
     {
         #region field
         private static int roomId = 1;
-        private Dictionary<int, User> users;
-        private Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
+        private readonly Dictionary<int, User> users = new Dictionary<int, User>();
+        private readonly Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
         private delegate void EventHandler((int, Packet) eventData);
-        private Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
-        private Stopwatch timer = new Stopwatch();
+        private readonly Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
+        private readonly Stopwatch timer = new Stopwatch();
         private float currentTime = 0;
         private long prevTime = 0;
         private const float DAY_TIME = 5;
@@ -33,7 +33,6 @@ namespace MyPacket
         {
             Server = server;
             Id = roomId++;
-            users = new Dictionary<int, User>();
             if (host != null)
             {
                 HostId = host.Id;
@@ -147,6 +146,7 @@ namespace MyPacket
             {
                 u.GameStart(u.IsMafia, mafias);
             }
+            EnrollHanders();
             var thread = new Thread(GameLoof);
             thread.Start();
             Console.WriteLine($"start : {user.Id}");
@@ -154,10 +154,18 @@ namespace MyPacket
         }
         private void EnrollHanders()
         {
-
+            On(PacketType.MOVE_REQ, OnMoveReq);
         }
         //플레이어들이 이동된 위치를 전송
-        private void MoveEvent() { }
+        private void MoveEvent()
+        {
+            var movedPlayer = (from u in users.Values
+                               where u.Moved
+                               select (u.Id, u.Transform)).ToArray();
+            var data = new MoveEventData(movedPlayer);
+            if (movedPlayer.Length > 0)
+                Broadcast(PacketType.MOVE_EVENT, data.ToBytes());
+        }
         private void TimeFlow()
         {
             long mill = timer.ElapsedMilliseconds;
@@ -210,6 +218,12 @@ namespace MyPacket
                     Timeout();
             }
             timer.Stop();
+        }
+        private void OnMoveReq((int, Packet) eventdata)
+        {
+            (var id, var packet) = eventdata;
+            var data = new MoveReqData(packet.Bytes);
+            users[id].Transform = data.location;
         }
     }
 }
