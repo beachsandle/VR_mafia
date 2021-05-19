@@ -19,6 +19,10 @@ namespace MyPacket
         private long prevTime = 0;
         private const float DAY_TIME = 5;
         private const float NIGHT_TIME = 5;
+        private const float VOTE_TIME = 10;
+        private const float VOTE_RESULT_TIME = 3;
+        private const float DEFENSE_TIME = 5;
+        private const float FINAL_VOTE_TIME = 10;
         #endregion
         #region property
         public int Id { get; private set; }
@@ -170,24 +174,59 @@ namespace MyPacket
                 handlerMap[data.packet.Header.Type](data);
             }
         }
+        private void StartNight()
+        {
+            currentTime = NIGHT_TIME;
+            Status = GameStatus.NIGHT;
+            Broadcast(PacketType.NIGHT_START);
+        }
+        private void StartVoting()
+        {
+            currentTime = VOTE_TIME;
+            Status = GameStatus.VOTE;
+            Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
+        }
+        private void EndVoting()
+        {
+            currentTime = VOTE_RESULT_TIME;
+            Status = GameStatus.VOTE_RESULT;
+            Broadcast(PacketType.VOTING_RESULT);
+
+        }
+        private void StartDefense()
+        {
+            currentTime = DEFENSE_TIME;
+            Status = GameStatus.DEFENSE;
+            Broadcast(PacketType.START_DEFENCE, new StartDefenseData((int)DEFENSE_TIME, 0).ToBytes());
+        }
+        private void StartFinalVotinig()
+        {
+            currentTime = FINAL_VOTE_TIME;
+            Status = GameStatus.FINAL_VOTE;
+            Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
+        }
+        private void EndFinalVotinig()
+        {
+            StartDay();
+        }
+        private void StartDay()
+        {
+            currentTime = DAY_TIME;
+            Status = GameStatus.DAY;
+            Broadcast(PacketType.DAY_START);
+
+        }
         //시간이 만료되면 발생하는 이벤트
         private void Timeout()
         {
             switch (Status)
             {
-                case GameStatus.DAY:
-                    currentTime = NIGHT_TIME;
-                    Status = GameStatus.NIGHT;
-                    Broadcast(PacketType.NIGHT_START);
-                    break;
-                case GameStatus.NIGHT:
-                    currentTime = DAY_TIME;
-                    Status = GameStatus.DAY;
-                    Broadcast(PacketType.DAY_START);
-                    break;
-                case GameStatus.VOTE: break;
-                case GameStatus.DEFENSE: break;
-                case GameStatus.FINAL_VOTE: break;
+                case GameStatus.DAY: StartNight(); break;
+                case GameStatus.NIGHT: StartVoting(); break;
+                case GameStatus.VOTE: EndVoting(); break;
+                case GameStatus.VOTE_RESULT: StartDefense(); break;
+                case GameStatus.DEFENSE: StartFinalVotinig(); break;
+                case GameStatus.FINAL_VOTE: EndFinalVotinig(); break;
                 default: break;
             }
             prevTime = 0;
@@ -197,7 +236,7 @@ namespace MyPacket
         private void GameLoof()
         {
             currentTime = DAY_TIME;
-            //timer.Start();
+            timer.Start();
             while (Status != GameStatus.END)
             {
                 Thread.Sleep(1);

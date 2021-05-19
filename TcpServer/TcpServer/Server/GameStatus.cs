@@ -15,6 +15,7 @@ namespace MyPacket
         DAY,
         NIGHT,
         VOTE,
+        VOTE_RESULT,
         DEFENSE,
         FINAL_VOTE,
         END
