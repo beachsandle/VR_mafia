@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class VoteReqData : IPacketData
     {
-        public int Target_id;
+        public int Target_id = -1;
         public int Size
         {
             get
@@ -17,9 +17,10 @@ namespace MyPacket
             }
         }
 
-        public VoteReqData()
+        public VoteReqData(byte[] bytes = null)
         {
-            Target_id = 0;
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public VoteReqData(int target_id)

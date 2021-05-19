@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class DieEventData : IPacketData
     {
-        public int Dead_id;
+        public int Dead_id = 0;
         public int Size
         {
             get
@@ -17,16 +17,16 @@ namespace MyPacket
             }
         }
 
-        public DieEventData()
+        public DieEventData(byte[] bytes = null)
         {
-            Dead_id = 0;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public DieEventData(int dead_id)
         {
             Dead_id = dead_id;
-  
+
         }
 
         public void FromBytes(byte[] bytes)

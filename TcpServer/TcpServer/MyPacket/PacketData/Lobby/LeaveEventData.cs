@@ -4,8 +4,9 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct LeaveEventData : IPacketData
+    public class LeaveEventData : IPacketData
     {
+        public int PlayerId = -1;
         public int Size
         {
             get
@@ -13,7 +14,11 @@ namespace MyPacket
                 return 4;
             }
         }
-        public int PlayerId { get; set; }
+        public LeaveEventData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
         public LeaveEventData(int playerId = -1)
         {
             PlayerId = playerId;

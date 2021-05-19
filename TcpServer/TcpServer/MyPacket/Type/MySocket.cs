@@ -15,8 +15,6 @@ namespace MyPacket
         protected NetworkStream stream;
         protected Dictionary<PacketType, MessageHandler> handlerMap = new Dictionary<PacketType, MessageHandler>();
         protected Queue<Packet> readQueue = new Queue<Packet>();
-        protected Queue<Packet> writeQueue = new Queue<Packet>();
-        protected PacketHeader header;
         protected byte[] buffer;
         #endregion
         #region property
@@ -67,6 +65,7 @@ namespace MyPacket
         //스트림에서 패킷을 읽고 버퍼에 저장
         private void ReadPacket()
         {
+            var header = new PacketHeader();
             //먼저 헤더 크기만큼 읽고 버퍼에 저장
             stream.Read(buffer, 0, PacketHeader.SIZE);
             header.FromBytes(buffer);
@@ -79,7 +78,7 @@ namespace MyPacket
             if (header.Size != 0)
                 stream.Read(buffer, 0, header.Size);
 
-            //비동기 중인 경우 바로 핸들러를 호출하고 아닐 경우 큐에 저장
+            //비동기적인 경우 바로 핸들러를 호출하고 아닐 경우 큐에 저장
             var packet = new Packet(header, buffer);
             if (IsAsync)
                 handlerMap[header.Type](this, packet);

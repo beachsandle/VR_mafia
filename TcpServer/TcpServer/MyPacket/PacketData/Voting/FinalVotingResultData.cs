@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class FinalVotingResultData : IPacketData
     {
-        public int Kicking_id;
+        public int Kicking_id = -1;
         public int Size
         {
             get
@@ -17,17 +17,17 @@ namespace MyPacket
             }
         }
 
-        public FinalVotingResultData()
+        public FinalVotingResultData(byte[] bytes = null)
         {
-            Kicking_id = 0;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
 
         public FinalVotingResultData(int kicking_id)
         {
             Kicking_id = kicking_id;
-  
+
         }
 
         public void FromBytes(byte[] bytes)

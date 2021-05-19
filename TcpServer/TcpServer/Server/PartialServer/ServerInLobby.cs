@@ -19,8 +19,7 @@ namespace MyPacket
         private void OnSetNameReq(MySocket socket, Packet packet)
         {
             var user = socket as User;
-            var data = new SetNameReqData();
-            data.FromBytes(packet.Bytes);
+            var data = new SetNameReqData(packet.Bytes);
             if (user.SetName(data.UserName))
                 Console.WriteLine($"setname : {user.Id} {user.Name}");
         }
@@ -35,8 +34,7 @@ namespace MyPacket
         private void OnCreateRoomReq(MySocket socket, Packet packet)
         {
             var user = socket as User;
-            var data = new CreateRoomReqData();
-            data.FromBytes(packet.Bytes);
+            var data = new CreateRoomReqData(packet.Bytes);
             if (user.CreateRoom(data.RoomName))
                 Console.WriteLine($"create room req : {user.Id}");
         }
@@ -44,8 +42,7 @@ namespace MyPacket
         private void OnJoinRoomReq(MySocket socket, Packet packet)
         {
             var user = socket as User;
-            var data = new JoinRoomReqData();
-            data.FromBytes(packet.Bytes);
+            var data = new JoinRoomReqData(packet.Bytes);
             var room = roomMap.ContainsKey(data.RoomId) ? roomMap[data.RoomId] : null;
             if (user.JoinRoom(room))
                 Console.WriteLine($"join room : {user.Id}");

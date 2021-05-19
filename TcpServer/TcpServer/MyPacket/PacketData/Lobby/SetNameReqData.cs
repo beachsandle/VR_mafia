@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MyPacket
 {
-    public struct SetNameReqData : IPacketData
+    public class SetNameReqData : IPacketData
     {
         public int Size
         {
@@ -13,8 +13,13 @@ namespace MyPacket
                 return Encoding.UTF8.GetBytes(UserName).Length;
             }
         }
-        public string UserName { get; set; }
-        public SetNameReqData(string userName = "")
+        public string UserName = "";
+        public SetNameReqData(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public SetNameReqData(string userName)
         {
             UserName = userName;
         }

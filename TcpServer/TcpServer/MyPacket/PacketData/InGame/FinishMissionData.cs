@@ -8,8 +8,8 @@ namespace MyPacket
 {
     public class FinishMissionData : IPacketData
     {
-        public int Mission_id;
-        public int User_id;
+        public int Mission_id = 0;
+        public int User_id = 0;
 
         public int Size
         {
@@ -18,10 +18,10 @@ namespace MyPacket
                 return 8;
             }
         }
-        public FinishMissionData()
+        public FinishMissionData(byte[] bytes = null)
         {
-            Mission_id = 0;
-            User_id = 0;
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public FinishMissionData(int mission_id, int user_id)

@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class StartDefenseData: IPacketData
+    public class StartDefenseData : IPacketData
     {
-        public int Defense_time;
-        public int Elected_id;
+        public int Defense_time = 0;
+        public int Elected_id = 0;
         public int Size
         {
             get
@@ -18,10 +18,10 @@ namespace MyPacket
             }
         }
 
-        public StartDefenseData()
+        public StartDefenseData(byte[] bytes = null)
         {
-            Defense_time = 20; // 임의로 20초 초기화
-            Elected_id = 0;
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public StartDefenseData(int defense_time, int elected_id)

@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class FinalVoteReq : IPacketData
     {
-        public bool Agree;
+        public bool Agree = true;
         public int Size
         {
             get
@@ -17,15 +17,16 @@ namespace MyPacket
             }
         }
 
-        public FinalVoteReq()
+        public FinalVoteReq(byte[] bytes = null)
         {
-            Agree = false;
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public FinalVoteReq(bool agree)
         {
             Agree = agree;
-  
+
         }
 
         public byte[] ToBytes()

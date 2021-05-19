@@ -8,7 +8,7 @@ namespace MyPacket
 {
     public class KillResDada : IPacketData
     {
-        public bool Result;
+        public bool Result = true;
         public int Size
         {
             get
@@ -17,22 +17,22 @@ namespace MyPacket
             }
         }
 
-        public KillResDada()
+        public KillResDada(byte[] bytes = null)
         {
-            Result = true;
-
+            if (bytes != null)
+                FromBytes(bytes);
         }
 
         public KillResDada(bool result)
         {
             Result = result;
-  
+
         }
 
         public void FromBytes(byte[] bytes)
         {
             Result = BitConverter.ToBoolean(bytes, 0);
-  
+
         }
 
         public byte[] ToBytes()
