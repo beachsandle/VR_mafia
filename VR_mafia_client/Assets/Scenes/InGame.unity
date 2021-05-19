@@ -1518,7 +1518,6 @@ MonoBehaviour:
   backButton: {fileID: 1739346337}
   menuState: 0
   votingPanel: {fileID: 851271952}
-  timeText: {fileID: 1070470588}
   finalVotingPanel: {fileID: 1913033438}
   playerOrder: 
 --- !u!4 &415983047
@@ -3552,7 +3551,7 @@ RectTransform:
   m_Children:
   - {fileID: 621290194}
   m_Father: {fileID: 1275793199}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -3720,7 +3719,7 @@ RectTransform:
   m_Children:
   - {fileID: 715302823}
   m_Father: {fileID: 1275793199}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -5055,9 +5054,9 @@ RectTransform:
   - {fileID: 252407045}
   - {fileID: 2082507984}
   - {fileID: 1757450515}
-  - {fileID: 865664231}
   - {fileID: 851271953}
   - {fileID: 1913033439}
+  - {fileID: 865664231}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6478,7 +6477,7 @@ RectTransform:
   m_Children:
   - {fileID: 2020888418}
   m_Father: {fileID: 1275793199}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
