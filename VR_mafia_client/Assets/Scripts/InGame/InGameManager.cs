@@ -133,7 +133,6 @@ public class InGameManager : MonoBehaviour
                 ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
             }
         }
-
     }
 
     #region Phase
