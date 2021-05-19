@@ -40,8 +40,11 @@ public class Player : MonoBehaviour
     {
         if (InGameManager.instance.phaseChange) return;
 
-        if (Move() | Rotate())
-            ClientManager.instance.EmitMove(transform.position, transform.rotation);
+        Move();
+        Rotate();
+        ClientManager.instance.EmitMove(transform.position, transform.rotation);
+
+        if (InGameManager.instance.menuState) return;
 
         FindTarget();
 
@@ -76,7 +79,7 @@ public class Player : MonoBehaviour
     }
 
     #region 움직임 관련
-    bool Move()
+    void Move()
     {
         if (CC.isGrounded)
         {
@@ -89,20 +92,14 @@ public class Player : MonoBehaviour
                 moveDirection.y = jumpSpeed;
             }
         }
-
-        if (moveDirection != Vector3.zero || !CC.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
-            CC.Move(moveDirection * Time.deltaTime);
-            return true;
-        }
-        return false;
+        moveDirection.y -= gravity * Time.deltaTime;
+        CC.Move(moveDirection * Time.deltaTime);
     }
 
-    bool Rotate()
+    void Rotate()
     {
-        if (InGameManager.instance.menuState)
-            return false;
+        if (InGameManager.instance.menuState) return;
+
         rotX += Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
         rotY += Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
 
@@ -110,13 +107,9 @@ public class Player : MonoBehaviour
         else if (90f <= rotX) rotX = 90f;
         //if (90f <= rotY) rotY = 90f;
         //if (rotY <= -90f) rotY = -90f;
-        if (HEAD.transform.eulerAngles.x != -rotX || HEAD.transform.eulerAngles.y != rotY)
-        {
-            transform.eulerAngles = new Vector3(0f, rotY, 0);
-            HEAD.transform.eulerAngles = new Vector3(-rotX, rotY, 0f);
-            return true;
-        }
-        return false;
+
+        transform.eulerAngles = new Vector3(0f, rotY, 0);
+        HEAD.transform.eulerAngles = new Vector3(-rotX, rotY, 0f);
     }
     #endregion
 }

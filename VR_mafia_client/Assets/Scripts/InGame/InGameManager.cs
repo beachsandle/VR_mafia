@@ -102,13 +102,13 @@ public class InGameManager : MonoBehaviour
             p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
             p.transform.position = spawnPos.GetChild(idx++).position;
 
-            if(u.Id == ClientManager.instance.playerID)
+            if (u.Id == ClientManager.instance.playerID)
             {
                 p.AddComponent<Player>();
 
                 roleText.text = isMafia ? "마피아" : "시민";
                 StartInformation(string.Format("당신은 {0}입니다", roleText.text));
-                
+
                 Camera.main.transform.parent = p.transform.Find("Head");
                 Camera.main.transform.localPosition = new Vector3(0, 0, 0);
             }
@@ -122,7 +122,7 @@ public class InGameManager : MonoBehaviour
     {
         Transform spawnPos = GameObject.Find("SpawnPosition").transform;
 
-        for(int i = 0; i < playerOrder.Count; i++)
+        for (int i = 0; i < playerOrder.Count; i++)
         {
             if (playerOrder[i] == ClientManager.instance.playerID)
             {
@@ -161,7 +161,7 @@ public class InGameManager : MonoBehaviour
         phaseChange = true;
 
         float time = 1f;
-        while(0f < time)
+        while (0f < time)
         {
             time -= Time.deltaTime;
 
@@ -173,19 +173,17 @@ public class InGameManager : MonoBehaviour
     }
     #endregion
 
-    public void UpdatePlayerTransform(MoveEventData eventData)
+    public void UpdatePlayerTransform(MoveEventData data)
     {
-        foreach(var data in eventData.movedPlayer)
-        {
-            if (data.player_id == ClientManager.instance.playerID) continue;
+        if (data.Player_id == ClientManager.instance.playerID) return;
 
-            V3 pos = data.location.position;
-            V3 rot = data.location.rotation;
+        V3 pos = data.Location.position;
+        V3 rot = data.Location.rotation;
 
-            Transform TR = players[data.player_id].transform;
-            TR.position = new Vector3(pos.x, pos.y, pos.z);
-            TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
-        }
+        Transform TR = players[data.Player_id].transform;
+        TR.position = new Vector3(pos.x, pos.y, pos.z);
+        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+
     }
 
     public void StartInformation(string s)
@@ -201,7 +199,7 @@ public class InGameManager : MonoBehaviour
         Color clearColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 0);
         float time = 0f;
 
-        while(informationText.color.a > 0.0f)
+        while (informationText.color.a > 0.0f)
         {
             informationText.color = Color.Lerp(orginColor, clearColor, time / fadeTime);
             time += Time.deltaTime;
@@ -309,18 +307,18 @@ public class InGameManager : MonoBehaviour
     public void DisplayVotingResult((int pid, int count)[] result)
     {
         var votingContent = votingPanel.transform.GetChild(0);
-        for(int i = 0; i < players.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
             votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
         }
 
-        for(int i = 0; i < result.Length; i++)
+        for (int i = 0; i < result.Length; i++)
         {
             int id = result[i].pid;
 
-            for(int j = 0; j < result.Length; j++)
+            for (int j = 0; j < result.Length; j++)
             {
-                if(id == playerOrder[j])
+                if (id == playerOrder[j])
                 {
                     Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
                     countText.text = result[i].count.ToString();
@@ -338,7 +336,7 @@ public class InGameManager : MonoBehaviour
         finalVotingPanel.SetActive(true);
 
         var finalVotingContent = finalVotingPanel.transform.GetChild(0);
-        
+
         Button btn;
         btn = finalVotingContent.Find("Pros Button").GetComponent<Button>();
         btn.onClick.AddListener(() => { OnProsConsButton(true); });
@@ -403,7 +401,7 @@ public class InGameManager : MonoBehaviour
     {
         finalVotingPanel.SetActive(false);
     }
-    
+
     public void DisplayFinalVotingResult(int id)
     {
         Debug.Log(id + "Kicked...");

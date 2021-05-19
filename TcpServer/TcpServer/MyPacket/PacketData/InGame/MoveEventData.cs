@@ -8,12 +8,13 @@ namespace MyPacket
 {
     public class MoveEventData : IPacketData
     {
-        public (int player_id, Location location)[] movedPlayer = null;
+        public int Player_id = -1;
+        public Location Location = new Location();
         public int Size
         {
             get
             {
-                return 28 * movedPlayer.Length;
+                return 28;
             }
         }
 
@@ -23,32 +24,21 @@ namespace MyPacket
                 FromBytes(bytes);
         }
 
-        public MoveEventData((int player_id, Location location)[] movedPlayer)
+        public MoveEventData(int player_id, Location location)
         {
-            this.movedPlayer = movedPlayer;
+            Player_id = player_id;
+            Location = location;
         }
 
         public void FromBytes(byte[] bytes)
         {
-            movedPlayer = new (int, Location)[bytes.Length / 28];
-            int idx = 0;
-            for (int i = 0; i < movedPlayer.Length; ++i)
-            {
-                movedPlayer[i].player_id = BitConverter.ToInt32(bytes, idx);
-                idx += 4;
-                movedPlayer[i].location.FromBytes(bytes.Skip(idx).ToArray());
-                idx += 24;
-            }
+            Player_id = BitConverter.ToInt32(bytes, 0);
+            Location.FromBytes(bytes.Skip(4).ToArray());
         }
 
         public byte[] ToBytes()
         {
-            var bb = new ByteBuilder(Size);
-            foreach (var (player_id, location) in movedPlayer)
-            {
-                bb.Append(player_id).Append(location.ToBytes());
-            }
-            return bb.Get();
+            return new ByteBuilder(28).Append(Player_id).Append(Location.ToBytes()).Get();
         }
     }
 }

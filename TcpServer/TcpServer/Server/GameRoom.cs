@@ -156,22 +156,6 @@ namespace MyPacket
         {
             On(PacketType.MOVE_REQ, OnMoveReq);
         }
-        //플레이어들이 이동된 위치를 전송
-        private void MoveEvent()
-        {
-            var movedPlayer = new List<(int, Location)>();
-            foreach (var u in users.Values)
-            {
-                if (u.Moved)
-                {
-                    movedPlayer.Add((u.Id, u.Transform));
-                    u.Moved = false;
-                }
-            }
-            var data = new MoveEventData(movedPlayer.ToArray());
-            if (data.Size > 0)
-                Broadcast(PacketType.MOVE_EVENT, data.ToBytes());
-        }
         private void TimeFlow()
         {
             long mill = timer.ElapsedMilliseconds;
@@ -218,7 +202,6 @@ namespace MyPacket
             {
                 Thread.Sleep(1);
                 EventHandling();
-                MoveEvent();
                 TimeFlow();
                 if (currentTime < 0)
                     Timeout();
@@ -232,6 +215,8 @@ namespace MyPacket
                 return;
             var data = new MoveReqData(packet.Bytes);
             users[id].Transform = data.location;
+            var sendData = new MoveEventData(id, data.location);
+            Broadcast(PacketType.MOVE_EVENT, sendData.ToBytes(), users[id]);
         }
     }
 }

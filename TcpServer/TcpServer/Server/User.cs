@@ -9,23 +9,8 @@ namespace MyPacket
     {
         private static int playerId = 1;
         private readonly GameServer server;
-        private Location prevTransform = new Location();
-        private Location transform = new Location();
         #region property
-        public Location Transform
-        {
-            get
-            {
-                return transform;
-            }
-            set
-            {
-                if (!prevTransform.Equals(value))
-                    Moved = true;
-                prevTransform = transform;
-                transform = value;
-            }
-        }
+        public Location Transform { get; set; } = new Location();
         public bool Moved { get; set; } = false;
         public int Id { get; private set; }
         public string Name { get; private set; }
