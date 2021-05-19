@@ -9,7 +9,6 @@ namespace MyPacket
     {
         private static int playerId = 1;
         private readonly GameServer server;
-        private Location prevTransform = new Location();
         private Location transform = new Location();
         #region property
         public Location Transform
@@ -20,11 +19,7 @@ namespace MyPacket
             }
             set
             {
-                if (value.Equals(prevTransform))
-                    Moved = false;
-                else
-                    Moved = true;
-                prevTransform = transform;
+                Moved = true;
                 transform = value;
             }
         }

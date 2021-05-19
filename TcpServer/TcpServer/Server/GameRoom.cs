@@ -159,11 +159,17 @@ namespace MyPacket
         //플레이어들이 이동된 위치를 전송
         private void MoveEvent()
         {
-            var movedPlayer = (from u in users.Values
-                               where u.Moved
-                               select (u.Id, u.Transform)).ToArray();
-            var data = new MoveEventData(movedPlayer);
-            if (movedPlayer.Length > 0)
+            var movedPlayer = new List<(int, Location)>();
+            foreach (var u in users.Values)
+            {
+                if (u.Moved)
+                {
+                    movedPlayer.Add((u.Id, u.Transform));
+                    u.Moved = false;
+                }
+            }
+            var data = new MoveEventData(movedPlayer.ToArray());
+            if (data.Size > 0)
                 Broadcast(PacketType.MOVE_EVENT, data.ToBytes());
         }
         private void TimeFlow()
