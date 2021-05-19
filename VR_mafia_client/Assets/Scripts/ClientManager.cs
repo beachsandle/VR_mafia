@@ -123,8 +123,7 @@ public class ClientManager : MonoBehaviour
     #region Lobby
     private void OnSetNameRes(MySocket socket, Packet packet)
     {
-        var data = new SetNameResData();
-        data.FromBytes(packet.Bytes);
+        var data = new SetNameResData(packet.Bytes);
 
         Debug.Log("OnSetName : " + data.UserName);
 
@@ -151,8 +150,8 @@ public class ClientManager : MonoBehaviour
 
     private void OnJoinRoomRes(MySocket socket, Packet packet)
     {
-        var data = new JoinRoomResData();
-        data.FromBytes(packet.Bytes);
+        var data = new JoinRoomResData(packet.Bytes);
+
         users = data.Users;
 
         SceneManager.LoadScene("WaitingRoom");
@@ -166,8 +165,7 @@ public class ClientManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "InGame") return;
 
-        var data = new RoomListResData();
-        data.FromBytes(packet.Bytes);
+        var data = new RoomListResData(packet.Bytes);
 
         //TODO: HostId에서 HostName으로 받을 수 있게 변경
         int roomCount = data.Rooms.Count;
@@ -186,16 +184,15 @@ public class ClientManager : MonoBehaviour
     #region WaitingRoom
     private void OnJoinEvent(MySocket socket, Packet packet)
     {
-        var data = new JoinEventData();
-        data.FromBytes(packet.Bytes);
+        var data = new JoinEventData(packet.Bytes);
 
         users.Add(data.Info);
         WaitingRoomManager.instance.AddPlayer(data.Info);
     }
     private void OnLeaveEvent(MySocket socket, Packet packet)
     {
-        var data = new LeaveEventData();
-        data.FromBytes(packet.Bytes);
+        var data = new LeaveEventData(packet.Bytes);
+
         if (data.PlayerId == playerID)
         {
             SceneManager.LoadScene("Lobby");
@@ -222,12 +219,11 @@ public class ClientManager : MonoBehaviour
     }
     private void OnGameStart(MySocket socket, Packet packet)
     {
-        var data = new GameStartData();
-        data.FromBytes(packet.Bytes);
+        var data = new GameStartData(packet.Bytes);
+
         isMafia = data.IsMafia;
 
         Debug.Log("Start");
-
         SceneManager.LoadScene("InGame");
     }
     #endregion
@@ -235,8 +231,7 @@ public class ClientManager : MonoBehaviour
     #region Ingame
     private void OnMove(MySocket socket, Packet packet)
     {
-        var data = new MoveEventData();
-        data.FromBytes(packet.Bytes);
+        var data = new MoveEventData(packet.Bytes);
 
         InGameManager.instance.UpdatePlayerTransform(data);
     }
@@ -250,6 +245,7 @@ public class ClientManager : MonoBehaviour
     {
         var position = new V3(pos.x, pos.y, pos.z);
         var rotation = new V3(rot.eulerAngles.x, rot.eulerAngles.y, rot.eulerAngles.z);
+
         return new Location(position, rotation);
     }
 
@@ -264,8 +260,7 @@ public class ClientManager : MonoBehaviour
 
     private void OnStartVoting(MySocket socket, Packet packet)
     {
-        var data = new StartVotingData();
-        data.FromBytes(packet.Bytes);
+        var data = new StartVotingData(packet.Bytes);
 
         InGameManager.instance.OnVotingPanel(data.Voting_time);
     }

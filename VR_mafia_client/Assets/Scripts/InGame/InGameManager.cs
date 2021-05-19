@@ -87,6 +87,20 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
+    public void UpdatePlayerTransform(MoveEventData eventData)
+    {
+        foreach(var data in eventData.movedPlayer)
+        {
+            if (data.player_id == ClientManager.instance.playerID) continue;
+
+            V3 pos = data.location.position;
+            V3 rot = data.location.rotation;
+
+            Transform TR = players[data.player_id].transform;
+            TR.position = new Vector3(pos.x, pos.y, pos.z);
+            TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+        }
+    }
 
     private void SpawnPlayers()
     {
@@ -95,12 +109,14 @@ public class InGameManager : MonoBehaviour
 
         foreach (UserInfo u in ClientManager.instance.users)
         {
+            playerOrder.Add(u.Id);
+
             GameObject p = Instantiate(playerObj);
             p.name = "Player_" + u.Id;
-            playerOrder.Add(u.Id);
-            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
-            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx]; // 임시
+            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
+            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
             p.transform.position = spawnPos.GetChild(idx++).position;
+            p.transform.parent = playerObjects.transform;
 
             if (u.Id == ClientManager.instance.playerID)
             {
@@ -113,7 +129,6 @@ public class InGameManager : MonoBehaviour
                 Camera.main.transform.localPosition = new Vector3(0, 0, 0);
             }
 
-            p.transform.parent = GameObject.Find("PlayerObjects").transform;
             players.Add(u.Id, p);
         }
     }
@@ -130,10 +145,10 @@ public class InGameManager : MonoBehaviour
                 myObject.GetComponent<Player>().CC.enabled = false;
                 myObject.transform.position = spawnPos.GetChild(i).position;
                 myObject.GetComponent<Player>().CC.enabled = true;
+
                 ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
             }
         }
-
     }
 
     #region Phase
@@ -141,7 +156,6 @@ public class InGameManager : MonoBehaviour
     {
         StartInformation("낮이 되었습니다.");
     }
-
     public void StartNight()
     {
         phaseChange = true;
@@ -173,19 +187,7 @@ public class InGameManager : MonoBehaviour
     }
     #endregion
 
-    public void UpdatePlayerTransform(MoveEventData data)
-    {
-        if (data.Player_id == ClientManager.instance.playerID) return;
-
-        V3 pos = data.Location.position;
-        V3 rot = data.Location.rotation;
-
-        Transform TR = players[data.Player_id].transform;
-        TR.position = new Vector3(pos.x, pos.y, pos.z);
-        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
-
-    }
-
+    #region Information
     public void StartInformation(string s)
     {
         informationText.gameObject.SetActive(true);
@@ -211,6 +213,7 @@ public class InGameManager : MonoBehaviour
         informationText.color = orginColor;
         informationText.gameObject.SetActive(false);
     }
+    #endregion
 
     #region MenuPanel
     private void InitMenuPanel()
@@ -239,6 +242,7 @@ public class InGameManager : MonoBehaviour
     private void OnBackButton()
     {
         menuState = false;
+
         SetActiveMenuPanel(menuState);
     }
     #endregion
@@ -264,6 +268,7 @@ public class InGameManager : MonoBehaviour
                 Destroy(buttonTR.gameObject);
             }
         }
+
         timeText = votingContent.Find("Time Text").GetComponent<Text>();
 
         votingPanel.SetActive(false);
@@ -301,6 +306,8 @@ public class InGameManager : MonoBehaviour
     }
     private void OffVotingPanel()
     {
+        suffrage = false;
+
         votingPanel.SetActive(false);
     }
 
