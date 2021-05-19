@@ -19,7 +19,7 @@ namespace MyPacket
             if (bytes != null)
                 FromBytes(bytes);
         }
-        public LeaveEventData(int playerId = -1)
+        public LeaveEventData(int playerId)
         {
             PlayerId = playerId;
         }
