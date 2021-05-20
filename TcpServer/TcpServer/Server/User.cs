@@ -46,7 +46,7 @@ namespace MyPacket
             var sendData = new GameStartData(isMafia);
             if (isMafia)
                 sendData.Mafias = (from u in team select u.Id).ToArray();
-            Status = GameStatus.DAY;
+            Status = GameStatus.INGAME;
             Emit(PacketType.GAME_START, sendData.ToBytes());
         }
         //유저 정보 반환
@@ -186,8 +186,9 @@ namespace MyPacket
         }
         private void OnLeaveRoomReq(Packet packet)
         {
-            var sendData = new LeaveResData();
-            sendData.Result = (Status == GameStatus.WAITTING && Room.Leave(this));
+            var sendData = new LeaveResData(
+                Status == GameStatus.WAITTING &&
+                Room.Leave(this));
             Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
             if (sendData.Result)
                 Console.WriteLine($"leave : {Id}");

@@ -63,28 +63,18 @@ namespace MyPacket
         #endregion
 
         #region private method
-        //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
-        private void InitHandlerMap()
+        private List<User> DesideMafia()
         {
-            foreach (PacketType type in Enum.GetValues(typeof(PacketType)))
-            {
-                handlerMap[type] = EmptyHandler;
-            }
+            var mafias = users.Values
+                        .OrderBy(a => Guid.NewGuid())
+                        .Take(Participants > 6 ? 2 : 1);
+            foreach (var u in mafias)
+                u.SetMafia();
+            return mafias.ToList();
         }
-        //공백 핸들러
-        private void EmptyHandler((int, Packet) data) { }
-        private void EnrollHanders()
-        {
-            On(PacketType.MOVE_REQ, OnMoveReq);
-            On(PacketType.VOTE_REQ, OnVoteReq);
-            On(PacketType.FINAL_VOTE_REQ, OnFinalVoteReq);
-        }
-        private void TimeFlow()
-        {
-            long mill = timer.ElapsedMilliseconds;
-            currentTime -= (float)(mill - prevTime) / 1000;
-            prevTime = mill;
-        }
+        #endregion
+
+        #region life cycle
         private void EventHandling()
         {
             while (eventQueue.Count > 0)
@@ -92,6 +82,12 @@ namespace MyPacket
                 var data = eventQueue.Dequeue();
                 handlerMap[data.packet.Header.Type](data);
             }
+        }
+        private void TimeFlow()
+        {
+            long mill = timer.ElapsedMilliseconds;
+            currentTime -= (float)(mill - prevTime) / 1000;
+            prevTime = mill;
         }
         private void StartNight()
         {
@@ -158,6 +154,7 @@ namespace MyPacket
         //게임로직을 담당하는 루프
         private void GameLoof()
         {
+            EnrollHanders();
             currentTime = DAY_TIME;
             timer.Start();
             while (Status != GameStatus.END)
@@ -170,14 +167,126 @@ namespace MyPacket
             }
             timer.Stop();
         }
+        #endregion
+
+        #region public method
+        //이벤트 큐에 패킷 추가
+        public void Enqueue(int id, Packet packet)
+        {
+            eventQueue.Enqueue((id, packet));
+        }
+        //유저 참가 처리
+        public bool Join(User user)
+        {
+            if (Participants == Maximum)
+                return false;
+            users[user.Id] = user;
+            var data = new JoinEventData(user.GetInfo());
+            Broadcast(PacketType.JOIN_EVENT, data.ToBytes(), user);
+            return true;
+        }
+        //유저 제거
+        public void RemoveUser(int userId)
+        {
+            users.Remove(userId);
+        }
+        //유저 퇴장 처리
+        public bool Leave(User user)
+        {
+            if (Status != GameStatus.WAITTING)
+                return false;
+            user.LeaveRoom();
+            RemoveUser(user.Id);
+            // 방장이 퇴장한 경우
+            if (HostId == user.Id)
+            {
+                //모든 유저 퇴장
+                foreach (var u in users.Values)
+                {
+                    u.LeaveRoom();
+                    RemoveUser(u.Id);
+                }
+                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
+                Broadcast(PacketType.ROOM_DESTROY_EVENT);
+                server.RemoveRoom(Id);
+            }
+            //그 외엔 남은 유저들에게 퇴장사실 전달
+            else
+                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
+            return true;
+        }
+        //게임방의 정보를 반환
+        public GameRoomInfo GetInfo()
+        {
+            return new GameRoomInfo(Id, HostId, Participants, Name);
+        }
+
+        //유저들의 정보를 반환
+        public List<UserInfo> GetUserInfos()
+        {
+            return (from u in users.Values select u.GetInfo()).ToList();
+        }
+        //게임 시작
+        public bool GameStart(User user)
+        {
+            //대기실이고, 방장일 경우에만 게임 시작 가능
+            if (user.Status != GameStatus.WAITTING || HostId != user.Id)
+                return false;
+            Status = GameStatus.DAY;
+            var mafias = DesideMafia();
+            foreach (var u in users.Values)
+            {
+                u.GameStart(u.IsMafia, mafias);
+            }
+            var thread = new Thread(GameLoof);
+            thread.Start();
+            Console.WriteLine($"start : {user.Id}");
+            return true;
+        }
+        #endregion
+
+        #region eventhandler
+        //이벤트 핸들러 등록
+        private void On(PacketType type, EventHandler handler)
+        {
+            handlerMap[type] += handler;
+        }
+        //모든 유저에게 송신
+        private void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
+        {
+            foreach (var p in users.ToArray())
+            {
+                if (sender?.Id == p.Value.Id)
+                    continue;
+                p.Value.Emit(type, bytes);
+            }
+        }
+        //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
+        private void InitHandlerMap()
+        {
+            foreach (PacketType type in Enum.GetValues(typeof(PacketType)))
+            {
+                handlerMap[type] = EmptyHandler;
+            }
+        }
+        //핸들러 등록
+        private void EnrollHanders()
+        {
+            On(PacketType.MOVE_REQ, OnMoveReq);
+            On(PacketType.VOTE_REQ, OnVoteReq);
+            On(PacketType.FINAL_VOTE_REQ, OnFinalVoteReq);
+        }
+        //공백 핸들러
+        private void EmptyHandler((int, Packet) data) { }
+        //move 이벤트 핸들러
         private void OnMoveReq((int, Packet) eventdata)
         {
             (var id, var packet) = eventdata;
             if (!users.ContainsKey(id))
                 return;
             var data = new MoveReqData(packet.Bytes);
-            users[id].MoveTo(data.location);
             var sendData = new MoveEventData(id, data.location);
+            users[id].MoveTo(data.location);
             Broadcast(PacketType.MOVE_EVENT, sendData.ToBytes(), users[id]);
         }
         private void OnVoteReq((int, Packet) eventdata)
@@ -211,117 +320,6 @@ namespace MyPacket
                 //투표 처리
             }
             users[id].Emit(PacketType.FINAL_VOTE_RES, sendData.ToBytes());
-        }
-        //이벤트 핸들러 등록
-        private void On(PacketType type, EventHandler handler)
-        {
-            handlerMap[type] += handler;
-        }
-        //TODO: 게임룸 내에 큐를 만들고 동기적으로 하고싶음
-        private List<User> DesideMafia()
-        {
-            var mafias = users.Values
-                        .OrderBy(a => Guid.NewGuid())
-                        .Take(Participants > 6 ? 2 : 1);
-            foreach (var u in mafias)
-                u.SetMafia();
-            return mafias.ToList();
-        }
-        private void On(PacketType type, MySocket.MessageHandler handler)
-        {
-            foreach (var user in users.Values)
-            {
-                user.On(type, handler);
-            }
-        }
-        private void Clear(PacketType type)
-        {
-            foreach (var user in users.Values)
-            {
-                user.Clear(type);
-            }
-        }
-        private void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
-        {
-            foreach (var p in users.ToArray())
-            {
-                if (sender?.Id == p.Value.Id)
-                    continue;
-                p.Value.Emit(type, bytes);
-            }
-        }
-        #endregion
-
-        #region public method
-        public void Enqueue(int id, Packet packet)
-        {
-            eventQueue.Enqueue((id, packet));
-        }
-        public bool Join(User user)
-        {
-            if (Participants == Maximum)
-                return false;
-            users[user.Id] = user;
-            var data = new JoinEventData(user.GetInfo());
-            Broadcast(PacketType.JOIN_EVENT, data.ToBytes(), user);
-            return true;
-        }
-        public void RemoveUser(int userId)
-        {
-            users.Remove(userId);
-        }
-        public bool Leave(User user)
-        {
-            if (Status != GameStatus.WAITTING)
-                return false;
-            user.LeaveRoom();
-            RemoveUser(user.Id);
-            // 방장이 퇴장한 경우
-            if (HostId == user.Id)
-            {
-                //모든 유저 퇴장
-                foreach (var u in users.Values)
-                {
-                    u.LeaveRoom();
-                    RemoveUser(u.Id);
-                }
-                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
-                Broadcast(PacketType.ROOM_DESTROY_EVENT);
-                server.RemoveRoom(Id);
-            }
-            //그 외엔 남은 유저들에게 퇴장사실 전달
-            else
-                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
-            return true;
-        }
-        //게임방의 정보를 생성
-        public GameRoomInfo GetInfo()
-        {
-            return new GameRoomInfo(Id, HostId, Participants, Name);
-        }
-
-        //유저들의 정보를 반환
-        public List<UserInfo> GetUserInfos()
-        {
-            return (from u in users.Values select u.GetInfo()).ToList();
-        }
-        //게임 시작
-        public bool GameStart(User user)
-        {
-            //대기실이고, 방장일 경우에만 게임 시작 가능
-            if (user.Status != GameStatus.WAITTING || HostId != user.Id)
-                return false;
-            Status = GameStatus.DAY;
-            var mafias = DesideMafia();
-            foreach (var u in users.Values)
-            {
-                u.GameStart(u.IsMafia, mafias);
-            }
-            EnrollHanders();
-            var thread = new Thread(GameLoof);
-            thread.Start();
-            Console.WriteLine($"start : {user.Id}");
-            return true;
         }
         #endregion
     }
