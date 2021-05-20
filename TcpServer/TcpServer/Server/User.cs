@@ -18,6 +18,8 @@ namespace MyPacket
         public GameRoom Room { get; private set; }
         public bool IsMafia { get; private set; } = false;
         public bool Alive { get; private set; } = true;
+        public bool Voted { get; private set; } = false;
+        public int VoteCount { get; private set; } = 0;
         public GameStatus Status { get; private set; } = GameStatus.CONNECT;
         public Location Transform { get; private set; } = new Location();
         #endregion
@@ -59,10 +61,27 @@ namespace MyPacket
         {
             IsMafia = true;
         }
+        public void ResetVoteStatus()
+        {
+            Voted = false;
+            VoteCount = 0;
+        }
+        public void Vote()
+        {
+            Voted = true;
+        }
+        public void IsVoted()
+        {
+            ++VoteCount;
+        }
         //유저 이동
         public void MoveTo(Location transform)
         {
             Transform = transform;
+        }
+        public void Dead()
+        {
+            Alive = false;
         }
         #endregion
 

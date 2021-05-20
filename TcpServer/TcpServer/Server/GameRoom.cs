@@ -16,6 +16,9 @@ namespace MyPacket
         private static int roomId = 1;
         private float currentTime = 0;
         private long prevTime = 0;
+        private int voters = 0;
+        private int maxVoters = 0;
+        private int electedId = -1;
         private readonly GameServer server;
         private readonly Dictionary<int, User> users = new Dictionary<int, User>();
         private readonly Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
@@ -72,6 +75,22 @@ namespace MyPacket
                 u.SetMafia();
             return mafias.ToList();
         }
+        private void InitVotingPhase()
+        {
+            foreach (var u in users.Values)
+            {
+                if (u.Alive)
+                {
+                    ++maxVoters;
+                    u.ResetVoteStatus();
+                }
+            }
+            voters = maxVoters;
+        }
+        private void DeadReport(int id)
+        {
+
+        }
         #endregion
 
         #region life cycle
@@ -94,38 +113,66 @@ namespace MyPacket
             currentTime = NIGHT_TIME;
             Status = GameStatus.NIGHT;
             Broadcast(PacketType.NIGHT_START);
+            Console.WriteLine($"night start : {Id}");
         }
         private void StartVoting()
         {
             currentTime = VOTE_TIME;
             Status = GameStatus.VOTE;
+            InitVotingPhase();
             Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
+            Console.WriteLine($"voting start : {Id}");
         }
         private void EndVoting()
         {
             currentTime = VOTE_RESULT_TIME;
             Status = GameStatus.VOTE_RESULT;
-            Broadcast(PacketType.VOTING_RESULT);
-
+            var result = from u in users.Values
+                         orderby u.VoteCount descending
+                         select (u.Id, u.VoteCount);
+            var elected = result.First();
+            //최대 득표수가 1이거나 동수일 경우
+            if (elected.VoteCount < 2 ||
+                elected.VoteCount == result.ElementAt(1).VoteCount)
+                elected.Id = -1;
+            electedId = elected.Id;
+            var sendData = new VotingResultData(result.ToArray());
+            Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
+            Console.WriteLine($"voting result : {elected}");
         }
         private void HandlingVoteResult()
         {
-            StartDefense();
+            if (electedId == -1)
+                StartDay();
+            else
+                StartDefense();
         }
         private void StartDefense()
         {
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
-            Broadcast(PacketType.START_DEFENCE, new StartDefenseData((int)DEFENSE_TIME, 0).ToBytes());
+            Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
+            Console.WriteLine($"defense start : {Id}");
         }
         private void StartFinalVotinig()
         {
             currentTime = FINAL_VOTE_TIME;
             Status = GameStatus.FINAL_VOTE;
+            InitVotingPhase();
             Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
+            Console.WriteLine($"final voting start : {Id}");
         }
-        private void EndFinalVotinig()
+        private void EndFinalVoting()
         {
+            var sendData = new FinalVotingResultData(electedId, users[electedId].VoteCount);
+            if (sendData.voteCount * 2 >= maxVoters)
+            {
+                users[electedId].Dead();
+            }
+            else
+                sendData.Kicking_id = -1;
+            Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
+            Console.WriteLine($"final voting result : {electedId} {sendData.voteCount}");
             StartDay();
         }
         private void StartDay()
@@ -133,6 +180,7 @@ namespace MyPacket
             currentTime = DAY_TIME;
             Status = GameStatus.DAY;
             Broadcast(PacketType.DAY_START);
+            Console.WriteLine($"day start : {Id}");
 
         }
         //시간이 만료되면 발생하는 이벤트
@@ -145,7 +193,7 @@ namespace MyPacket
                 case GameStatus.VOTE: EndVoting(); break;
                 case GameStatus.VOTE_RESULT: HandlingVoteResult(); break;
                 case GameStatus.DEFENSE: StartFinalVotinig(); break;
-                case GameStatus.FINAL_VOTE: EndFinalVotinig(); break;
+                case GameStatus.FINAL_VOTE: EndFinalVoting(); break;
                 default: break;
             }
             prevTime = 0;
@@ -275,6 +323,7 @@ namespace MyPacket
             On(PacketType.MOVE_REQ, OnMoveReq);
             On(PacketType.VOTE_REQ, OnVoteReq);
             On(PacketType.FINAL_VOTE_REQ, OnFinalVoteReq);
+            On(PacketType.FINAL_VOTE_REQ, OnDeadReport);
         }
         //공백 핸들러
         private void EmptyHandler((int, Packet) data) { }
@@ -294,32 +343,56 @@ namespace MyPacket
             (int id, Packet packet) = eventdata;
             var data = new VoteReqData(packet.Bytes);
             var sendData = new VoteResData();
-            if (Status != GameStatus.VOTE)
+            if (Status == GameStatus.VOTE)
             {
-                sendData.Result = false;
+                if (!users[id].Voted)
+                {
+                    users[id].Vote();
+                    users[data.Target_id].IsVoted();
+                    --voters;
+                    Console.WriteLine($"vote : {id} -> {data.Target_id}");
+                }
+                else
+                    sendData.Result = false;
             }
             else
-            {
-                data.Target_id = 0;
-                //투표 처리
-            }
+                sendData.Result = false;
             users[id].Emit(PacketType.VOTE_RES, sendData.ToBytes());
+            if (voters == 0)
+                EndVoting();
         }
         private void OnFinalVoteReq((int, Packet) eventdata)
         {
             (int id, Packet packet) = eventdata;
             var data = new FinalVoteReqData(packet.Bytes);
             var sendData = new FinalVoteResData();
-            if (Status != GameStatus.VOTE)
+            if (Status == GameStatus.FINAL_VOTE)
             {
-                sendData.Result = false;
+                if (!users[id].Voted)
+                {
+                    users[id].Vote();
+                    --voters;
+                    if (data.Agree)
+                        users[electedId].IsVoted();
+                    Console.WriteLine($"final vote : {id} -> {data.Agree}");
+                }
+                else
+                    sendData.Result = false;
             }
             else
-            {
-                data.Agree = false;
-                //투표 처리
-            }
+                sendData.Result = false;
             users[id].Emit(PacketType.FINAL_VOTE_RES, sendData.ToBytes());
+            if (voters == 0)
+                EndFinalVoting();
+        }
+        private void OnDeadReport((int, Packet) eventdata)
+        {
+            if (Status == GameStatus.DAY)
+            {
+                DeadReport(eventdata.Item1);
+                StartNight();
+                Console.WriteLine($"dead report : {eventdata.Item1}");
+            }
         }
         #endregion
     }

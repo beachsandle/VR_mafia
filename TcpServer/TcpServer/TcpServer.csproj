@@ -47,6 +47,7 @@
     <Compile Include="MyPacket\PacketData\InGame\DieEventData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVoteReqData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVoteResData.cs" />
+    <Compile Include="MyPacket\PacketData\Voting\VotingResultData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVotingResultData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\FinishMissionData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\KillReqData.cs" />

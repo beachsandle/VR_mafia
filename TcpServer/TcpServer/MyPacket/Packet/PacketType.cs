@@ -47,7 +47,7 @@ namespace MyPacket
         VOTE_RES,
         VOTE_EVENT,
         VOTING_RESULT,
-        START_DEFENCE,
+        START_DEFENSE,
         START_FINAL_VOTING,
         FINAL_VOTE_RES,
         FINAL_VOTE_REQ,
