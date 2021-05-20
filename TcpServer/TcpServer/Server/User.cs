@@ -7,49 +7,94 @@ namespace MyPacket
 {
     public class User : MySocket
     {
+        #region field
         private static int playerId = 1;
         private readonly GameServer server;
+        #endregion
+
         #region property
-        public Location Transform { get; set; } = new Location();
-        public bool Moved { get; set; } = false;
         public int Id { get; private set; }
         public string Name { get; private set; }
         public GameRoom Room { get; private set; }
-        public bool Alive { get; private set; } = true;
         public bool IsMafia { get; private set; } = false;
+        public bool Alive { get; private set; } = true;
         public GameStatus Status { get; private set; } = GameStatus.CONNECT;
+        public Location Transform { get; private set; } = new Location();
         #endregion
+
         #region constructor
         public User(TcpClient client, GameServer server) : base(client)
         {
             Id = playerId++;
             Name = $"Player{Id:X}";
             this.server = server;
+            EnrollHandler();
         }
         #endregion
+
         #region public method
-        #region connect
-        public void EnrollHandler()
+        public bool LeaveRoom()
         {
+            //대기실인 경우 퇴장 처리
+            if (Status == GameStatus.WAITTING)
+            {
+                Room.Leave(this);
+                Room = null;
+                Status = GameStatus.LOBBY;
+                return true;
+            }
+            return false;
+        }
+        public void GameStart(bool isMafia, List<User> team)
+        {
+            if (Status != GameStatus.WAITTING)
+                return;
+            var sendData = new GameStartData(isMafia);
+            if (isMafia)
+                sendData.Mafias = (from u in team select u.Id).ToArray();
+            Status = GameStatus.DAY;
+            Emit(PacketType.GAME_START, sendData.ToBytes());
+        }
+        //유저 정보 반환
+        public UserInfo GetInfo()
+        {
+            return new UserInfo(Id, Name);
+        }
+        //마피아 직업 부여
+        public void SetMafia()
+        {
+            IsMafia = true;
+        }
+        //유저 이동
+        public void MoveTo(Location transform)
+        {
+            Transform = transform;
+        }
+        #endregion
+
+        #region eventhandler
+
+        //유저의 이벤트 핸들러 등록
+        private void EnrollHandler()
+        {
+            //connect
             On(PacketType.CONNECT, OnConnect);
             On(PacketType.DISCONNECT, OnDisconnect);
-
+            //lobby
             On(PacketType.SET_NAME_REQ, OnSetNameReq);
             On(PacketType.ROOM_LIST_REQ, OnRoomListReq);
             On(PacketType.CREATE_ROOM_REQ, OnCreateRoomReq);
             On(PacketType.JOIN_ROOM_REQ, OnJoinRoomReq);
-
+            //watting
             On(PacketType.LEAVE_ROOM_REQ, OnLeaveRoomReq);
             On(PacketType.GAME_START_REQ, OnGameStartReq);
-
+            //ingame
             for (PacketType type = PacketType.INGAME_PACKET + 1; type < PacketType.END; ++type)
             {
                 On(type, (Packet packet) => { Room.Enqueue(Id, packet); });
             }
-
         }
-        //status가 connect일 경우 로비로 이동하고 connect, set name res 전송
-        public void OnConnect(Packet packet)
+        private void OnConnect(Packet packet)
         {
             if (Status == GameStatus.CONNECT)
             {
@@ -60,14 +105,13 @@ namespace MyPacket
             Console.WriteLine($"connect : {Id}");
         }
         //
-        public void OnDisconnect(Packet packet)
+        private void OnDisconnect(Packet packet)
         {
             Close();
             switch (Status)
             {
                 case GameStatus.WAITTING:
-                    Status = GameStatus.NONE;
-                    Room.Leave(this);
+                    LeaveRoom();
                     break;
                 case GameStatus.DAY:
                 case GameStatus.NIGHT:
@@ -80,8 +124,7 @@ namespace MyPacket
             server.RemoveUser(Id);
             Console.WriteLine($"disconnect : {Id}, {Name}");
         }
-        #endregion
-        public void OnSetNameReq(Packet packet)
+        private void OnSetNameReq(Packet packet)
         {
             var data = new SetNameReqData(packet.Bytes);
             var sendData = new SetNameResData();
@@ -152,44 +195,14 @@ namespace MyPacket
         }
         private void OnLeaveRoomReq(Packet packet)
         {
-            if (LeaveRoom())
-                Console.WriteLine($"leave : {Id}");
-        }
-        public bool LeaveRoom()
-        {
-            var sendData = new LeaveResData();
-            if (Status != GameStatus.WAITTING || Room == null)
-            {
-                sendData.Result = false;
-                Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
-                return false;
-            }
-            Room = null;
-            Status = GameStatus.LOBBY;
+            var sendData = new LeaveResData(LeaveRoom());
             Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
-            return true;
+            if (sendData.Result)
+                Console.WriteLine($"leave : {Id}");
         }
         private void OnGameStartReq(Packet packet)
         {
             Room.GameStart(this);
-        }
-        public void GameStart(bool isMafia, List<User> team)
-        {
-            if (Status != GameStatus.WAITTING)
-                return;
-            var sendData = new GameStartData(isMafia);
-            if (isMafia)
-                sendData.Mafias = (from u in team select u.Id).ToArray();
-            Status = GameStatus.DAY;
-            Emit(PacketType.GAME_START, sendData.ToBytes());
-        }
-        public UserInfo GetInfo()
-        {
-            return new UserInfo(Id, Name);
-        }
-        public void SetMafia()
-        {
-            IsMafia = true;
         }
         #endregion
     }

@@ -113,8 +113,11 @@ namespace MyPacket
         //메시지 전송
         public void Emit(PacketType type, byte[] bytes = null)
         {
-            var packet = new Packet(type, bytes);
-            stream.Write(packet.ToBytes(), 0, packet.Size);
+            if (stream.CanWrite)
+            {
+                var packet = new Packet(type, bytes);
+                stream.Write(packet.ToBytes(), 0, packet.Size);
+            }
         }
         //readQueue에서 메시지 하나를 읽고 처리
         public void Handle()

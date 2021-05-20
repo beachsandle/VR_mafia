@@ -176,7 +176,7 @@ namespace MyPacket
             if (!users.ContainsKey(id))
                 return;
             var data = new MoveReqData(packet.Bytes);
-            users[id].Transform = data.location;
+            users[id].MoveTo(data.location);
             var sendData = new MoveEventData(id, data.location);
             Broadcast(PacketType.MOVE_EVENT, sendData.ToBytes(), users[id]);
         }

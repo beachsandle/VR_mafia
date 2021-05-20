@@ -12,6 +12,7 @@ namespace MyPacket
         CONNECT,
         LOBBY,
         WAITTING,
+        INGAME,
         DAY,
         NIGHT,
         VOTE,
