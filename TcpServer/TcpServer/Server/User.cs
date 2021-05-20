@@ -98,7 +98,6 @@ namespace MyPacket
             }
             Console.WriteLine($"connect : {Id}");
         }
-        //
         private void OnDisconnect(Packet packet)
         {
             Close();
@@ -122,87 +121,81 @@ namespace MyPacket
         {
             var data = new SetNameReqData(packet.Bytes);
             var sendData = new SetNameResData();
-            //로비가 아닐 경우 실패
-            if (Status != GameStatus.LOBBY)
+            //로비일 경우 이름 변경
+            if (Status == GameStatus.LOBBY)
             {
-                sendData.Result = false;
-                Emit(PacketType.SET_NAME_RES, sendData.ToBytes());
-                return;
+                Name = data.UserName;
+                sendData.UserName = data.UserName;
             }
-            //이름을 변경하고 결과 전송
-            Name = data.UserName;
-            sendData.UserName = data.UserName;
+            else
+                sendData.Result = false;
+            //결과 전송
             Emit(PacketType.SET_NAME_RES, sendData.ToBytes());
-            Console.WriteLine($"setname : {Id}, {Name}");
+            if (sendData.Result)
+                Console.WriteLine($"setname : {Id}, {Name}");
         }
         private void OnRoomListReq(Packet packet)
         {
             var sendData = new RoomListResData();
-            if (Status != GameStatus.LOBBY)
-            {
+            //로비일경우 방목록 저장 
+            if (Status == GameStatus.LOBBY)
+                sendData.Rooms = server.GetRoomInfos();
+            else
                 sendData.Result = false;
-                Emit(PacketType.ROOM_LIST_RES, sendData.ToBytes());
-                return;
-            }
-            sendData.Rooms = server.GetRoomInfos();
+            //결과 전송
             Emit(PacketType.ROOM_LIST_RES, sendData.ToBytes());
-            Console.WriteLine($"room list req : {Id}");
+            if (sendData.Result)
+                Console.WriteLine($"room list req : {Id}");
         }
         private void OnCreateRoomReq(Packet packet)
         {
             var data = new CreateRoomReqData(packet.Bytes);
             var sendData = new CreateRoomResData();
-            if (Status != GameStatus.LOBBY)
+            //로비일 경우 방을 생성하고 대기실로 입장
+            if (Status == GameStatus.LOBBY)
             {
-                sendData.Result = false;
-                Emit(PacketType.CREATE_ROOM_RES, sendData.ToBytes());
-                return;
+                Room = server.CreateRoom(this, data.RoomName);
+                Room.Join(this);
+                Status = GameStatus.WAITTING;
             }
-            Room = server.CreateRoom(this, data.RoomName);
-            Room.Join(this);
-            Status = GameStatus.WAITTING;
+            else
+                sendData.Result = false;
+            //결과 전송
             Emit(PacketType.CREATE_ROOM_RES, sendData.ToBytes());
-            Console.WriteLine($"create room req : {Id}");
+            if (sendData.Result)
+                Console.WriteLine($"create room req : {Id}");
         }
         private void OnJoinRoomReq(Packet packet)
         {
             var data = new JoinRoomReqData(packet.Bytes);
             var sendData = new JoinRoomResData();
             var room = server.FindRoomById(data.RoomId);
-            if (Status != GameStatus.LOBBY || room == null)
-            {
-                sendData.Result = false;
-                Emit(PacketType.JOIN_ROOM_RES, sendData.ToBytes());
-                return;
-            }
-            if (room.Join(this))
+            //로비이고 방 참여에 성공했을 경우
+            if (Status == GameStatus.LOBBY && (room?.Join(this) ?? false))
             {
                 Room = room;
                 sendData.Users = room.GetUserInfos();
                 Status = GameStatus.WAITTING;
-                Emit(PacketType.JOIN_ROOM_RES, sendData.ToBytes());
-                return;
             }
-            sendData.Result = false;
+            else
+                sendData.Result = false;
+            //결과 전송
             Emit(PacketType.JOIN_ROOM_RES, sendData.ToBytes());
-            Console.WriteLine($"join room : {Id}");
+            if (sendData.Result)
+                Console.WriteLine($"join room : {Id}");
         }
         private void OnLeaveRoomReq(Packet packet)
         {
             var sendData = new LeaveResData();
-            //대기실인 경우 퇴장
-            if (Status == GameStatus.WAITTING)
-                Room.Leave(this);
-            else
-                sendData.Result = false;
-
+            sendData.Result = (Status == GameStatus.WAITTING && Room.Leave(this));
             Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
             if (sendData.Result)
                 Console.WriteLine($"leave : {Id}");
         }
         private void OnGameStartReq(Packet packet)
         {
-            Room.GameStart(this);
+            if (Status == GameStatus.WAITTING)
+                Room.GameStart(this);
         }
         #endregion
     }
