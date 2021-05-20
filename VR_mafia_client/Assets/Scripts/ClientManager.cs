@@ -95,6 +95,7 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
         socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
         socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
+        socket.On(PacketType.ROOM_DESTROY_EVENT, OnRoomDestroyEvent);
         socket.On(PacketType.GAME_START, OnGameStart);
 
         socket.On(PacketType.MOVE_EVENT, OnMove);
@@ -195,18 +196,13 @@ public class ClientManager : MonoBehaviour
     private void OnLeaveEvent(Packet packet)
     {
         var data = new LeaveEventData(packet.Bytes);
-
-        if (data.PlayerId == playerID)
-        {
-            SceneManager.LoadScene("Lobby");
-        }
-        else
-        {
-            users.Remove((from u in users where u.Id == data.PlayerId select u).First());
-            WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
-        }
+        users.Remove((from u in users where u.Id == data.PlayerId select u).First());
+        WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
     }
-
+    private void OnRoomDestroyEvent(Packet packet)
+    {
+        SceneManager.LoadScene("Lobby");
+    }
     public void EmitLeaveRoomReq()
     {
         socket.Emit(PacketType.LEAVE_ROOM_REQ);
@@ -296,7 +292,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitFinalVoteReq(bool agree)
     {
-        
+
     }
     private void OnFinalVoteRes(Packet packet)
     {
