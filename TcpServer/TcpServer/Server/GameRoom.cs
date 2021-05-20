@@ -248,14 +248,15 @@ namespace MyPacket
             // 방장이 퇴장한 경우
             if (HostId == user.Id)
             {
+                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
+                Broadcast(PacketType.ROOM_DESTROY_EVENT);
                 //모든 유저 퇴장
-                foreach (var u in users.Values)
+                foreach (var u in users.Values.ToArray())
                 {
                     u.LeaveRoom();
                     RemoveUser(u.Id);
                 }
-                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
-                Broadcast(PacketType.ROOM_DESTROY_EVENT);
+                Console.WriteLine($"room destroy : {Id}");
                 server.RemoveRoom(Id);
             }
             //그 외엔 남은 유저들에게 퇴장사실 전달
