@@ -12,9 +12,9 @@ namespace MyPacket
     public partial class GameServer
     {
         #region field
-        private TcpListener server;
-        private Dictionary<int, User> userMap = new Dictionary<int, User>();
-        private Dictionary<int, GameRoom> roomMap = new Dictionary<int, GameRoom>();
+        private readonly TcpListener server;
+        private readonly Dictionary<int, User> userMap = new Dictionary<int, User>();
+        private readonly Dictionary<int, GameRoom> roomMap = new Dictionary<int, GameRoom>();
         #endregion
         #region constructor
         public GameServer(TcpListener server)
@@ -40,6 +40,10 @@ namespace MyPacket
             roomMap[room.Id] = room;
             return room;
         }
+        public GameRoom FindRoomById(int roomId)
+        {
+            return roomMap.ContainsKey(roomId) ? roomMap[roomId] : null;
+        }
         public void RemoveUser(int userId)
         {
             userMap.Remove(userId);
@@ -55,16 +59,12 @@ namespace MyPacket
 
             var user = new User(client, this);
             userMap[user.Id] = user;
-            EnrollConnectHandler(user);
-            EnrollLobbyHandler(user);
-            EnrollWatingHandler(user);
-            EnrollPlayingHandler(user);
             user.Listen(true);
         }
-        private List<GameRoomInfo> GetRoomInfos()
+        public List<GameRoomInfo> GetRoomInfos()
         {
-            return (from r in roomMap.Values 
-                    where r.Status == GameStatus.WAITTING 
+            return (from r in roomMap.Values
+                    where r.Status == GameStatus.WAITTING
                     select r.GetInfo()).ToList();
         }
         #endregion
