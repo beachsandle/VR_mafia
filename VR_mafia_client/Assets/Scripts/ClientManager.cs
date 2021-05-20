@@ -79,7 +79,7 @@ public class ClientManager : MonoBehaviour
         }
     }
 
-    private void OnConnect(MySocket socket, Packet packet)
+    private void OnConnect(Packet packet)
     {
         var data = new ConnectData();
         data.FromBytes(packet.Bytes);
@@ -102,12 +102,12 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.NIGHT_START, OnNightStart);
         socket.On(PacketType.START_VOTING, OnStartVoting);
         socket.On(PacketType.VOTING_RESULT, OnVotingResult);
-        socket.On(PacketType.START_DEFENCE, OnStartDefense);
+        socket.On(PacketType.START_DEFENSE, OnStartDefense);
         socket.On(PacketType.START_FINAL_VOTING, OnStartFinalVoting);
 
         socket.Emit(PacketType.ROOM_LIST_REQ);
     }
-    private void OnDisconnect(MySocket socket, Packet packet)
+    private void OnDisconnect(Packet packet)
     {
         socket.Close();
 
@@ -124,7 +124,7 @@ public class ClientManager : MonoBehaviour
     }
 
     #region Lobby
-    private void OnSetNameRes(MySocket socket, Packet packet)
+    private void OnSetNameRes(Packet packet)
     {
         var data = new SetNameResData(packet.Bytes);
 
@@ -139,7 +139,7 @@ public class ClientManager : MonoBehaviour
         socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
     }
 
-    private void OnCreateRoomRes(MySocket socket, Packet packet)
+    private void OnCreateRoomRes(Packet packet)
     {
         users.Add(new UserInfo(playerID, userName));
         SceneManager.LoadScene("WaitingRoom");
@@ -151,7 +151,7 @@ public class ClientManager : MonoBehaviour
         socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
     }
 
-    private void OnJoinRoomRes(MySocket socket, Packet packet)
+    private void OnJoinRoomRes(Packet packet)
     {
         var data = new JoinRoomResData(packet.Bytes);
 
@@ -164,7 +164,7 @@ public class ClientManager : MonoBehaviour
         socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
     }
 
-    private void OnRoomListRes(MySocket socket, Packet packet)
+    private void OnRoomListRes(Packet packet)
     {
         if (SceneManager.GetActiveScene().name == "InGame") return;
 
@@ -185,14 +185,14 @@ public class ClientManager : MonoBehaviour
     #endregion
 
     #region WaitingRoom
-    private void OnJoinEvent(MySocket socket, Packet packet)
+    private void OnJoinEvent(Packet packet)
     {
         var data = new JoinEventData(packet.Bytes);
 
         users.Add(data.Info);
         WaitingRoomManager.instance.AddPlayer(data.Info);
     }
-    private void OnLeaveEvent(MySocket socket, Packet packet)
+    private void OnLeaveEvent(Packet packet)
     {
         var data = new LeaveEventData(packet.Bytes);
 
@@ -211,7 +211,7 @@ public class ClientManager : MonoBehaviour
     {
         socket.Emit(PacketType.LEAVE_ROOM_REQ);
     }
-    private void OnLeaveRoomRes(MySocket socket, Packet packet)
+    private void OnLeaveRoomRes(Packet packet)
     {
         SceneManager.LoadScene("Lobby");
     }
@@ -220,7 +220,7 @@ public class ClientManager : MonoBehaviour
     {
         socket.Emit(PacketType.GAME_START_REQ);
     }
-    private void OnGameStart(MySocket socket, Packet packet)
+    private void OnGameStart(Packet packet)
     {
         var data = new GameStartData(packet.Bytes);
 
@@ -232,7 +232,7 @@ public class ClientManager : MonoBehaviour
     #endregion
 
     #region Ingame
-    private void OnMove(MySocket socket, Packet packet)
+    private void OnMove(Packet packet)
     {
         var data = new MoveEventData(packet.Bytes);
 
@@ -252,16 +252,16 @@ public class ClientManager : MonoBehaviour
         return new Location(position, rotation);
     }
 
-    private void OnDayStart(MySocket socket, Packet packet)
+    private void OnDayStart(Packet packet)
     {
         InGameManager.instance.StartDay();
     }
-    private void OnNightStart(MySocket socket, Packet packet)
+    private void OnNightStart(Packet packet)
     {
         InGameManager.instance.StartNight();
     }
 
-    private void OnStartVoting(MySocket socket, Packet packet)
+    private void OnStartVoting(Packet packet)
     {
         var data = new StartVotingData(packet.Bytes);
 
@@ -271,26 +271,26 @@ public class ClientManager : MonoBehaviour
     {
         socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
     }
-    private void OnVoteRes(MySocket socket, Packet packet)
+    private void OnVoteRes(Packet packet)
     {
         //var data = new VoteResData();
         //data.FromBytes(packet.Bytes);
 
         //InGameManager.instance.suffrage = false;
     }
-    private void OnVotingResult(MySocket socket, Packet packet)
+    private void OnVotingResult(Packet packet)
     {
         //var data = new VotingResultData(packet.Bytes);
         Debug.Log("OnVotingResult");
         //InGameManager.instance.DisplayVotingResult(data);
     }
 
-    private void OnStartDefense(MySocket socket, Packet packet)
+    private void OnStartDefense(Packet packet)
     {
         Debug.Log("OnStartDefense");
     }
 
-    private void OnStartFinalVoting(MySocket socket, Packet packet)
+    private void OnStartFinalVoting(Packet packet)
     {
         Debug.Log("OnStartFinalVoting");
     }
@@ -298,11 +298,11 @@ public class ClientManager : MonoBehaviour
     {
         
     }
-    private void OnFinalVoteRes(MySocket socket, Packet packet)
+    private void OnFinalVoteRes(Packet packet)
     {
 
     }
-    private void OnFinalVotingResult(MySocket socket, Packet packet)
+    private void OnFinalVotingResult(Packet packet)
     {
 
     }
