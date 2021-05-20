@@ -270,25 +270,26 @@ namespace MyPacket
         {
             users.Remove(userId);
         }
-        public bool Leave(User user)
+        public void Leave(User user)
         {
-            if (!user.LeaveRoom())
-                return false;
+            user.LeaveRoom();
             RemoveUser(user.Id);
+            //대기실에서 방장이 퇴장한 경우
             if (Status == GameStatus.WAITTING && HostId == user.Id)
             {
-                foreach (var u in users.Values.ToArray())
+                //모든 유저 퇴장
+                foreach (var u in users.Values)
                 {
-                    if (u.LeaveRoom())
-                    {
-                        RemoveUser(u.Id);
-                    }
+                    u.LeaveRoom();
+                    RemoveUser(u.Id);
                 }
-            }
-            Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
-            if (Participants == 0)
+                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
+                Broadcast(PacketType.ROOM_DESTROY_EVENT);
                 server.RemoveRoom(Id);
-            return true;
+            }
+            //그 외엔 남은 유저들에게 퇴장사실 전달
+            else
+                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
         }
         //게임방의 정보를 생성
         public GameRoomInfo GetInfo()

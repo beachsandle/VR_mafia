@@ -33,17 +33,11 @@ namespace MyPacket
         #endregion
 
         #region public method
-        public bool LeaveRoom()
+        //유저를 퇴장시킴
+        public void LeaveRoom()
         {
-            //대기실인 경우 퇴장 처리
-            if (Status == GameStatus.WAITTING)
-            {
-                Room.Leave(this);
-                Room = null;
-                Status = GameStatus.LOBBY;
-                return true;
-            }
-            return false;
+            Room = null;
+            Status = GameStatus.LOBBY;
         }
         public void GameStart(bool isMafia, List<User> team)
         {
@@ -111,7 +105,7 @@ namespace MyPacket
             switch (Status)
             {
                 case GameStatus.WAITTING:
-                    LeaveRoom();
+                    Room.Leave(this);
                     break;
                 case GameStatus.DAY:
                 case GameStatus.NIGHT:
@@ -195,7 +189,13 @@ namespace MyPacket
         }
         private void OnLeaveRoomReq(Packet packet)
         {
-            var sendData = new LeaveResData(LeaveRoom());
+            var sendData = new LeaveResData();
+            //대기실인 경우 퇴장
+            if (Status == GameStatus.WAITTING)
+                Room.Leave(this);
+            else
+                sendData.Result = false;
+
             Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
             if (sendData.Result)
                 Console.WriteLine($"leave : {Id}");
