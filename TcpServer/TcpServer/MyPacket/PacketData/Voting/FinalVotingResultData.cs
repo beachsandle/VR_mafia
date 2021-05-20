@@ -9,11 +9,12 @@ namespace MyPacket
     public class FinalVotingResultData : IPacketData
     {
         public int Kicking_id = -1;
+        public int voteCount = 0;
         public int Size
         {
             get
             {
-                return 4;
+                return 8;
             }
         }
 
@@ -24,20 +25,22 @@ namespace MyPacket
         }
 
 
-        public FinalVotingResultData(int kicking_id)
+        public FinalVotingResultData(int kicking_id, int voteCount = 0)
         {
             Kicking_id = kicking_id;
+            this.voteCount = voteCount;
 
         }
 
         public void FromBytes(byte[] bytes)
         {
             Kicking_id = BitConverter.ToInt32(bytes, 0);
+            voteCount = BitConverter.ToInt32(bytes, 4);
         }
 
         public byte[] ToBytes()
         {
-            return BitConverter.GetBytes(Kicking_id);
+            return new ByteBuilder(8).Append(Kicking_id).Append(voteCount).Get();
         }
     }
 }

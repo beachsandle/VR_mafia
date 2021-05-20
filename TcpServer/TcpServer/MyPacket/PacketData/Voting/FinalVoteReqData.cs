@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyPacket
 {
-    public class FinalVoteReq : IPacketData
+    public class FinalVoteReqData : IPacketData
     {
         public bool Agree = true;
         public int Size
@@ -17,13 +17,13 @@ namespace MyPacket
             }
         }
 
-        public FinalVoteReq(byte[] bytes = null)
+        public FinalVoteReqData(byte[] bytes = null)
         {
             if (bytes != null)
                 FromBytes(bytes);
         }
 
-        public FinalVoteReq(bool agree)
+        public FinalVoteReqData(bool agree)
         {
             Agree = agree;
 

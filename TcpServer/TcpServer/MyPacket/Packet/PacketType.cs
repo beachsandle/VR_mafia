@@ -28,6 +28,7 @@ namespace MyPacket
         LEAVE_ROOM_REQ,
         LEAVE_ROOM_RES,
         LEAVE_EVENT,
+        ROOM_DESTROY_EVENT,
         GAME_START_REQ,
         GAME_START,
         //ingame
@@ -40,16 +41,18 @@ namespace MyPacket
         KILL_RES,
         DIE_EVENT,
         DEAD_REPORT,
+        //voting
         START_VOTING,
         VOTE_REQ,
         VOTE_RES,
         VOTE_EVENT,
         VOTING_RESULT,
-        START_DEFENCE,
+        START_DEFENSE,
         START_FINAL_VOTING,
         FINAL_VOTE_RES,
         FINAL_VOTE_REQ,
         FINAL_VOTING_RESULT,
+        //
         END
     }
 }

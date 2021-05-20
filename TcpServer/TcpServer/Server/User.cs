@@ -7,30 +7,107 @@ namespace MyPacket
 {
     public class User : MySocket
     {
+        #region field
         private static int playerId = 1;
         private readonly GameServer server;
+        #endregion
+
         #region property
-        public Location Transform { get; set; } = new Location();
-        public bool Moved { get; set; } = false;
         public int Id { get; private set; }
         public string Name { get; private set; }
         public GameRoom Room { get; private set; }
-        public bool Alive { get; private set; } = true;
         public bool IsMafia { get; private set; } = false;
+        public bool Alive { get; private set; } = true;
+        public bool Voted { get; private set; } = false;
+        public int VoteCount { get; private set; } = 0;
         public GameStatus Status { get; private set; } = GameStatus.CONNECT;
+        public Location Transform { get; private set; } = new Location();
         #endregion
+
         #region constructor
         public User(TcpClient client, GameServer server) : base(client)
         {
             Id = playerId++;
             Name = $"Player{Id:X}";
             this.server = server;
+            EnrollHandler();
         }
         #endregion
+
         #region public method
-        #region connect
-        //status가 connect일 경우 로비로 이동하고 connect, set name res 전송
-        public void Connect()
+        //유저를 퇴장시킴
+        public void LeaveRoom()
+        {
+            Room = null;
+            Status = GameStatus.LOBBY;
+        }
+        public void GameStart(bool isMafia, List<User> team)
+        {
+            if (Status != GameStatus.WAITTING)
+                return;
+            var sendData = new GameStartData(isMafia);
+            if (isMafia)
+                sendData.Mafias = (from u in team select u.Id).ToArray();
+            Status = GameStatus.INGAME;
+            Emit(PacketType.GAME_START, sendData.ToBytes());
+        }
+        //유저 정보 반환
+        public UserInfo GetInfo()
+        {
+            return new UserInfo(Id, Name);
+        }
+        //마피아 직업 부여
+        public void SetMafia()
+        {
+            IsMafia = true;
+        }
+        public void ResetVoteStatus()
+        {
+            Voted = false;
+            VoteCount = 0;
+        }
+        public void Vote()
+        {
+            Voted = true;
+        }
+        public void IsVoted()
+        {
+            ++VoteCount;
+        }
+        //유저 이동
+        public void MoveTo(Location transform)
+        {
+            Transform = transform;
+        }
+        public void Dead()
+        {
+            Alive = false;
+        }
+        #endregion
+
+        #region eventhandler
+
+        //유저의 이벤트 핸들러 등록
+        private void EnrollHandler()
+        {
+            //connect
+            On(PacketType.CONNECT, OnConnect);
+            On(PacketType.DISCONNECT, OnDisconnect);
+            //lobby
+            On(PacketType.SET_NAME_REQ, OnSetNameReq);
+            On(PacketType.ROOM_LIST_REQ, OnRoomListReq);
+            On(PacketType.CREATE_ROOM_REQ, OnCreateRoomReq);
+            On(PacketType.JOIN_ROOM_REQ, OnJoinRoomReq);
+            //watting
+            On(PacketType.LEAVE_ROOM_REQ, OnLeaveRoomReq);
+            On(PacketType.GAME_START_REQ, OnGameStartReq);
+            //ingame
+            for (PacketType type = PacketType.INGAME_PACKET + 1; type < PacketType.END; ++type)
+            {
+                On(type, (Packet packet) => { Room.Enqueue(Id, packet); });
+            }
+        }
+        private void OnConnect(Packet packet)
         {
             if (Status == GameStatus.CONNECT)
             {
@@ -40,14 +117,12 @@ namespace MyPacket
             }
             Console.WriteLine($"connect : {Id}");
         }
-        //
-        public void Disconnect()
+        private void OnDisconnect(Packet packet)
         {
             Close();
             switch (Status)
             {
                 case GameStatus.WAITTING:
-                    Status = GameStatus.NONE;
                     Room.Leave(this);
                     break;
                 case GameStatus.DAY:
@@ -61,103 +136,86 @@ namespace MyPacket
             server.RemoveUser(Id);
             Console.WriteLine($"disconnect : {Id}, {Name}");
         }
-        #endregion
-        public bool SetName(string name)
+        private void OnSetNameReq(Packet packet)
         {
-            var data = new SetNameResData();
-            //로비가 아닐 경우 실패
-            if (Status != GameStatus.LOBBY)
+            var data = new SetNameReqData(packet.Bytes);
+            var sendData = new SetNameResData();
+            //로비일 경우 이름 변경
+            if (Status == GameStatus.LOBBY)
             {
-                data.Result = false;
-                Emit(PacketType.SET_NAME_RES, data.ToBytes());
-                return false;
+                Name = data.UserName;
+                sendData.UserName = data.UserName;
             }
-            //이름을 변경하고 결과 전송
-            Name = name;
-            data.UserName = name;
-            Emit(PacketType.SET_NAME_RES, data.ToBytes());
-            return true;
+            else
+                sendData.Result = false;
+            //결과 전송
+            Emit(PacketType.SET_NAME_RES, sendData.ToBytes());
+            if (sendData.Result)
+                Console.WriteLine($"setname : {Id}, {Name}");
         }
-        public bool SendRoomList(List<GameRoomInfo> roomInfos)
+        private void OnRoomListReq(Packet packet)
         {
-            var data = new RoomListResData();
-            if (Status != GameStatus.LOBBY)
-            {
-                data.Result = false;
-                Emit(PacketType.ROOM_LIST_RES, data.ToBytes());
-                return false;
-            }
-            data.Rooms = roomInfos;
-            Emit(PacketType.ROOM_LIST_RES, data.ToBytes());
-            return true;
+            var sendData = new RoomListResData();
+            //로비일경우 방목록 저장 
+            if (Status == GameStatus.LOBBY)
+                sendData.Rooms = server.GetRoomInfos();
+            else
+                sendData.Result = false;
+            //결과 전송
+            Emit(PacketType.ROOM_LIST_RES, sendData.ToBytes());
+            if (sendData.Result)
+                Console.WriteLine($"room list req : {Id}");
         }
-        public bool CreateRoom(string roomName)
+        private void OnCreateRoomReq(Packet packet)
         {
-            var data = new CreateRoomResData();
-            if (Status != GameStatus.LOBBY)
+            var data = new CreateRoomReqData(packet.Bytes);
+            var sendData = new CreateRoomResData();
+            //로비일 경우 방을 생성하고 대기실로 입장
+            if (Status == GameStatus.LOBBY)
             {
-                data.Result = false;
-                Emit(PacketType.CREATE_ROOM_RES, data.ToBytes());
-                return false;
+                Room = server.CreateRoom(this, data.RoomName);
+                Room.Join(this);
+                Status = GameStatus.WAITTING;
             }
-            Room = server.CreateRoom(this, roomName);
-            Room.Join(this);
-            Status = GameStatus.WAITTING;
-            Emit(PacketType.CREATE_ROOM_RES, data.ToBytes());
-            return true;
+            else
+                sendData.Result = false;
+            //결과 전송
+            Emit(PacketType.CREATE_ROOM_RES, sendData.ToBytes());
+            if (sendData.Result)
+                Console.WriteLine($"create room req : {Id}");
         }
-        public bool JoinRoom(GameRoom room)
+        private void OnJoinRoomReq(Packet packet)
         {
-            var data = new JoinRoomResData();
-            if (Status != GameStatus.LOBBY || room == null)
-            {
-                data.Result = false;
-                Emit(PacketType.JOIN_ROOM_RES, data.ToBytes());
-                return false;
-            }
-            if (room.Join(this))
+            var data = new JoinRoomReqData(packet.Bytes);
+            var sendData = new JoinRoomResData();
+            var room = server.FindRoomById(data.RoomId);
+            //로비이고 방 참여에 성공했을 경우
+            if (Status == GameStatus.LOBBY && (room?.Join(this) ?? false))
             {
                 Room = room;
-                data.Users = room.GetUserInfos();
+                sendData.Users = room.GetUserInfos();
                 Status = GameStatus.WAITTING;
-                Emit(PacketType.JOIN_ROOM_RES, data.ToBytes());
-                return true;
             }
-            data.Result = false;
-            Emit(PacketType.JOIN_ROOM_RES, data.ToBytes());
-            return false;
+            else
+                sendData.Result = false;
+            //결과 전송
+            Emit(PacketType.JOIN_ROOM_RES, sendData.ToBytes());
+            if (sendData.Result)
+                Console.WriteLine($"join room : {Id}");
         }
-        public bool LeaveRoom()
+        private void OnLeaveRoomReq(Packet packet)
         {
-            var data = new LeaveResData();
-            if (Status != GameStatus.WAITTING || Room == null)
-            {
-                data.Result = false;
-                Emit(PacketType.LEAVE_ROOM_RES, data.ToBytes());
-                return false;
-            }
-            Room = null;
-            Status = GameStatus.LOBBY;
-            Emit(PacketType.LEAVE_ROOM_RES, data.ToBytes());
-            return true;
+            var sendData = new LeaveResData(
+                Status == GameStatus.WAITTING &&
+                Room.Leave(this));
+            Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
+            if (sendData.Result)
+                Console.WriteLine($"leave : {Id}");
         }
-        public void GameStart(bool isMafia, List<User> team)
+        private void OnGameStartReq(Packet packet)
         {
-            if (Status != GameStatus.WAITTING)
-                return;
-            var data = new GameStartData(isMafia);
-            if (isMafia)
-                data.Mafias = (from u in team select u.Id).ToArray();
-            Status = GameStatus.DAY;
-            Emit(PacketType.GAME_START, data.ToBytes());
-        }
-        public UserInfo GetInfo()
-        {
-            return new UserInfo(Id, Name);
-        }
-        public void SetMafia()
-        {
-            IsMafia = true;
+            if (Status == GameStatus.WAITTING)
+                Room.GameStart(this);
         }
         #endregion
     }
