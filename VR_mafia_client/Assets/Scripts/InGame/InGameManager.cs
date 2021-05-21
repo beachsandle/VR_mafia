@@ -87,6 +87,7 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
+    
     public void UpdatePlayerTransform(MoveEventData data)
     {
             if (data.Player_id == ClientManager.instance.playerID) return;
@@ -285,8 +286,6 @@ public class InGameManager : MonoBehaviour
         {
             string s = playerObjects.transform.GetChild(pNum - 1).name;
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
-
-            suffrage = false; // TODO: OnVoteRes() 에서 처리하도록 변경
         }
     }
 
@@ -332,7 +331,6 @@ public class InGameManager : MonoBehaviour
         for (int i = 0; i < result.Length; i++)
         {
             int id = result[i].pid;
-
             for (int j = 0; j < result.Length; j++)
             {
                 if (id == playerOrder[j])

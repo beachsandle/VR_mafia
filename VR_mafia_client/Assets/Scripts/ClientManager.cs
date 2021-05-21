@@ -102,6 +102,7 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.DAY_START, OnDayStart);
         socket.On(PacketType.NIGHT_START, OnNightStart);
         socket.On(PacketType.START_VOTING, OnStartVoting);
+        socket.On(PacketType.VOTE_RES, OnVoteRes);
         socket.On(PacketType.VOTING_RESULT, OnVotingResult);
         socket.On(PacketType.START_DEFENSE, OnStartDefense);
         socket.On(PacketType.START_FINAL_VOTING, OnStartFinalVoting);
@@ -269,16 +270,18 @@ public class ClientManager : MonoBehaviour
     }
     private void OnVoteRes(Packet packet)
     {
-        //var data = new VoteResData();
-        //data.FromBytes(packet.Bytes);
+        var data = new VoteResData(packet.Bytes);
 
-        //InGameManager.instance.suffrage = false;
+        if (data.Result)
+        {
+            InGameManager.instance.suffrage = false;
+        }
     }
     private void OnVotingResult(Packet packet)
     {
-        //var data = new VotingResultData(packet.Bytes);
-        Debug.Log("OnVotingResult");
-        //InGameManager.instance.DisplayVotingResult(data);
+        var data = new VotingResultData(packet.Bytes);
+
+        InGameManager.instance.DisplayVotingResult(data.result);
     }
 
     private void OnStartDefense(Packet packet)
