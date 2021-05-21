@@ -298,6 +298,10 @@ public class ClientManager : MonoBehaviour
     private void OnStartFinalVoting(Packet packet)
     {
         Debug.Log("OnStartFinalVoting");
+
+        var data = new StartFinalVotingData(packet.Bytes);
+
+        InGameManager.instance.StartFinalVoting(data.Voting_time);
     }
     public void EmitFinalVoteReq(bool agree)
     {
