@@ -322,9 +322,14 @@ public class InGameManager : MonoBehaviour
 
     public void DisplayVotingResult((int pid, int count)[] result)
     {
+        int maxCount = 0;
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < players.Count; i++)
         {
+            if (maxCount < result[i].count)
+            {
+                maxCount = result[i].count;
+            }
             votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
         }
 
@@ -337,6 +342,10 @@ public class InGameManager : MonoBehaviour
                 {
                     Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
                     countText.text = result[i].count.ToString();
+                    if(result[i].count == maxCount)
+                    {
+                        votingContent.GetChild(j + 1).GetComponent<Button>().image.color = Color.red;
+                    }
 
                     break;
                 }

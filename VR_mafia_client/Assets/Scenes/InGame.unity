@@ -1511,6 +1511,7 @@ MonoBehaviour:
   playerObj: {fileID: 3325488367929111906, guid: 23c8f804cccdb3e48b65ac14d9c7711f,
     type: 3}
   phaseChange: 0
+  isVoting: 0
   suffrage: 0
   roleText: {fileID: 1757450516}
   informationText: {fileID: 2082507985}
