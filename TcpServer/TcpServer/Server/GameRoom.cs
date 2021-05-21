@@ -77,6 +77,7 @@ namespace MyPacket
         }
         private void InitVotingPhase()
         {
+            maxVoters = 0;
             foreach (var u in users.Values)
             {
                 if (u.Alive)
@@ -205,9 +206,10 @@ namespace MyPacket
             EnrollHanders();
             currentTime = DAY_TIME;
             timer.Start();
-            while (Status != GameStatus.END)
+            while (Status != GameStatus.END || Participants > 0)
             {
-                Thread.Sleep(1);
+                if (eventQueue.Count == 0)
+                    Thread.Sleep(1);
                 EventHandling();
                 TimeFlow();
                 if (currentTime < 0)
