@@ -163,6 +163,11 @@ public class InGameManager : MonoBehaviour
     #region Phase
     public void StartDay()
     {
+        if (votingPanel)
+        {
+            OffVotingPanel();
+        }
+
         StartInformation("낮이 되었습니다.");
     }
     public void StartNight()
@@ -308,8 +313,6 @@ public class InGameManager : MonoBehaviour
             time--;
             yield return new WaitForSeconds(1f);
         }
-
-        OffVotingPanel();
     }
     private void OffVotingPanel()
     {
@@ -322,6 +325,8 @@ public class InGameManager : MonoBehaviour
 
     public void DisplayVotingResult((int pid, int count)[] result)
     {
+        StopCoroutine("UpdateVotingTime");
+
         int maxCount = 0;
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < players.Count; i++)
@@ -401,6 +406,11 @@ public class InGameManager : MonoBehaviour
     }
     public void StartDefense(int id, int defenseTime)
     {
+        if (votingPanel)
+        {
+            OffVotingPanel();
+        }
+
         OnFinalVotingPanel(id);
         StartCoroutine(UpdateFinalVotingTime(defenseTime, false));
     }
