@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (InGameManager.instance.phaseChange) return;
+        if (InGameManager.instance.phaseChange || InGameManager.instance.isVoting) return;
 
         Move();
         Rotate();

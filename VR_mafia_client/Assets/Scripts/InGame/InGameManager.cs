@@ -25,6 +25,7 @@ public class InGameManager : MonoBehaviour
 
     private bool isMafia;
     public bool phaseChange;
+    public bool isVoting;
     public bool suffrage;
 
     [Header("UI")]
@@ -75,8 +76,7 @@ public class InGameManager : MonoBehaviour
         InitVotingPanel();
         InitFinalVotingPanel();
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        HideCursor();
     }
 
     void Update()
@@ -87,6 +87,7 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
+    
     public void UpdatePlayerTransform(MoveEventData data)
     {
             if (data.Player_id == ClientManager.instance.playerID) return;
@@ -97,6 +98,17 @@ public class InGameManager : MonoBehaviour
             Transform TR = players[data.Player_id].transform;
             TR.position = new Vector3(pos.x, pos.y, pos.z);
             TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+    }
+
+    private void ShowCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+    private void HideCursor()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void SpawnPlayers()
@@ -151,6 +163,11 @@ public class InGameManager : MonoBehaviour
     #region Phase
     public void StartDay()
     {
+        if (votingPanel)
+        {
+            OffVotingPanel();
+        }
+
         StartInformation("낮이 되었습니다.");
     }
     public void StartNight()
@@ -226,13 +243,11 @@ public class InGameManager : MonoBehaviour
         if (state)
         {
             menuPanel.SetActive(true);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            ShowCursor();
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            HideCursor();
             menuPanel.SetActive(false);
         }
     }
@@ -276,14 +291,14 @@ public class InGameManager : MonoBehaviour
         {
             string s = playerObjects.transform.GetChild(pNum - 1).name;
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
-
-            suffrage = false; // TODO: OnVoteRes() 에서 처리하도록 변경
         }
     }
 
     public void OnVotingPanel(int time)
     {
         suffrage = true;
+        isVoting = true;
+        ShowCursor();
 
         votingPanel.SetActive(true);
 
@@ -298,34 +313,44 @@ public class InGameManager : MonoBehaviour
             time--;
             yield return new WaitForSeconds(1f);
         }
-
-        OffVotingPanel();
     }
     private void OffVotingPanel()
     {
         suffrage = false;
+        isVoting = false;
+        HideCursor();
 
         votingPanel.SetActive(false);
     }
 
     public void DisplayVotingResult((int pid, int count)[] result)
     {
+        StopCoroutine("UpdateVotingTime");
+
+        int maxCount = 0;
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < players.Count; i++)
         {
+            if (maxCount < result[i].count)
+            {
+                maxCount = result[i].count;
+            }
             votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
         }
 
         for (int i = 0; i < result.Length; i++)
         {
             int id = result[i].pid;
-
             for (int j = 0; j < result.Length; j++)
             {
                 if (id == playerOrder[j])
                 {
                     Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
                     countText.text = result[i].count.ToString();
+                    if(result[i].count == maxCount)
+                    {
+                        votingContent.GetChild(j + 1).GetComponent<Button>().image.color = Color.red;
+                    }
 
                     break;
                 }
@@ -359,17 +384,34 @@ public class InGameManager : MonoBehaviour
         if (suffrage)
         {
             ClientManager.instance.EmitFinalVoteReq(isPros);
-
-            suffrage = false; // TODO: OnFinalVoteRes() 에서 처리하도록 변경
         }
     }
 
-    public void OnFinalVotingPanel()
+    public void OnFinalVotingPanel(int id)
     {
+        isVoting = true;
+        ShowCursor();
+
+        for(int i = 0; i < players.Count; i++)
+        {
+            if(playerOrder[i] == id)
+            {
+                Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
+                imageTR.GetComponent<Image>().color = Global.colors[i];
+                imageTR.GetComponentInChildren<Text>().text = "P" + id;
+            }
+        }
+
         finalVotingPanel.SetActive(true);
     }
-    public void StartDefense(int defenseTime)
+    public void StartDefense(int id, int defenseTime)
     {
+        if (votingPanel)
+        {
+            OffVotingPanel();
+        }
+
+        OnFinalVotingPanel(id);
         StartCoroutine(UpdateFinalVotingTime(defenseTime, false));
     }
     public void StartFinalVoting(int time)
@@ -403,12 +445,15 @@ public class InGameManager : MonoBehaviour
     }
     private void OffFinalVotingPanel()
     {
+        isVoting = false;
+        HideCursor();
+
         finalVotingPanel.SetActive(false);
     }
 
-    public void DisplayFinalVotingResult(int id)
+    public void DisplayFinalVotingResult(int id, int count)
     {
-        Debug.Log(id + "Kicked...");
+        Debug.Log(id + "가 " + count + "명의 동의로 추방되었습니다.");
     }
     #endregion
 }
