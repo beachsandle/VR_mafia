@@ -379,20 +379,29 @@ public class InGameManager : MonoBehaviour
         if (suffrage)
         {
             ClientManager.instance.EmitFinalVoteReq(isPros);
-
-            suffrage = false; // TODO: OnFinalVoteRes() 에서 처리하도록 변경
         }
     }
 
-    public void OnFinalVotingPanel()
+    public void OnFinalVotingPanel(int id)
     {
         isVoting = true;
         ShowCursor();
 
+        for(int i = 0; i < players.Count; i++)
+        {
+            if(playerOrder[i] == id)
+            {
+                Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
+                imageTR.GetComponent<Image>().color = Global.colors[i];
+                imageTR.GetComponentInChildren<Text>().text = "P" + id;
+            }
+        }
+
         finalVotingPanel.SetActive(true);
     }
-    public void StartDefense(int defenseTime)
+    public void StartDefense(int id, int defenseTime)
     {
+        OnFinalVotingPanel(id);
         StartCoroutine(UpdateFinalVotingTime(defenseTime, false));
     }
     public void StartFinalVoting(int time)
@@ -432,9 +441,9 @@ public class InGameManager : MonoBehaviour
         finalVotingPanel.SetActive(false);
     }
 
-    public void DisplayFinalVotingResult(int id)
+    public void DisplayFinalVotingResult(int id, int count)
     {
-        Debug.Log(id + "Kicked...");
+        Debug.Log(id + "가 " + count + "명의 동의로 추방되었습니다.");
     }
     #endregion
 }
