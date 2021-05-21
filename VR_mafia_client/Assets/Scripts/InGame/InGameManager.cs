@@ -25,6 +25,7 @@ public class InGameManager : MonoBehaviour
 
     private bool isMafia;
     public bool phaseChange;
+    public bool isVoting;
     public bool suffrage;
 
     [Header("UI")]
@@ -75,8 +76,7 @@ public class InGameManager : MonoBehaviour
         InitVotingPanel();
         InitFinalVotingPanel();
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        HideCursor();
     }
 
     void Update()
@@ -97,6 +97,17 @@ public class InGameManager : MonoBehaviour
             Transform TR = players[data.Player_id].transform;
             TR.position = new Vector3(pos.x, pos.y, pos.z);
             TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+    }
+
+    private void ShowCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+    private void HideCursor()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void SpawnPlayers()
@@ -226,13 +237,11 @@ public class InGameManager : MonoBehaviour
         if (state)
         {
             menuPanel.SetActive(true);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            ShowCursor();
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            HideCursor();
             menuPanel.SetActive(false);
         }
     }
@@ -284,6 +293,8 @@ public class InGameManager : MonoBehaviour
     public void OnVotingPanel(int time)
     {
         suffrage = true;
+        isVoting = true;
+        ShowCursor();
 
         votingPanel.SetActive(true);
 
@@ -304,6 +315,8 @@ public class InGameManager : MonoBehaviour
     private void OffVotingPanel()
     {
         suffrage = false;
+        isVoting = false;
+        HideCursor();
 
         votingPanel.SetActive(false);
     }
@@ -366,6 +379,9 @@ public class InGameManager : MonoBehaviour
 
     public void OnFinalVotingPanel()
     {
+        isVoting = true;
+        ShowCursor();
+
         finalVotingPanel.SetActive(true);
     }
     public void StartDefense(int defenseTime)
@@ -403,6 +419,9 @@ public class InGameManager : MonoBehaviour
     }
     private void OffFinalVotingPanel()
     {
+        isVoting = false;
+        HideCursor();
+
         finalVotingPanel.SetActive(false);
     }
 
