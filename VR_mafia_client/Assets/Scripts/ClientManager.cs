@@ -305,7 +305,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitFinalVoteReq(bool agree)
     {
-        socket.Emit(PacketType.VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
+        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
     }
     private void OnFinalVoteRes(Packet packet)
     {
