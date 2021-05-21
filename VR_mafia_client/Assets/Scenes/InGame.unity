@@ -2433,6 +2433,7 @@ GameObject:
   - component: {fileID: 851271953}
   - component: {fileID: 851271955}
   - component: {fileID: 851271954}
+  - component: {fileID: 851271956}
   m_Layer: 5
   m_Name: Voting Panel
   m_TagString: Untagged
@@ -2497,6 +2498,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 851271952}
   m_CullTransparentMesh: 0
+--- !u!114 &851271956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851271952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a2e6bd1a7f8d054a8d5a159f51d1372, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &859694395
 GameObject:
   m_ObjectHideFlags: 0
