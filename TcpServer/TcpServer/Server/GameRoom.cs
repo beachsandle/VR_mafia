@@ -30,9 +30,10 @@ namespace MyPacket
         private const float DAY_TIME = 5;
         private const float NIGHT_TIME = 5;
         private const float VOTE_TIME = 10;
-        private const float VOTE_RESULT_TIME = 3;
+        private const float VOTE_END_TIME = 3;
         private const float DEFENSE_TIME = 5;
         private const float FINAL_VOTE_TIME = 10;
+        private const float FINAL_VOTE_END_TIME = 3;
         #endregion
 
         #region property
@@ -137,8 +138,8 @@ namespace MyPacket
         private void EndVoting()
         {
             if (Status != GameStatus.VOTE) return;
-            currentTime = VOTE_RESULT_TIME;
-            Status = GameStatus.VOTE_RESULT;
+            currentTime = VOTE_END_TIME;
+            Status = GameStatus.VOTE_END;
             var result = from u in users.Values
                          orderby u.VoteCount descending
                          select (u.Id, u.VoteCount);
@@ -155,7 +156,7 @@ namespace MyPacket
         }
         private void HandlingVoteResult()
         {
-            if (Status != GameStatus.VOTE_RESULT) return;
+            if (Status != GameStatus.VOTE_END) return;
             if (electedId == -1)
                 StartDay();
             else
@@ -163,7 +164,7 @@ namespace MyPacket
         }
         private void StartDefense()
         {
-            if (Status != GameStatus.VOTE_RESULT) return;
+            if (Status != GameStatus.VOTE_END) return;
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
             Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
@@ -191,11 +192,10 @@ namespace MyPacket
             Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
 
             lock (Console.Out) Console.WriteLine($"final voting result : {electedId} {sendData.voteCount}");
-            StartDay();
         }
         private void StartDay()
         {
-            if (Status != GameStatus.FINAL_VOTE && Status != GameStatus.VOTE_RESULT) return;
+            if (Status != GameStatus.FINAL_VOTE_END && Status != GameStatus.VOTE_END) return;
             currentTime = DAY_TIME;
             Status = GameStatus.DAY;
             Broadcast(PacketType.DAY_START);
@@ -211,9 +211,10 @@ namespace MyPacket
                 case GameStatus.DAY: StartNight(); break;
                 case GameStatus.NIGHT: StartVoting(); break;
                 case GameStatus.VOTE: EndVoting(); break;
-                case GameStatus.VOTE_RESULT: HandlingVoteResult(); break;
+                case GameStatus.VOTE_END: HandlingVoteResult(); break;
                 case GameStatus.DEFENSE: StartFinalVotinig(); break;
                 case GameStatus.FINAL_VOTE: EndFinalVoting(); break;
+                case GameStatus.FINAL_VOTE_END: StartDay(); break;
                 default: break;
             }
             prevTime = 0;
