@@ -9,7 +9,7 @@ public class RoomList : MonoBehaviour
     private GameObject roomObject;
 
     private GameObject content;
-    
+
     public int select;
 
     void Start()
@@ -25,9 +25,8 @@ public class RoomList : MonoBehaviour
     }
     public void CreateRoom(string rName = "rName", string hName = "hName", int hCount = 0, int rId = -1)
     {
-        GameObject room = Instantiate(roomObject);
+        GameObject room = Instantiate(roomObject, content.transform);
         room.name = string.Format("room({0})", rId);
-        room.transform.SetParent(content.transform);
 
         room.GetComponent<Room>().SetRoomInfo(rName, hName, hCount, rId);
     }
