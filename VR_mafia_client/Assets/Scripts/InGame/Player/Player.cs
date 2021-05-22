@@ -22,6 +22,19 @@ public class Player : MonoBehaviour
     public float gravity = 20.0F;
     public float range = 5.0F;
 
+    public bool ControllerEnabled
+    {
+        get
+        {
+            return CC.enabled;
+        }
+        set
+        {
+            CC.enabled = value;
+            moveDirection = Vector3.zero;
+        }
+    }
+
     void Start()
     {
         CC = GetComponent<CharacterController>();

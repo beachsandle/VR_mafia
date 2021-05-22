@@ -20,7 +20,7 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    private Global.GameStatus gameStatus;
+    //private Global.GameStatus gameStatus;
 
     [SerializeField]
     private GameObject playerObj;
@@ -79,6 +79,8 @@ public class InGameManager : MonoBehaviour
         InitFinalVotingPanel();
 
         HideCursor();
+
+        FadeInOut.instance.FadeIn();
     }
 
     void Update()
@@ -153,9 +155,9 @@ public class InGameManager : MonoBehaviour
             if (playerOrder[i] == ClientManager.instance.playerID)
             {
                 GameObject myObject = players[playerOrder[i]];
-                myObject.GetComponent<Player>().CC.enabled = false;
+                myObject.GetComponent<Player>().ControllerEnabled = false;
                 myObject.transform.position = spawnPos.GetChild(i).position;
-                myObject.GetComponent<Player>().CC.enabled = true;
+                myObject.GetComponent<Player>().ControllerEnabled = true;
 
                 ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
             }
@@ -170,7 +172,7 @@ public class InGameManager : MonoBehaviour
             OffVotingPanel();
         }
 
-        FadeInOut.instance.FadeIn();
+        FadeInOut.instance.FadeAll();
 
         StartInformation("낮이 되었습니다.");
     }
@@ -178,10 +180,13 @@ public class InGameManager : MonoBehaviour
     {
         phaseChange = true;
 
+        //FadeInOut.instance.FadeIn();
+        
         StartInformation("밤이 되었습니다.");
-        GatherPlayers();
+        FadeInOut.instance.FadeAll(() => { GatherPlayers(); }, () => { phaseChange = false; });
+        //GatherPlayers();
 
-        phaseChange = false;
+        //phaseChange = false;
     }
     #endregion
 
@@ -439,7 +444,14 @@ public class InGameManager : MonoBehaviour
     {
         OffFinalVotingPanel();
 
-        StartInformation("!!!");
+        if(id != -1)
+        {
+            StartInformation($"{ClientManager.instance.users.Find((UserInfo info)=>info.Id==id).Name}님이 {count}명의 동의로 추방되었습니다.");
+        }
+        else
+        {
+            StartInformation($"찬성 {count}표로 부결되었습니다.");
+        }
     }
     #endregion
 }
