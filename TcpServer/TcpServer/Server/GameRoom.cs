@@ -37,7 +37,7 @@ namespace MyPacket
 
         #region property
         public static int Maximum { get; private set; } = 10;
-        public int Id { get; private set; }
+        public int RoomId { get; private set; }
         public int HostId { get; private set; }
         public int Participants
         {
@@ -55,7 +55,7 @@ namespace MyPacket
         public GameRoom(GameServer server, User host = null, string name = "")
         {
             this.server = server;
-            Id = roomId++;
+            RoomId = roomId++;
             if (host != null)
             {
                 HostId = host.Id;
@@ -121,7 +121,7 @@ namespace MyPacket
             Status = GameStatus.NIGHT;
             Broadcast(PacketType.NIGHT_START);
 
-            lock (Console.Out) Console.WriteLine($"night start : {Id}");
+            lock (Console.Out) Console.WriteLine($"night start : {RoomId}");
         }
         private void StartVoting()
         {
@@ -132,7 +132,7 @@ namespace MyPacket
             InitVotingPhase();
             Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"voting start : {Id}");
+            lock (Console.Out) Console.WriteLine($"voting start : {RoomId}");
         }
         private void EndVoting()
         {
@@ -167,7 +167,7 @@ namespace MyPacket
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
             Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
-            lock (Console.Out) Console.WriteLine($"defense start : {Id}");
+            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}");
         }
         private void StartFinalVotinig()
         {
@@ -176,7 +176,7 @@ namespace MyPacket
             Status = GameStatus.FINAL_VOTE;
             InitVotingPhase();
             Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
-            lock (Console.Out) Console.WriteLine($"final voting start : {Id}");
+            lock (Console.Out) Console.WriteLine($"final voting start : {RoomId}");
         }
         private void EndFinalVoting()
         {
@@ -200,7 +200,7 @@ namespace MyPacket
             Status = GameStatus.DAY;
             Broadcast(PacketType.DAY_START);
 
-            lock (Console.Out) Console.WriteLine($"day start : {Id}");
+            lock (Console.Out) Console.WriteLine($"day start : {RoomId}");
 
         }
         //시간이 만료되면 발생하는 이벤트
@@ -279,8 +279,8 @@ namespace MyPacket
                     RemoveUser(u.Id);
                 }
 
-                lock (Console.Out) Console.WriteLine($"room destroy : {Id}");
-                server.RemoveRoom(Id);
+                lock (Console.Out) Console.WriteLine($"room destroy : {RoomId}");
+                server.RemoveRoom(RoomId);
             }
             //그 외엔 남은 유저들에게 퇴장사실 전달
             else
@@ -290,7 +290,7 @@ namespace MyPacket
         //게임방의 정보를 반환
         public GameRoomInfo GetInfo()
         {
-            return new GameRoomInfo(Id, HostId, Participants, Name);
+            return new GameRoomInfo(RoomId, HostId, Participants, Name);
         }
 
         //유저들의 정보를 반환
@@ -372,7 +372,7 @@ namespace MyPacket
             {
                 if (users.ContainsKey(data.Target_id) &&
                     users[data.Target_id].Alive &&
-                    users[Id].Alive &&
+                    users[id].Alive &&
                     !users[id].Voted)
                 {
                     users[id].Vote();
@@ -398,7 +398,8 @@ namespace MyPacket
             lock (Console.Out) Console.WriteLine($"final vote : {id} -> {data.Agree}");
             if (Status == GameStatus.FINAL_VOTE)
             {
-                if (!users[id].Voted)
+                if (users[id].Alive &&
+                    !users[id].Voted)
                 {
                     users[id].Vote();
                     --voters;

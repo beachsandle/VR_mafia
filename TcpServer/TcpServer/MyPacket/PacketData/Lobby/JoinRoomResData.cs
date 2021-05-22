@@ -7,7 +7,7 @@ namespace MyPacket
     public class JoinRoomResData : IPacketData
     {
         public bool Result = true;
-        public List<UserInfo> Users = null;
+        public List<UserInfo> Users = new List<UserInfo>();
         public JoinRoomResData(byte[] bytes = null)
         {
             if (bytes != null)
