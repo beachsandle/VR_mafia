@@ -27,7 +27,8 @@ namespace MyPacket
         public void Start()
         {
             server.Start();
-            Console.WriteLine("server start");
+
+            lock (Console.Out) lock (Console.Out) Console.WriteLine("server start");
             while (true)
             {
                 var client = server.AcceptTcpClient();
