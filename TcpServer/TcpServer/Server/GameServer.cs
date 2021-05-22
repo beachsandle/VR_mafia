@@ -38,7 +38,7 @@ namespace MyPacket
         public GameRoom CreateRoom(User user, string roomName)
         {
             var room = new GameRoom(this, user, roomName);
-            roomMap[room.Id] = room;
+            roomMap[room.RoomId] = room;
             return room;
         }
         public GameRoom FindRoomById(int roomId)

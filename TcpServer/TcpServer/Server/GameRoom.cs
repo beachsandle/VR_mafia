@@ -30,14 +30,15 @@ namespace MyPacket
         private const float DAY_TIME = 5;
         private const float NIGHT_TIME = 5;
         private const float VOTE_TIME = 10;
-        private const float VOTE_RESULT_TIME = 3;
+        private const float VOTE_END_TIME = 3;
         private const float DEFENSE_TIME = 5;
         private const float FINAL_VOTE_TIME = 10;
+        private const float FINAL_VOTE_END_TIME = 3;
         #endregion
 
         #region property
         public static int Maximum { get; private set; } = 10;
-        public int Id { get; private set; }
+        public int RoomId { get; private set; }
         public int HostId { get; private set; }
         public int Participants
         {
@@ -55,7 +56,7 @@ namespace MyPacket
         public GameRoom(GameServer server, User host = null, string name = "")
         {
             this.server = server;
-            Id = roomId++;
+            RoomId = roomId++;
             if (host != null)
             {
                 HostId = host.Id;
@@ -121,7 +122,7 @@ namespace MyPacket
             Status = GameStatus.NIGHT;
             Broadcast(PacketType.NIGHT_START);
 
-            lock (Console.Out) Console.WriteLine($"night start : {Id}");
+            lock (Console.Out) Console.WriteLine($"night start : {RoomId}");
         }
         private void StartVoting()
         {
@@ -132,13 +133,13 @@ namespace MyPacket
             InitVotingPhase();
             Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"voting start : {Id}");
+            lock (Console.Out) Console.WriteLine($"voting start : {RoomId}");
         }
         private void EndVoting()
         {
             if (Status != GameStatus.VOTE) return;
-            currentTime = VOTE_RESULT_TIME;
-            Status = GameStatus.VOTE_RESULT;
+            currentTime = VOTE_END_TIME;
+            Status = GameStatus.VOTE_END;
             var result = from u in users.Values
                          orderby u.VoteCount descending
                          select (u.Id, u.VoteCount);
@@ -155,7 +156,7 @@ namespace MyPacket
         }
         private void HandlingVoteResult()
         {
-            if (Status != GameStatus.VOTE_RESULT) return;
+            if (Status != GameStatus.VOTE_END) return;
             if (electedId == -1)
                 StartDay();
             else
@@ -163,11 +164,11 @@ namespace MyPacket
         }
         private void StartDefense()
         {
-            if (Status != GameStatus.VOTE_RESULT) return;
+            if (Status != GameStatus.VOTE_END) return;
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
             Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
-            lock (Console.Out) Console.WriteLine($"defense start : {Id}");
+            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}");
         }
         private void StartFinalVotinig()
         {
@@ -176,7 +177,7 @@ namespace MyPacket
             Status = GameStatus.FINAL_VOTE;
             InitVotingPhase();
             Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
-            lock (Console.Out) Console.WriteLine($"final voting start : {Id}");
+            lock (Console.Out) Console.WriteLine($"final voting start : {RoomId}");
         }
         private void EndFinalVoting()
         {
@@ -191,16 +192,15 @@ namespace MyPacket
             Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
 
             lock (Console.Out) Console.WriteLine($"final voting result : {electedId} {sendData.voteCount}");
-            StartDay();
         }
         private void StartDay()
         {
-            if (Status != GameStatus.FINAL_VOTE && Status != GameStatus.VOTE_RESULT) return;
+            if (Status != GameStatus.FINAL_VOTE_END && Status != GameStatus.VOTE_END) return;
             currentTime = DAY_TIME;
             Status = GameStatus.DAY;
             Broadcast(PacketType.DAY_START);
 
-            lock (Console.Out) Console.WriteLine($"day start : {Id}");
+            lock (Console.Out) Console.WriteLine($"day start : {RoomId}");
 
         }
         //시간이 만료되면 발생하는 이벤트
@@ -211,9 +211,10 @@ namespace MyPacket
                 case GameStatus.DAY: StartNight(); break;
                 case GameStatus.NIGHT: StartVoting(); break;
                 case GameStatus.VOTE: EndVoting(); break;
-                case GameStatus.VOTE_RESULT: HandlingVoteResult(); break;
+                case GameStatus.VOTE_END: HandlingVoteResult(); break;
                 case GameStatus.DEFENSE: StartFinalVotinig(); break;
                 case GameStatus.FINAL_VOTE: EndFinalVoting(); break;
+                case GameStatus.FINAL_VOTE_END: StartDay(); break;
                 default: break;
             }
             prevTime = 0;
@@ -279,8 +280,8 @@ namespace MyPacket
                     RemoveUser(u.Id);
                 }
 
-                lock (Console.Out) Console.WriteLine($"room destroy : {Id}");
-                server.RemoveRoom(Id);
+                lock (Console.Out) Console.WriteLine($"room destroy : {RoomId}");
+                server.RemoveRoom(RoomId);
             }
             //그 외엔 남은 유저들에게 퇴장사실 전달
             else
@@ -290,7 +291,7 @@ namespace MyPacket
         //게임방의 정보를 반환
         public GameRoomInfo GetInfo()
         {
-            return new GameRoomInfo(Id, HostId, Participants, Name);
+            return new GameRoomInfo(RoomId, HostId, Participants, Name);
         }
 
         //유저들의 정보를 반환
@@ -372,7 +373,7 @@ namespace MyPacket
             {
                 if (users.ContainsKey(data.Target_id) &&
                     users[data.Target_id].Alive &&
-                    users[Id].Alive &&
+                    users[id].Alive &&
                     !users[id].Voted)
                 {
                     users[id].Vote();
@@ -398,7 +399,8 @@ namespace MyPacket
             lock (Console.Out) Console.WriteLine($"final vote : {id} -> {data.Agree}");
             if (Status == GameStatus.FINAL_VOTE)
             {
-                if (!users[id].Voted)
+                if (users[id].Alive &&
+                    !users[id].Voted)
                 {
                     users[id].Vote();
                     --voters;
