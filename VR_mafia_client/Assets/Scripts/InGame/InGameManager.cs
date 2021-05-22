@@ -20,6 +20,8 @@ public class InGameManager : MonoBehaviour
         }
     }
 
+    private Global.GameStatus gameStatus;
+
     [SerializeField]
     private GameObject playerObj;
 
@@ -168,6 +170,8 @@ public class InGameManager : MonoBehaviour
             OffVotingPanel();
         }
 
+        FadeInOut.instance.FadeIn();
+
         StartInformation("낮이 되었습니다.");
     }
     public void StartNight()
@@ -177,26 +181,6 @@ public class InGameManager : MonoBehaviour
         StartInformation("밤이 되었습니다.");
         GatherPlayers();
 
-        phaseChange = false;
-    }
-
-    public void StartPhaseChange()
-    {
-        StartCoroutine(PhaseChange());
-    }
-    private IEnumerator PhaseChange()
-    {
-        phaseChange = true;
-
-        float time = 1f;
-        while (0f < time)
-        {
-            time -= Time.deltaTime;
-
-            yield return null;
-        }
-
-        GatherPlayers();
         phaseChange = false;
     }
     #endregion
@@ -453,7 +437,9 @@ public class InGameManager : MonoBehaviour
 
     public void DisplayFinalVotingResult(int id, int count)
     {
-        Debug.Log(id + "가 " + count + "명의 동의로 추방되었습니다.");
+        OffFinalVotingPanel();
+
+        StartInformation("!!!");
     }
     #endregion
 }
