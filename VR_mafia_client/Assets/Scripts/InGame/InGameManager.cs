@@ -51,6 +51,7 @@ public class InGameManager : MonoBehaviour
     public Dictionary<int, GameObject> players; // id, object
     public List<int> playerOrder;
     private GameObject playerObjects; // 임시
+    public Player myInfo;
 
     private void Awake()
     {
@@ -133,7 +134,8 @@ public class InGameManager : MonoBehaviour
 
             if (u.Id == ClientManager.instance.playerID)
             {
-                p.AddComponent<Player>();
+                myInfo = p.GetComponent<Player>();
+                p.AddComponent<PlayerController>();
 
                 roleText.text = isMafia ? "마피아" : "시민";
                 StartInformation(string.Format("당신은 {0}입니다", roleText.text));
@@ -155,9 +157,9 @@ public class InGameManager : MonoBehaviour
             if (playerOrder[i] == ClientManager.instance.playerID)
             {
                 GameObject myObject = players[playerOrder[i]];
-                myObject.GetComponent<Player>().ControllerEnabled = false;
+                myObject.GetComponent<PlayerController>().ControllerEnabled = false;
                 myObject.transform.position = spawnPos.GetChild(i).position;
-                myObject.GetComponent<Player>().ControllerEnabled = true;
+                myObject.GetComponent<PlayerController>().ControllerEnabled = true;
 
                 ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
             }
@@ -172,9 +174,8 @@ public class InGameManager : MonoBehaviour
             OffVotingPanel();
         }
 
-        FadeInOut.instance.FadeAll();
-
         StartInformation("낮이 되었습니다.");
+        FadeInOut.instance.FadeAll();
     }
     public void StartNight()
     {
@@ -446,7 +447,10 @@ public class InGameManager : MonoBehaviour
 
         if(id != -1)
         {
-            StartInformation($"{ClientManager.instance.users.Find((UserInfo info)=>info.Id==id).Name}님이 {count}명의 동의로 추방되었습니다.");
+            Player p = players[id].GetComponent<Player>();
+
+            StartInformation($"{p.Name}님이 {count}명의 동의로 추방되었습니다.");
+            p.Dead();
         }
         else
         {
