@@ -277,7 +277,7 @@ public class InGameManager : MonoBehaviour
     }
     private void OnVoteButton(int pNum)
     {
-        if (suffrage)
+        if (suffrage && myInfo.IsAlive)
         {
             string s = playerObjects.transform.GetChild(pNum - 1).name;
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
@@ -371,7 +371,7 @@ public class InGameManager : MonoBehaviour
     }
     private void OnProsConsButton(bool isPros)
     {
-        if (suffrage)
+        if (suffrage && myInfo.IsAlive)
         {
             ClientManager.instance.EmitFinalVoteReq(isPros);
         }
