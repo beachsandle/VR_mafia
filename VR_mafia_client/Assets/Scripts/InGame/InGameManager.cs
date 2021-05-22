@@ -20,7 +20,7 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    private Global.GameStatus gameStatus;
+    //private Global.GameStatus gameStatus;
 
     [SerializeField]
     private GameObject playerObj;
@@ -51,6 +51,7 @@ public class InGameManager : MonoBehaviour
     public Dictionary<int, GameObject> players; // id, object
     public List<int> playerOrder;
     private GameObject playerObjects; // 임시
+    public Player myInfo;
 
     private void Awake()
     {
@@ -79,6 +80,8 @@ public class InGameManager : MonoBehaviour
         InitFinalVotingPanel();
 
         HideCursor();
+
+        FadeInOut.instance.FadeIn();
     }
 
     void Update()
@@ -131,7 +134,8 @@ public class InGameManager : MonoBehaviour
 
             if (u.Id == ClientManager.instance.playerID)
             {
-                p.AddComponent<Player>();
+                myInfo = p.GetComponent<Player>();
+                p.AddComponent<PlayerController>();
 
                 roleText.text = isMafia ? "마피아" : "시민";
                 StartInformation(string.Format("당신은 {0}입니다", roleText.text));
@@ -153,9 +157,9 @@ public class InGameManager : MonoBehaviour
             if (playerOrder[i] == ClientManager.instance.playerID)
             {
                 GameObject myObject = players[playerOrder[i]];
-                myObject.GetComponent<Player>().CC.enabled = false;
+                myObject.GetComponent<PlayerController>().ControllerEnabled = false;
                 myObject.transform.position = spawnPos.GetChild(i).position;
-                myObject.GetComponent<Player>().CC.enabled = true;
+                myObject.GetComponent<PlayerController>().ControllerEnabled = true;
 
                 ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
             }
@@ -170,18 +174,20 @@ public class InGameManager : MonoBehaviour
             OffVotingPanel();
         }
 
-        FadeInOut.instance.FadeIn();
-
         StartInformation("낮이 되었습니다.");
+        FadeInOut.instance.FadeAll();
     }
     public void StartNight()
     {
         phaseChange = true;
 
+        //FadeInOut.instance.FadeIn();
+        
         StartInformation("밤이 되었습니다.");
-        GatherPlayers();
+        FadeInOut.instance.FadeAll(() => { GatherPlayers(); }, () => { phaseChange = false; });
+        //GatherPlayers();
 
-        phaseChange = false;
+        //phaseChange = false;
     }
     #endregion
 
@@ -271,7 +277,7 @@ public class InGameManager : MonoBehaviour
     }
     private void OnVoteButton(int pNum)
     {
-        if (suffrage)
+        if (suffrage && myInfo.IsAlive)
         {
             string s = playerObjects.transform.GetChild(pNum - 1).name;
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
@@ -365,7 +371,7 @@ public class InGameManager : MonoBehaviour
     }
     private void OnProsConsButton(bool isPros)
     {
-        if (suffrage)
+        if (suffrage && myInfo.IsAlive)
         {
             ClientManager.instance.EmitFinalVoteReq(isPros);
         }
@@ -439,7 +445,17 @@ public class InGameManager : MonoBehaviour
     {
         OffFinalVotingPanel();
 
-        StartInformation("!!!");
+        if(id != -1)
+        {
+            Player p = players[id].GetComponent<Player>();
+
+            StartInformation($"{p.Name}님이 {count}명의 동의로 추방되었습니다.");
+            p.Dead();
+        }
+        else
+        {
+            StartInformation($"찬성 {count}표로 부결되었습니다.");
+        }
     }
     #endregion
 }

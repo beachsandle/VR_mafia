@@ -24,7 +24,7 @@ public class FadeInOut : MonoBehaviour
     private Color orginColor;
     private Color srcColor;
     private Color destColor;
-    private float fadeTime = 1f;
+    private float fadeTime = 0.75f;
 
     private void Awake()
     {
@@ -43,31 +43,40 @@ public class FadeInOut : MonoBehaviour
         image = GetComponent<Image>();
 
         orginColor = image.color;
+        orginColor.a = 1f;
         image.color = Color.clear;
 
         gameObject.SetActive(false);
     }
 
-    public void FadeIn()
+    public void FadeIn(System.Action callback = null)
     {
         gameObject.SetActive(true);
 
         srcColor = orginColor;
         destColor = Color.clear;
 
-        StartCoroutine(Fade());
+        StartCoroutine(Fade(callback));
     }
-    public void FadeOut()
+    public void FadeOut(System.Action callback = null)
     {
         gameObject.SetActive(true);
 
         srcColor = Color.clear;
         destColor = orginColor;
 
-        StartCoroutine(Fade());
+        StartCoroutine(Fade(callback));
+    }
+    public void FadeAll(System.Action outCallback = null, System.Action inCallback = null)
+    {
+        FadeOut(() =>
+        {
+            outCallback?.Invoke();
+            FadeIn(inCallback);
+        });
     }
 
-    IEnumerator Fade()
+    IEnumerator Fade(System.Action callback)
     {
         float time = 0;
         while (time < 1)
@@ -79,5 +88,7 @@ public class FadeInOut : MonoBehaviour
         }
 
         gameObject.SetActive(false);
+
+        callback?.Invoke();
     }
 }
