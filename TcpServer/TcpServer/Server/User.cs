@@ -114,7 +114,6 @@ namespace MyPacket
             {
                 Status = GameStatus.LOBBY;
                 Emit(PacketType.CONNECT, new ConnectData(Id).ToBytes());
-                Emit(PacketType.SET_NAME_RES, new SetNameResData(true, Name).ToBytes());
             }
             lock (Console.Out) Console.WriteLine($"connect : {Id}");
         }
@@ -126,11 +125,7 @@ namespace MyPacket
                 case GameStatus.WAITTING:
                     Room.Leave(this);
                     break;
-                case GameStatus.DAY:
-                case GameStatus.NIGHT:
-                case GameStatus.VOTE:
-                case GameStatus.DEFENSE:
-                case GameStatus.FINAL_VOTE:
+                case GameStatus.INGAME:
                     Room.RemoveUser(Id);
                     break;
             }
