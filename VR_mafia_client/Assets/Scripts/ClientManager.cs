@@ -31,6 +31,7 @@ public class ClientManager : MonoBehaviour
     {
         instance = this;
 
+        userName = "";
         DontDestroyOnLoad(gameObject);
     }
     private void Start()
@@ -65,8 +66,6 @@ public class ClientManager : MonoBehaviour
             socket.Listen(false);
             socket.Emit(PacketType.CONNECT);
             socketReady = true;
-
-            SceneManager.LoadScene("Lobby");
         }
         catch (Exception e)
         {
@@ -83,8 +82,12 @@ public class ClientManager : MonoBehaviour
     {
         var data = new ConnectData();
         data.FromBytes(packet.Bytes);
+
         Debug.Log("OnConnect : " + data.PlayerId);
+
         playerID = data.PlayerId;
+        userName = "Player" + playerID;
+
         socket.Clear(PacketType.CONNECT);
 
         socket.On(PacketType.SET_NAME_RES, OnSetNameRes);
@@ -109,7 +112,7 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.FINAL_VOTE_RES, OnFinalVoteRes);
         socket.On(PacketType.FINAL_VOTING_RESULT, OnFinalVotingResult);
 
-        socket.Emit(PacketType.ROOM_LIST_REQ);
+        SceneManager.LoadScene("Lobby");
     }
     private void OnDisconnect(Packet packet)
     {
@@ -136,7 +139,7 @@ public class ClientManager : MonoBehaviour
 
         userName = data.UserName;
     }
-    public void EmitSetName(string userName)
+    public void EmitSetNameReq(string userName)
     {
         if (!socketReady) return;
 
@@ -146,6 +149,7 @@ public class ClientManager : MonoBehaviour
     private void OnCreateRoomRes(Packet packet)
     {
         users.Add(new UserInfo(playerID, userName));
+
         SceneManager.LoadScene("WaitingRoom");
     }
     public void EmitCreateRoomReq(string roomName)
