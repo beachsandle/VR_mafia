@@ -22,6 +22,7 @@ public class ClientManager : MonoBehaviour
 
     public int playerID;
     public string userName;
+    public string roomName;
 
     public List<UserInfo> users;
     public bool isMafia;
@@ -148,14 +149,18 @@ public class ClientManager : MonoBehaviour
 
     private void OnCreateRoomRes(Packet packet)
     {
-        users.Add(new UserInfo(playerID, userName));
-
-        SceneManager.LoadScene("WaitingRoom");
+        var data = new CreateRoomResData(packet.Bytes);
+        if (data.Result)
+        {
+            users.Add(new UserInfo(playerID, userName));
+            SceneManager.LoadScene("WaitingRoom");
+        }
     }
     public void EmitCreateRoomReq(string roomName)
     {
         if (!socketReady) return;
 
+        this.roomName = roomName;
         socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
     }
 
@@ -183,6 +188,7 @@ public class ClientManager : MonoBehaviour
         for (int i = 0; i < roomCount; i++)
         {
             var r = data.Rooms[i];
+            Debug.Log(r.Name);
             LobbyManager.instance.UpdateRooms(r.Name, r.HostId.ToString(), r.Participants, r.Id);
         }
     }
