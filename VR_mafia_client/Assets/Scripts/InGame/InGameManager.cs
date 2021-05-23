@@ -92,21 +92,22 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
-    
+
     public void UpdatePlayerTransform(MoveEventData data)
     {
-            if (data.Player_id == ClientManager.instance.playerID) return;
+        if (data.Player_id == ClientManager.instance.playerID) return;
 
-            V3 pos = data.Location.position;
-            V3 rot = data.Location.rotation;
+        V3 pos = data.Location.position;
+        V3 rot = data.Location.rotation;
 
-            Transform TR = players[data.Player_id].transform;
-            TR.position = new Vector3(pos.x, pos.y, pos.z);
-            TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+        Transform TR = players[data.Player_id].transform;
+        TR.position = new Vector3(pos.x, pos.y, pos.z);
+        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
 
     private void ShowCursor()
     {
+        Debug.Log("true");
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -132,10 +133,10 @@ public class InGameManager : MonoBehaviour
             p.transform.position = spawnPos.GetChild(idx).position;
             p.transform.parent = playerObjects.transform;
 
+            p.GetComponent<Player>().InitPlayerInfo(idx, u);
             if (u.Id == ClientManager.instance.playerID)
             {
                 myInfo = p.GetComponent<Player>();
-                myInfo.InitPlayerInfo(idx, u);
                 p.AddComponent<PlayerController>();
 
                 roleText.text = isMafia ? "마피아" : "시민";
@@ -184,7 +185,7 @@ public class InGameManager : MonoBehaviour
         phaseChange = true;
 
         //FadeInOut.instance.FadeIn();
-        
+
         StartInformation("밤이 되었습니다.");
         FadeInOut.instance.FadeAll(() => { GatherPlayers(); }, () => { phaseChange = false; });
         //GatherPlayers();
@@ -232,16 +233,15 @@ public class InGameManager : MonoBehaviour
     }
     private void SetActiveMenuPanel(bool state)
     {
-        if (state)
+        if (!isVoting)
         {
-            menuPanel.SetActive(true);
-            ShowCursor();
+            if (state)
+                ShowCursor();
+            else
+                HideCursor();
         }
-        else
-        {
-            HideCursor();
-            menuPanel.SetActive(false);
-        }
+
+        menuPanel.SetActive(state);
     }
     private void OnBackButton()
     {
@@ -285,11 +285,11 @@ public class InGameManager : MonoBehaviour
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
         }
     }
-    
+
     private void UpdateVotingContent()
     {
         var votingContent = votingPanel.transform.GetChild(0);
-        for(int i = 0; i < players.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
             if (!players[playerOrder[i]].GetComponent<Player>().IsAlive)
             {
@@ -329,18 +329,13 @@ public class InGameManager : MonoBehaviour
         votingPanel.SetActive(false);
     }
 
-    public void DisplayVotingResult((int pid, int count)[] result)
+    public void DisplayVotingResult(int electedId, (int pid, int count)[] result)
     {
         StopCoroutine("UpdateVotingTime");
 
-        int maxCount = 0;
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < players.Count; i++)
         {
-            if (maxCount < result[i].count)
-            {
-                maxCount = result[i].count;
-            }
             votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
         }
 
@@ -353,7 +348,7 @@ public class InGameManager : MonoBehaviour
                 {
                     Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
                     countText.text = result[i].count.ToString();
-                    if(result[i].count == maxCount)
+                    if (id == electedId)
                     {
                         votingContent.GetChild(j + 1).GetComponent<Button>().image.color = Color.red;
                     }
@@ -361,6 +356,15 @@ public class InGameManager : MonoBehaviour
                     break;
                 }
             }
+        }
+
+        if (electedId == -1)
+        {
+            StartInformation("투표가 부결되었습니다.");
+        }
+        else
+        {
+            StartInformation($"{players[electedId].GetComponent<Player>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
         }
     }
     #endregion
@@ -395,16 +399,19 @@ public class InGameManager : MonoBehaviour
 
     public void OnFinalVotingPanel(int id)
     {
+        Debug.Log(id);
         isVoting = true;
         ShowCursor();
 
-        for(int i = 0; i < players.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
-            if(playerOrder[i] == id)
+            if (playerOrder[i] == id)
             {
                 Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
                 imageTR.GetComponent<Image>().color = Global.colors[i];
                 imageTR.GetComponentInChildren<Text>().text = "P" + id;
+
+                break;
             }
         }
 
@@ -461,7 +468,7 @@ public class InGameManager : MonoBehaviour
     {
         OffFinalVotingPanel();
 
-        if(id != -1)
+        if (id != -1)
         {
             Player p = players[id].GetComponent<Player>();
 
