@@ -200,7 +200,8 @@ public class InGameManager : MonoBehaviour
         informationText.gameObject.SetActive(true);
         informationText.text = s;
 
-        StartCoroutine(FadeOutInformationText());
+        StopCoroutine("FadeOutInformationText");
+        StartCoroutine("FadeOutInformationText");
     }
     private IEnumerator FadeOutInformationText()
     {
