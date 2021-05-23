@@ -288,17 +288,13 @@ public class ClientManager : MonoBehaviour
 
     private void OnStartDefense(Packet packet)
     {
-        Debug.Log("OnStartDefense");
-
         var data = new StartDefenseData(packet.Bytes);
-        Debug.Log(data.Elected_id);
+
         InGameManager.instance.StartDefense(data.Elected_id, data.Defense_time);
     }
 
     private void OnStartFinalVoting(Packet packet)
     {
-        Debug.Log("OnStartFinalVoting");
-
         var data = new StartFinalVotingData(packet.Bytes);
 
         InGameManager.instance.StartFinalVoting(data.Voting_time);

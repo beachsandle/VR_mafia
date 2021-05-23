@@ -107,7 +107,6 @@ public class InGameManager : MonoBehaviour
 
     private void ShowCursor()
     {
-        Debug.Log("true");
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -401,7 +400,6 @@ public class InGameManager : MonoBehaviour
 
     public void OnFinalVotingPanel(int id)
     {
-        Debug.Log(id);
         isVoting = true;
         ShowCursor();
 
@@ -411,7 +409,7 @@ public class InGameManager : MonoBehaviour
             {
                 Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
                 imageTR.GetComponent<Image>().color = Global.colors[i];
-                imageTR.GetComponentInChildren<Text>().text = "P" + id;
+                imageTR.GetComponentInChildren<Text>().text = players[id].GetComponent<Player>().Name;
 
                 break;
             }
