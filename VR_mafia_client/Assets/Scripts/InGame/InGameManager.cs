@@ -129,12 +129,13 @@ public class InGameManager : MonoBehaviour
             p.name = "Player_" + u.Id;
             p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
             p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
-            p.transform.position = spawnPos.GetChild(idx++).position;
+            p.transform.position = spawnPos.GetChild(idx).position;
             p.transform.parent = playerObjects.transform;
 
             if (u.Id == ClientManager.instance.playerID)
             {
                 myInfo = p.GetComponent<Player>();
+                myInfo.InitPlayerInfo(idx, u);
                 p.AddComponent<PlayerController>();
 
                 roleText.text = isMafia ? "마피아" : "시민";
@@ -145,6 +146,7 @@ public class InGameManager : MonoBehaviour
             }
 
             players.Add(u.Id, p);
+            idx++;
         }
     }
 
