@@ -30,6 +30,8 @@ public class WaitingRoomManager : MonoBehaviour
 
     void Start()
     {
+        SetRoomName(ClientManager.instance.roomName);
+
         startButton.onClick.AddListener(OnStartButton);
         leaveButton.onClick.AddListener(OnLeaveButton);
 

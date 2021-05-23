@@ -44,10 +44,12 @@ public class LobbyManager : MonoBehaviour
         refreshButton.onClick.AddListener(OnRefreshButton);
         changeNameButton.onClick.AddListener(OnChangeNameButton);
 
-        playerName.text = ClientManager.instance.userName;
-
         InitChangeNamePanel();
         InitCreateRoomPanel();
+
+        playerName.text = ClientManager.instance.userName;
+        ClientManager.instance.EmitSetNameReq(playerName.text);
+        ClientManager.instance.EmitRoomListReq();
     }
     public void UpdateRooms(string rn, string hn, int p, int i) // 임시
     {
@@ -111,7 +113,7 @@ public class LobbyManager : MonoBehaviour
     void OnChangeNameOKButton()
     {
         ClientManager.instance.userName = nameInputField.text;
-        ClientManager.instance.EmitSetName(nameInputField.text);
+        ClientManager.instance.EmitSetNameReq(nameInputField.text);
         playerName.text = nameInputField.text;
         changeNamePanel.SetActive(false);
     }
