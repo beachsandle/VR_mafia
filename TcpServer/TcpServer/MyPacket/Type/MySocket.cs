@@ -118,6 +118,8 @@ namespace MyPacket
                 var packet = new Packet(type, bytes);
                 stream.Write(packet.ToBytes(), 0, packet.Size);
             }
+            else
+                handlerMap[PacketType.DISCONNECT](new Packet());
         }
         //readQueue에서 메시지 하나를 읽고 처리
         public void Handle()

@@ -19,6 +19,7 @@ namespace MyPacket
         private int voters = 0;
         private int maxVoters = 0;
         private int electedId = -1;
+        private int live = 0;
         private readonly GameServer server;
         private readonly Dictionary<int, User> users = new Dictionary<int, User>();
         private readonly Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
@@ -88,8 +89,6 @@ namespace MyPacket
                 }
             }
             voters = maxVoters;
-
-            lock (Console.Out) Console.WriteLine($"voters : {voters}");
         }
         private void DeadReport(int id)
         {
@@ -152,7 +151,7 @@ namespace MyPacket
             var sendData = new VotingResultData(electedId, result.ToArray());
             Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"voting result : {elected}");
+            lock (Console.Out) Console.WriteLine($"voting result : elected - {elected}");
         }
         private void HandlingVoteResult()
         {
@@ -168,7 +167,7 @@ namespace MyPacket
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
             Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
-            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}, {electedId}");
+            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}, elected - {electedId}");
         }
         private void StartFinalVotinig()
         {
@@ -188,12 +187,13 @@ namespace MyPacket
             if (sendData.voteCount * 2 >= maxVoters)
             {
                 users[electedId].Dead();
+                --live;
             }
             else
                 sendData.Kicking_id = -1;
             Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"final voting result : {electedId} {sendData.voteCount}");
+            lock (Console.Out) Console.WriteLine($"final voting result : elected - {electedId}, count - {sendData.voteCount}");
         }
         private void StartDay()
         {
@@ -228,7 +228,7 @@ namespace MyPacket
             EnrollHanders();
             currentTime = DAY_TIME;
             timer.Start();
-            while (Status != GameStatus.END || Participants > 0)
+            while (Status != GameStatus.END && live > 0)
             {
                 if (eventQueue.Count == 0)
                     Thread.Sleep(1);
@@ -261,6 +261,8 @@ namespace MyPacket
         //유저 제거
         public void RemoveUser(int userId)
         {
+            if (users[userId].Alive)
+                --live;
             users.Remove(userId);
         }
         //유저 퇴장 처리
@@ -308,6 +310,7 @@ namespace MyPacket
             if (user.Status != GameStatus.WAITTING || HostId != user.Id)
                 return false;
             Status = GameStatus.DAY;
+            live = users.Count;
             var mafias = DesideMafia();
             foreach (var u in users.Values)
             {
@@ -381,7 +384,6 @@ namespace MyPacket
                     users[id].Vote();
                     users[data.Target_id].IsVoted();
                     --voters;
-                    lock (Console.Out) Console.WriteLine($"vote : {id} -> {data.Target_id}");
                 }
                 else
                     sendData.Result = false;

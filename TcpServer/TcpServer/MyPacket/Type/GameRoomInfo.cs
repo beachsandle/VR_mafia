@@ -16,7 +16,7 @@ namespace MyPacket
         {
             get
             {
-                return sizeof(int) * 4 + 1 + Encoding.UTF8.GetBytes(Name).Length; ;
+                return sizeof(int) * 4 + Encoding.UTF8.GetBytes(Name).Length; ;
             }
         }
         public GameRoomInfo() { }
@@ -42,7 +42,7 @@ namespace MyPacket
             Id = BitConverter.ToInt32(bytes, 0);
             HostId = BitConverter.ToInt32(bytes, 4);
             Participants = BitConverter.ToInt32(bytes, 8);
-            Name = Encoding.UTF8.GetString(bytes, 9, bytes.Length - 9);
+            Name = Encoding.UTF8.GetString(bytes, 12, bytes.Length - 12);
         }
     }
 }
