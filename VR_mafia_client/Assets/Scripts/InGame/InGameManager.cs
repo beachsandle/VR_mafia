@@ -285,6 +285,19 @@ public class InGameManager : MonoBehaviour
             ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
         }
     }
+    
+    private void UpdateVotingContent()
+    {
+        var votingContent = votingPanel.transform.GetChild(0);
+        for(int i = 0; i < players.Count; i++)
+        {
+            if (!players[playerOrder[i]].GetComponent<Player>().IsAlive)
+            {
+                var btn = votingContent.GetChild(i + 1).GetComponent<Button>();
+                btn.interactable = false;
+            }
+        }
+    }
 
     public void OnVotingPanel(int time)
     {
@@ -293,6 +306,7 @@ public class InGameManager : MonoBehaviour
         ShowCursor();
 
         votingPanel.SetActive(true);
+        UpdateVotingContent();
 
         StartCoroutine(UpdateVotingTime(time));
     }

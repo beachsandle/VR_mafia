@@ -907,6 +907,7 @@ MonoBehaviour:
   votingPanel: {fileID: 851271952}
   finalVotingPanel: {fileID: 1913033438}
   playerOrder: 
+  myInfo: {fileID: 0}
 --- !u!4 &415983047
 Transform:
   m_ObjectHideFlags: 0
@@ -2446,7 +2447,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &851271953
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4731,6 +4732,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 621290194}
     m_Modifications:
+    - target: {fileID: 5791348768960370972, guid: b2ba4c9391028f4408ca7593bfde5615,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5791348768960370973, guid: b2ba4c9391028f4408ca7593bfde5615,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5791348768960370973, guid: b2ba4c9391028f4408ca7593bfde5615,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5791348768960370973, guid: b2ba4c9391028f4408ca7593bfde5615,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5791348768960370974, guid: b2ba4c9391028f4408ca7593bfde5615,
         type: 3}
       propertyPath: m_Name
