@@ -313,6 +313,7 @@ public class InGameManager : MonoBehaviour
     }
     IEnumerator UpdateVotingTime(int time)
     {
+        timeText.enabled = true;
         while (0 < time)
         {
             timeText.text = time.ToString();
@@ -332,7 +333,7 @@ public class InGameManager : MonoBehaviour
 
     public void DisplayVotingResult(int electedId, (int pid, int count)[] result)
     {
-        StopCoroutine("UpdateVotingTime");
+        timeText.enabled = false;
 
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < players.Count; i++)
