@@ -35,7 +35,7 @@ namespace MyPacket
         public void FromBytes(byte[] bytes)
         {
             Defense_time = BitConverter.ToInt32(bytes, 0);
-            Elected_id = BitConverter.ToInt32(bytes, 1);
+            Elected_id = BitConverter.ToInt32(bytes, 4);
         }
 
         public byte[] ToBytes()

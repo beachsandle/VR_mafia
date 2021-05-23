@@ -149,7 +149,7 @@ namespace MyPacket
                 elected.VoteCount == result.ElementAt(1).VoteCount)
                 elected.Id = -1;
             electedId = elected.Id;
-            var sendData = new VotingResultData(result.ToArray());
+            var sendData = new VotingResultData(electedId, result.ToArray());
             Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
 
             lock (Console.Out) Console.WriteLine($"voting result : {elected}");
@@ -168,7 +168,7 @@ namespace MyPacket
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
             Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
-            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}");
+            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}, {electedId}");
         }
         private void StartFinalVotinig()
         {
@@ -183,6 +183,8 @@ namespace MyPacket
         {
             if (Status != GameStatus.FINAL_VOTE) return;
             var sendData = new FinalVotingResultData(electedId, users[electedId].VoteCount);
+            currentTime = FINAL_VOTE_END_TIME;
+            Status = GameStatus.FINAL_VOTE_END;
             if (sendData.voteCount * 2 >= maxVoters)
             {
                 users[electedId].Dead();
