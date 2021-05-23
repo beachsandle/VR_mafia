@@ -283,13 +283,11 @@ public class ClientManager : MonoBehaviour
     {
         var data = new VotingResultData(packet.Bytes);
 
-        InGameManager.instance.DisplayVotingResult(data.result);
+        InGameManager.instance.DisplayVotingResult(data.elected_id, data.result);
     }
 
     private void OnStartDefense(Packet packet)
     {
-        Debug.Log("OnStartDefense");
-
         var data = new StartDefenseData(packet.Bytes);
 
         InGameManager.instance.StartDefense(data.Elected_id, data.Defense_time);
@@ -297,8 +295,6 @@ public class ClientManager : MonoBehaviour
 
     private void OnStartFinalVoting(Packet packet)
     {
-        Debug.Log("OnStartFinalVoting");
-
         var data = new StartFinalVotingData(packet.Bytes);
 
         InGameManager.instance.StartFinalVoting(data.Voting_time);

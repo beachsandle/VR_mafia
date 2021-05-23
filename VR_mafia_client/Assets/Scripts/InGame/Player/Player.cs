@@ -19,5 +19,6 @@ public class Player : MonoBehaviour
     public void Dead()
     {
         IsAlive = false;
+        transform.Find("Body").gameObject.SetActive(false);
     }
 }

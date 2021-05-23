@@ -8,12 +8,13 @@ namespace MyPacket
 {
     public class VotingResultData : IPacketData
     {
+        public int elected_id = -1;
         public (int id, int count)[] result = null;
         public int Size
         {
             get
             {
-                return result?.Length * 8 ?? 0;
+                return 4 + result?.Length * 8 ?? 0;
             }
         }
 
@@ -24,25 +25,27 @@ namespace MyPacket
         }
 
 
-        public VotingResultData((int, int)[] result)
+        public VotingResultData(int id, (int, int)[] result)
         {
+            elected_id = id;
             this.result = result;
 
         }
 
         public void FromBytes(byte[] bytes)
         {
+            elected_id = BitConverter.ToInt32(bytes, 0);
             result = new (int, int)[bytes.Length / 8];
             for (int i = 0; i < result.Length; ++i)
             {
-                result[i].id = BitConverter.ToInt32(bytes, i * 8);
-                result[i].count = BitConverter.ToInt32(bytes, i * 8 + 4);
+                result[i].id = BitConverter.ToInt32(bytes, i * 8 + 4);
+                result[i].count = BitConverter.ToInt32(bytes, i * 8 + 8);
             }
         }
 
         public byte[] ToBytes()
         {
-            var bb = new ByteBuilder(Size);
+            var bb = new ByteBuilder(Size).Append(elected_id);
             foreach ((int id, int count) in result)
             {
                 bb.Append(id).Append(count);

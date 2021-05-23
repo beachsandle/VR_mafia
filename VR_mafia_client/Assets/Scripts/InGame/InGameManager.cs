@@ -92,17 +92,17 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
-    
+
     public void UpdatePlayerTransform(MoveEventData data)
     {
-            if (data.Player_id == ClientManager.instance.playerID) return;
+        if (data.Player_id == ClientManager.instance.playerID) return;
 
-            V3 pos = data.Location.position;
-            V3 rot = data.Location.rotation;
+        V3 pos = data.Location.position;
+        V3 rot = data.Location.rotation;
 
-            Transform TR = players[data.Player_id].transform;
-            TR.position = new Vector3(pos.x, pos.y, pos.z);
-            TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+        Transform TR = players[data.Player_id].transform;
+        TR.position = new Vector3(pos.x, pos.y, pos.z);
+        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
 
     private void ShowCursor()
@@ -129,9 +129,10 @@ public class InGameManager : MonoBehaviour
             p.name = "Player_" + u.Id;
             p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
             p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
-            p.transform.position = spawnPos.GetChild(idx++).position;
+            p.transform.position = spawnPos.GetChild(idx).position;
             p.transform.parent = playerObjects.transform;
 
+            p.GetComponent<Player>().InitPlayerInfo(idx, u);
             if (u.Id == ClientManager.instance.playerID)
             {
                 myInfo = p.GetComponent<Player>();
@@ -145,6 +146,7 @@ public class InGameManager : MonoBehaviour
             }
 
             players.Add(u.Id, p);
+            idx++;
         }
     }
 
@@ -182,7 +184,7 @@ public class InGameManager : MonoBehaviour
         phaseChange = true;
 
         //FadeInOut.instance.FadeIn();
-        
+
         StartInformation("밤이 되었습니다.");
         FadeInOut.instance.FadeAll(() => { GatherPlayers(); }, () => { phaseChange = false; });
         //GatherPlayers();
@@ -197,7 +199,8 @@ public class InGameManager : MonoBehaviour
         informationText.gameObject.SetActive(true);
         informationText.text = s;
 
-        StartCoroutine(FadeOutInformationText());
+        StopCoroutine("FadeOutInformationText");
+        StartCoroutine("FadeOutInformationText");
     }
     private IEnumerator FadeOutInformationText()
     {
@@ -230,16 +233,15 @@ public class InGameManager : MonoBehaviour
     }
     private void SetActiveMenuPanel(bool state)
     {
-        if (state)
+        if (!isVoting)
         {
-            menuPanel.SetActive(true);
-            ShowCursor();
+            if (state)
+                ShowCursor();
+            else
+                HideCursor();
         }
-        else
-        {
-            HideCursor();
-            menuPanel.SetActive(false);
-        }
+
+        menuPanel.SetActive(state);
     }
     private void OnBackButton()
     {
@@ -284,6 +286,19 @@ public class InGameManager : MonoBehaviour
         }
     }
 
+    private void UpdateVotingContent()
+    {
+        var votingContent = votingPanel.transform.GetChild(0);
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (!players[playerOrder[i]].GetComponent<Player>().IsAlive)
+            {
+                var btn = votingContent.GetChild(i + 1).GetComponent<Button>();
+                btn.interactable = false;
+            }
+        }
+    }
+
     public void OnVotingPanel(int time)
     {
         suffrage = true;
@@ -291,11 +306,13 @@ public class InGameManager : MonoBehaviour
         ShowCursor();
 
         votingPanel.SetActive(true);
+        UpdateVotingContent();
 
         StartCoroutine(UpdateVotingTime(time));
     }
     IEnumerator UpdateVotingTime(int time)
     {
+        timeText.enabled = true;
         while (0 < time)
         {
             timeText.text = time.ToString();
@@ -313,18 +330,13 @@ public class InGameManager : MonoBehaviour
         votingPanel.SetActive(false);
     }
 
-    public void DisplayVotingResult((int pid, int count)[] result)
+    public void DisplayVotingResult(int electedId, (int pid, int count)[] result)
     {
-        StopCoroutine("UpdateVotingTime");
+        timeText.enabled = false;
 
-        int maxCount = 0;
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < players.Count; i++)
         {
-            if (maxCount < result[i].count)
-            {
-                maxCount = result[i].count;
-            }
             votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
         }
 
@@ -337,7 +349,7 @@ public class InGameManager : MonoBehaviour
                 {
                     Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
                     countText.text = result[i].count.ToString();
-                    if(result[i].count == maxCount)
+                    if (id == electedId)
                     {
                         votingContent.GetChild(j + 1).GetComponent<Button>().image.color = Color.red;
                     }
@@ -345,6 +357,15 @@ public class InGameManager : MonoBehaviour
                     break;
                 }
             }
+        }
+
+        if (electedId == -1)
+        {
+            StartInformation("투표가 부결되었습니다.");
+        }
+        else
+        {
+            StartInformation($"{players[electedId].GetComponent<Player>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
         }
     }
     #endregion
@@ -382,13 +403,15 @@ public class InGameManager : MonoBehaviour
         isVoting = true;
         ShowCursor();
 
-        for(int i = 0; i < players.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
-            if(playerOrder[i] == id)
+            if (playerOrder[i] == id)
             {
                 Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
                 imageTR.GetComponent<Image>().color = Global.colors[i];
-                imageTR.GetComponentInChildren<Text>().text = "P" + id;
+                imageTR.GetComponentInChildren<Text>().text = players[id].GetComponent<Player>().Name;
+
+                break;
             }
         }
 
@@ -445,7 +468,7 @@ public class InGameManager : MonoBehaviour
     {
         OffFinalVotingPanel();
 
-        if(id != -1)
+        if (id != -1)
         {
             Player p = players[id].GetComponent<Player>();
 
