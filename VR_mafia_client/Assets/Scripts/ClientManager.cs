@@ -102,7 +102,7 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.ROOM_DESTROY_EVENT, OnRoomDestroyEvent);
         socket.On(PacketType.GAME_START, OnGameStart);
 
-        socket.On(PacketType.MOVE_EVENT, OnMove);
+        socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
         socket.On(PacketType.DAY_START, OnDayStart);
         socket.On(PacketType.NIGHT_START, OnNightStart);
         socket.On(PacketType.START_VOTING, OnStartVoting);
@@ -243,13 +243,13 @@ public class ClientManager : MonoBehaviour
     #endregion
 
     #region Ingame
-    private void OnMove(Packet packet)
+    private void OnMoveEvent(Packet packet)
     {
         var data = new MoveEventData(packet.Bytes);
 
         InGameManager.instance.UpdatePlayerTransform(data);
     }
-    public void EmitMove(Vector3 pos, Quaternion rot)
+    public void EmitMoveReq(Vector3 pos, Quaternion rot)
     {
         if (!socketReady) return;
 

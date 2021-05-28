@@ -163,7 +163,7 @@ public class InGameManager : MonoBehaviour
                 myObject.transform.position = spawnPos.GetChild(i).position;
                 myObject.GetComponent<PlayerController>().ControllerEnabled = true;
 
-                ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
+                ClientManager.instance.EmitMoveReq(myObject.transform.position, myObject.transform.rotation);
             }
         }
     }
