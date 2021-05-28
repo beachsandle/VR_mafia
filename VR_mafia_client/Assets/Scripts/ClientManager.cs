@@ -1,18 +1,15 @@
-﻿using System.Collections;
+﻿using MyPacket;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Linq;
-using System;
-using System.Text;
-using System.Net.Sockets;
-using System.Threading;
-using MyPacket;
 
 public class ClientManager : MonoBehaviour
 {
     private TcpClient client;
-    public MySocket socket;
+    public MySocket Socket { get; private set; }
     private bool socketReady;
 
     [HideInInspector]
@@ -43,8 +40,8 @@ public class ClientManager : MonoBehaviour
     }
     private void Update()
     {
-        while (socketReady && 0 < socket.PacketCount)
-            socket.Handle();
+        while (socketReady && 0 < Socket.PacketCount)
+            Socket.Handle();
     }
 
     private void OnApplicationQuit()
@@ -61,11 +58,11 @@ public class ClientManager : MonoBehaviour
         try
         {
             client = new TcpClient(hostIp, port);
-            socket = new MySocket(client);
-            socket.On(PacketType.CONNECT, OnConnect);
-            socket.On(PacketType.DISCONNECT, OnDisconnect);
-            socket.Listen(false);
-            socket.Emit(PacketType.CONNECT);
+            Socket = new MySocket(client);
+            Socket.On(PacketType.CONNECT, OnConnect);
+            Socket.On(PacketType.DISCONNECT, OnDisconnect);
+            Socket.Listen(false);
+            Socket.Emit(PacketType.CONNECT);
             socketReady = true;
         }
         catch (Exception e)
@@ -89,37 +86,37 @@ public class ClientManager : MonoBehaviour
         playerID = data.PlayerId;
         userName = "Player" + playerID;
 
-        socket.Clear(PacketType.CONNECT);
+        Socket.Clear(PacketType.CONNECT);
 
-        socket.On(PacketType.SET_NAME_RES, OnSetNameRes);
-        socket.On(PacketType.ROOM_LIST_RES, OnRoomListRes);
-        socket.On(PacketType.CREATE_ROOM_RES, OnCreateRoomRes);
+        Socket.On(PacketType.SET_NAME_RES, OnSetNameRes);
+        Socket.On(PacketType.ROOM_LIST_RES, OnRoomListRes);
+        Socket.On(PacketType.CREATE_ROOM_RES, OnCreateRoomRes);
 
-        socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
-        socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
-        socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
-        socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
-        socket.On(PacketType.ROOM_DESTROY_EVENT, OnRoomDestroyEvent);
-        socket.On(PacketType.GAME_START, OnGameStart);
+        Socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
+        Socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
+        Socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
+        Socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
+        Socket.On(PacketType.ROOM_DESTROY_EVENT, OnRoomDestroyEvent);
+        Socket.On(PacketType.GAME_START, OnGameStart);
 
-        socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
-        socket.On(PacketType.DAY_START, OnDayStart);
-        socket.On(PacketType.NIGHT_START, OnNightStart);
-        socket.On(PacketType.START_VOTING, OnStartVoting);
-        socket.On(PacketType.VOTE_RES, OnVoteRes);
-        socket.On(PacketType.VOTING_RESULT, OnVotingResult);
-        socket.On(PacketType.START_DEFENSE, OnStartDefense);
-        socket.On(PacketType.START_FINAL_VOTING, OnStartFinalVoting);
-        socket.On(PacketType.FINAL_VOTE_RES, OnFinalVoteRes);
-        socket.On(PacketType.FINAL_VOTING_RESULT, OnFinalVotingResult);
-        socket.On(PacketType.KILL_RES, OnKillRes);
-        socket.On(PacketType.DIE_EVENT, OnDieEvent);
+        Socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
+        Socket.On(PacketType.DAY_START, OnDayStart);
+        Socket.On(PacketType.NIGHT_START, OnNightStart);
+        Socket.On(PacketType.START_VOTING, OnStartVoting);
+        Socket.On(PacketType.VOTE_RES, OnVoteRes);
+        Socket.On(PacketType.VOTING_RESULT, OnVotingResult);
+        Socket.On(PacketType.START_DEFENSE, OnStartDefense);
+        Socket.On(PacketType.START_FINAL_VOTING, OnStartFinalVoting);
+        Socket.On(PacketType.FINAL_VOTE_RES, OnFinalVoteRes);
+        Socket.On(PacketType.FINAL_VOTING_RESULT, OnFinalVotingResult);
+        Socket.On(PacketType.KILL_RES, OnKillRes);
+        Socket.On(PacketType.DIE_EVENT, OnDieEvent);
 
         SceneManager.LoadScene("Lobby");
     }
     private void OnDisconnect(Packet packet)
     {
-        socket.Close();
+        Socket.Close();
 
         Debug.Log("Disconnect");
     }
@@ -127,8 +124,8 @@ public class ClientManager : MonoBehaviour
     {
         if (!socketReady) return;
 
-        socket.Emit(PacketType.DISCONNECT);
-        socket.Close();
+        Socket.Emit(PacketType.DISCONNECT);
+        Socket.Close();
 
         socketReady = false;
     }
@@ -146,7 +143,7 @@ public class ClientManager : MonoBehaviour
     {
         if (!socketReady) return;
 
-        socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
+        Socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
     }
 
     private void OnCreateRoomRes(Packet packet)
@@ -163,7 +160,7 @@ public class ClientManager : MonoBehaviour
         if (!socketReady) return;
 
         this.roomName = roomName;
-        socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
+        Socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
     }
 
     private void OnJoinRoomRes(Packet packet)
@@ -176,7 +173,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitJoinRoomReq(int roomId)
     {
-        socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
+        Socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
     }
 
     private void OnRoomListRes(Packet packet)
@@ -196,7 +193,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitRoomListReq()
     {
-        socket.Emit(PacketType.ROOM_LIST_REQ);
+        Socket.Emit(PacketType.ROOM_LIST_REQ);
     }
     #endregion
 
@@ -220,7 +217,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitLeaveRoomReq()
     {
-        socket.Emit(PacketType.LEAVE_ROOM_REQ);
+        Socket.Emit(PacketType.LEAVE_ROOM_REQ);
     }
     private void OnLeaveRoomRes(Packet packet)
     {
@@ -229,7 +226,7 @@ public class ClientManager : MonoBehaviour
 
     public void EmitGameStartReq()
     {
-        socket.Emit(PacketType.GAME_START_REQ);
+        Socket.Emit(PacketType.GAME_START_REQ);
     }
     private void OnGameStart(Packet packet)
     {
@@ -253,7 +250,7 @@ public class ClientManager : MonoBehaviour
     {
         if (!socketReady) return;
 
-        socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)).ToBytes());
+        Socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)).ToBytes());
     }
     private Location MakeLocation(Vector3 pos, Quaternion rot)
     {
@@ -280,7 +277,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitVoteReq(int targetID)
     {
-        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
+        Socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
     }
     private void OnVoteRes(Packet packet)
     {
@@ -313,7 +310,7 @@ public class ClientManager : MonoBehaviour
     }
     public void EmitFinalVoteReq(bool agree)
     {
-        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
+        Socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
     }
     private void OnFinalVoteRes(Packet packet)
     {
@@ -333,7 +330,7 @@ public class ClientManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
-        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
+        Socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
     }
     private void OnKillRes(Packet packet)
     {

@@ -5,15 +5,18 @@ using MyPacket;
 
 public class Player : MonoBehaviour
 {
-    public bool IsAlive { get; private set; }
     public int Number { get; private set; }
+    public int ID { get; private set; }
     public string Name { get; private set; }
+    public bool IsAlive { get; private set; }
 
     public void InitPlayerInfo(int index, UserInfo info)
     {
-        IsAlive = true;
         Number = index;
+
+        ID = info.Id;
         Name = info.Name;
+        IsAlive = true;
     }
 
     public void Dead()

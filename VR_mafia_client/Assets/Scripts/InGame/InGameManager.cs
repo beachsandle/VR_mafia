@@ -50,7 +50,6 @@ public class InGameManager : MonoBehaviour
 
     public Dictionary<int, GameObject> players; // id, object
     public List<int> playerOrder;
-    private GameObject playerObjects; // 임시
     public Player myInfo;
 
     private void Awake()
@@ -67,8 +66,6 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
-        playerObjects = GameObject.Find("PlayerObjects");
-
         players = new Dictionary<int, GameObject>();
         playerOrder = new List<int>();
         isMafia = ClientManager.instance.isMafia;
@@ -118,6 +115,7 @@ public class InGameManager : MonoBehaviour
 
     private void SpawnPlayers()
     {
+        GameObject playerObjects = GameObject.Find("PlayerObjects"); ;
         Transform spawnPos = GameObject.Find("SpawnPosition").transform;
         int idx = 0;
 
@@ -286,8 +284,8 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage && myInfo.IsAlive)
         {
-            string s = playerObjects.transform.GetChild(pNum - 1).name;
-            ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
+            int targetID = players[playerOrder[pNum - 1]].GetComponent<Player>().ID;
+            ClientManager.instance.EmitVoteReq(targetID);
         }
     }
 
