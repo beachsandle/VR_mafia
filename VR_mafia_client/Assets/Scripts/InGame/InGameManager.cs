@@ -68,7 +68,7 @@ public class InGameManager : MonoBehaviour
     {
         players = new Dictionary<int, GameObject>();
         playerOrder = new List<int>();
-        isMafia = ClientManager.instance.isMafia;
+        isMafia = GameManager.Instance.IsMafia;
 
         SpawnPlayers();
 
@@ -92,7 +92,7 @@ public class InGameManager : MonoBehaviour
 
     public void UpdatePlayerTransform(MoveEventData data)
     {
-        if (data.Player_id == ClientManager.instance.playerID) return;
+        if (data.Player_id == GameManager.Instance.PlayerId) return;
 
         V3 pos = data.Location.position;
         V3 rot = data.Location.rotation;
@@ -119,7 +119,7 @@ public class InGameManager : MonoBehaviour
         Transform spawnPos = GameObject.Find("SpawnPosition").transform;
         int idx = 0;
 
-        foreach (UserInfo u in ClientManager.instance.users)
+        foreach (UserInfo u in GameManager.Instance.Users)
         {
             playerOrder.Add(u.Id);
 
@@ -131,7 +131,7 @@ public class InGameManager : MonoBehaviour
             p.transform.parent = playerObjects.transform;
 
             p.GetComponent<Player>().InitPlayerInfo(idx, u);
-            if (u.Id == ClientManager.instance.playerID)
+            if (u.Id == GameManager.Instance.PlayerId)
             {
                 myInfo = p.GetComponent<Player>();
                 p.AddComponent<PlayerController>();
@@ -154,14 +154,14 @@ public class InGameManager : MonoBehaviour
 
         for (int i = 0; i < playerOrder.Count; i++)
         {
-            if (playerOrder[i] == ClientManager.instance.playerID)
+            if (playerOrder[i] == GameManager.Instance.PlayerId)
             {
                 GameObject myObject = players[playerOrder[i]];
                 myObject.GetComponent<PlayerController>().ControllerEnabled = false;
                 myObject.transform.position = spawnPos.GetChild(i).position;
                 myObject.GetComponent<PlayerController>().ControllerEnabled = true;
 
-                ClientManager.instance.EmitMoveReq(myObject.transform.position, myObject.transform.rotation);
+                ClientManager.Instance.EmitMoveReq(myObject.transform.position, myObject.transform.rotation);
             }
         }
     }
@@ -285,7 +285,7 @@ public class InGameManager : MonoBehaviour
         if (suffrage && myInfo.IsAlive)
         {
             int targetID = players[playerOrder[pNum - 1]].GetComponent<Player>().ID;
-            ClientManager.instance.EmitVoteReq(targetID);
+            ClientManager.Instance.EmitVoteReq(targetID);
         }
     }
 
@@ -397,7 +397,7 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage && myInfo.IsAlive)
         {
-            ClientManager.instance.EmitFinalVoteReq(isPros);
+            ClientManager.Instance.EmitFinalVoteReq(isPros);
         }
     }
 

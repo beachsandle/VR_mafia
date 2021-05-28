@@ -15,24 +15,18 @@ public class ClientManager : MonoBehaviour
     [HideInInspector] public string hostIp;
     [HideInInspector] public int port;
 
-    public int playerID;
-    public string userName;
-    public string roomName;
-
-    public List<UserInfo> users;
     public bool isMafia;
 
-    public static ClientManager instance;
+    public static ClientManager Instance { get; private set; }
     void Awake()
     {
-        instance = this;
+        Instance = this;
 
-        userName = "";
         DontDestroyOnLoad(gameObject);
     }
     private void Start()
     {
-        users = new List<UserInfo>();
+
     }
     private void Update()
     {
@@ -64,7 +58,7 @@ public class ClientManager : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("Socket Error" + e.Message);
-            
+
             return false;
         }
 
@@ -73,26 +67,13 @@ public class ClientManager : MonoBehaviour
 
     private void OnConnect(Packet packet)
     {
-        var data = new ConnectData();
-        data.FromBytes(packet.Bytes);
+        var data = new ConnectData(packet.Bytes);
 
         Debug.Log("OnConnect : " + data.PlayerId);
 
-        playerID = data.PlayerId;
-        userName = "Player" + playerID;
+        GameManager.Instance.InitPlayerInfo(data.PlayerId);
 
         Socket.Clear(PacketType.CONNECT);
-
-        Socket.On(PacketType.SET_NAME_RES, OnSetNameRes);
-        Socket.On(PacketType.ROOM_LIST_RES, OnRoomListRes);
-        Socket.On(PacketType.CREATE_ROOM_RES, OnCreateRoomRes);
-
-        Socket.On(PacketType.JOIN_ROOM_RES, OnJoinRoomRes);
-        Socket.On(PacketType.JOIN_EVENT, OnJoinEvent);
-        Socket.On(PacketType.LEAVE_ROOM_RES, OnLeaveRoomRes);
-        Socket.On(PacketType.LEAVE_EVENT, OnLeaveEvent);
-        Socket.On(PacketType.ROOM_DESTROY_EVENT, OnRoomDestroyEvent);
-        Socket.On(PacketType.GAME_START, OnGameStart);
 
         Socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
         Socket.On(PacketType.DAY_START, OnDayStart);
@@ -126,112 +107,10 @@ public class ClientManager : MonoBehaviour
     }
 
     #region Lobby
-    private void OnSetNameRes(Packet packet)
-    {
-        var data = new SetNameResData(packet.Bytes);
-
-        Debug.Log("OnSetName : " + data.UserName);
-
-        userName = data.UserName;
-    }
-    public void EmitSetNameReq(string userName)
-    {
-        if (!socketReady) return;
-
-        Socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
-    }
-
-    private void OnCreateRoomRes(Packet packet)
-    {
-        var data = new CreateRoomResData(packet.Bytes);
-        if (data.Result)
-        {
-            users.Add(new UserInfo(playerID, userName));
-            SceneManager.LoadScene("WaitingRoom");
-        }
-    }
-    public void EmitCreateRoomReq(string roomName)
-    {
-        if (!socketReady) return;
-
-        this.roomName = roomName;
-        Socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
-    }
-
-    private void OnJoinRoomRes(Packet packet)
-    {
-        var data = new JoinRoomResData(packet.Bytes);
-
-        users = data.Users;
-
-        SceneManager.LoadScene("WaitingRoom");
-    }
-    public void EmitJoinRoomReq(int roomId)
-    {
-        Socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
-    }
-
-    private void OnRoomListRes(Packet packet)
-    {
-        if (SceneManager.GetActiveScene().name == "InGame") return;
-
-        var data = new RoomListResData(packet.Bytes);
-
-        //TODO: HostId에서 HostName으로 받을 수 있게 변경
-        int roomCount = data.Rooms.Count;
-        for (int i = 0; i < roomCount; i++)
-        {
-            var r = data.Rooms[i];
-            Debug.Log(r.Name);
-            LobbyManager.instance.UpdateRooms(r.Name, r.HostId.ToString(), r.Participants, r.Id);
-        }
-    }
-    public void EmitRoomListReq()
-    {
-        Socket.Emit(PacketType.ROOM_LIST_REQ);
-    }
     #endregion
 
     #region WaitingRoom
-    private void OnJoinEvent(Packet packet)
-    {
-        var data = new JoinEventData(packet.Bytes);
 
-        users.Add(data.Info);
-        WaitingRoomManager.instance.AddPlayer(data.Info);
-    }
-    private void OnLeaveEvent(Packet packet)
-    {
-        var data = new LeaveEventData(packet.Bytes);
-        users.Remove((from u in users where u.Id == data.PlayerId select u).First());
-        WaitingRoomManager.instance.RemovePlayer(data.PlayerId);
-    }
-    private void OnRoomDestroyEvent(Packet packet)
-    {
-        SceneManager.LoadScene("Lobby");
-    }
-    public void EmitLeaveRoomReq()
-    {
-        Socket.Emit(PacketType.LEAVE_ROOM_REQ);
-    }
-    private void OnLeaveRoomRes(Packet packet)
-    {
-        SceneManager.LoadScene("Lobby");
-    }
-
-    public void EmitGameStartReq()
-    {
-        Socket.Emit(PacketType.GAME_START_REQ);
-    }
-    private void OnGameStart(Packet packet)
-    {
-        var data = new GameStartData(packet.Bytes);
-
-        isMafia = data.IsMafia;
-
-        Debug.Log("Start");
-        SceneManager.LoadScene("InGame");
-    }
     #endregion
 
     #region Ingame
@@ -330,7 +209,7 @@ public class ClientManager : MonoBehaviour
     private void OnKillRes(Packet packet)
     {
         var data = new KillResDada(packet.Bytes);
-        
+
         if (data.Result)
         {
             // 총알 없애기

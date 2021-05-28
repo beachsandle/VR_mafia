@@ -17,7 +17,7 @@ public static class Global
         NONE,
         CONNECT,
         LOBBY,
-        WAITTING,
+        WAITING,
         INGAME,
         DAY,
         NIGHT,

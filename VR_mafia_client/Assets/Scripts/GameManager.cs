@@ -1,30 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MyPacket;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    private static GameManager _instance;
-    public static GameManager instance
+    private static GameManager instance;
+    public static GameManager Instance
     {
         get
         {
-            if (!_instance)
+            if (!instance)
             {
-                _instance = FindObjectOfType(typeof(GameManager)) as GameManager;
+                instance = FindObjectOfType(typeof(GameManager)) as GameManager;
             }
 
-            return _instance;
+            return instance;
         }
     }
 
+    public int PlayerId { get; private set; }
+    public string UserName { get; private set; }
+    public string RoomName { get; private set; }
+    public bool IsMafia { get; private set; }
+    public List<UserInfo> Users { get; private set; }
+    public int[] Mafias { get; private set; }
+
     private void Awake()
     {
-        if (_instance == null)
+        if (instance == null)
         {
-            _instance = this;
+            instance = this;
         }
-        else if (_instance != this)
+        else if (instance != this)
         {
             Destroy(gameObject);
         }
@@ -34,6 +43,42 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        PlayerId = -1;
+        UserName = "";
+        RoomName = "";
+        Users = new List<UserInfo>();
+    }
 
+    public void LobbyToWaitingRoom(string userName, string roomName, List<UserInfo> users = null)
+    {
+        UserName = userName;
+        RoomName = roomName;
+        if (users == null)
+            Users.Add(new UserInfo(PlayerId, userName));
+        else
+            Users = users;
+        SceneManager.LoadScene("WaitingRoom");
+    }
+    public (string, List<UserInfo>) GetWaitingRoomInfo()
+    {
+        return (RoomName, Users);
+    }
+
+    public void InitPlayerInfo(int pid)
+    {
+        PlayerId = pid;
+        UserName = "Player" + PlayerId;
+    }
+    public void WaitingRoomToLobby()
+    {
+        Users.Clear();
+        SceneManager.LoadScene("Lobby");
+    }
+    public void WaitingRoomToInGame(bool isMafia, int[] mafias, List<UserInfo> users)
+    {
+        IsMafia = isMafia;
+        Users = users;
+        Mafias = mafias;
+        SceneManager.LoadScene("InGame");
     }
 }

@@ -25,10 +25,10 @@ public class IntroManager : MonoBehaviour
 
     public void OnConnectButton()
     {
-        ClientManager.instance.hostIp = hostIpInputField.text;
-        ClientManager.instance.port = (portInputField.text == "") ? 0 : int.Parse(portInputField.text);
+        ClientManager.Instance.hostIp = hostIpInputField.text;
+        ClientManager.Instance.port = (portInputField.text == "") ? 0 : int.Parse(portInputField.text);
 
-        if (!ClientManager.instance.ConnectToServer())
+        if (!ClientManager.Instance.ConnectToServer())
             DisplayText("서버와 연결에 실패했습니다.");
     }
 }

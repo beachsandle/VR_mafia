@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour
 
         Move();
         Rotate();
-        ClientManager.instance.EmitMoveReq(transform.position, transform.rotation);
+        ClientManager.Instance.EmitMoveReq(transform.position, transform.rotation);
 
         if (InGameManager.instance.menuState) return;
 
@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour
         {
             int targetID = int.Parse(hit.transform.name.Split('_')[1]);
 
-            ClientManager.instance.EmitKillReq(targetID);
+            ClientManager.Instance.EmitKillReq(targetID);
         }
     }
 
