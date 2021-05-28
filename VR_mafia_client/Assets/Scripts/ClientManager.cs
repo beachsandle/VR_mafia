@@ -12,10 +12,8 @@ public class ClientManager : MonoBehaviour
     public MySocket Socket { get; private set; }
     private bool socketReady;
 
-    [HideInInspector]
-    public string hostIp;
-    [HideInInspector]
-    public int port;
+    [HideInInspector] public string hostIp;
+    [HideInInspector] public int port;
 
     public int playerID;
     public string userName;
@@ -34,8 +32,6 @@ public class ClientManager : MonoBehaviour
     }
     private void Start()
     {
-        //ConnectToServer();
-
         users = new List<UserInfo>();
     }
     private void Update()
@@ -48,9 +44,9 @@ public class ClientManager : MonoBehaviour
     {
         CloseSocket();
     }
-    public void ConnectToServer()
+    public bool ConnectToServer()
     {
-        if (socketReady) return;
+        if (socketReady) return true;
 
         if (hostIp == null) hostIp = "127.0.0.1";
         if (port == 0) port = 8080;
@@ -68,12 +64,11 @@ public class ClientManager : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("Socket Error" + e.Message);
-
-            if (IntroManager.instance)
-            {
-                IntroManager.instance.DisplayText("서버와 연결에 실패했습니다.");
-            }
+            
+            return false;
         }
+
+        return true;
     }
 
     private void OnConnect(Packet packet)

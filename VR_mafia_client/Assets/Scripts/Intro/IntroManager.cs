@@ -5,58 +5,30 @@ using UnityEngine.UI;
 
 public class IntroManager : MonoBehaviour
 {
-    private static IntroManager _instance;
-    public static IntroManager instance
-    {
-        get
-        {
-            if (!_instance)
-            {
-                _instance = FindObjectOfType(typeof(IntroManager)) as IntroManager;
-            }
+    [SerializeField] private bool autoBegin;
+    [SerializeField] private Text informationText;
+    [SerializeField] private InputField hostIpInputField;
+    [SerializeField] private InputField portInputField;
+    [SerializeField] private Button connectButton;
 
-            return _instance;
-        }
-    }
-
-    [SerializeField]
-    private Text Text;
-
-    [SerializeField]
-    private Button connectButton;
-    [SerializeField]
-    private InputField hostIpInputField;
-    [SerializeField]
-    private InputField portInputField;
-
-    void Awake()
-    {
-        if (_instance == null)
-        {
-            _instance = this;
-        }
-        else if (_instance != this)
-        {
-            Destroy(gameObject);
-        }
-    }
     void Start()
     {
         connectButton.onClick.AddListener(OnConnectButton);
+        if (autoBegin)
+            OnConnectButton();
     }
 
     public void DisplayText(string s)
     {
-        Text.text = s;
+        informationText.text = s;
     }
 
     public void OnConnectButton()
     {
-        FindObjectOfType<ClientManager>().gameObject.SetActive(true);
-
         ClientManager.instance.hostIp = hostIpInputField.text;
         ClientManager.instance.port = (portInputField.text == "") ? 0 : int.Parse(portInputField.text);
 
-        ClientManager.instance.ConnectToServer();
+        if (!ClientManager.instance.ConnectToServer())
+            DisplayText("서버와 연결에 실패했습니다.");
     }
 }
