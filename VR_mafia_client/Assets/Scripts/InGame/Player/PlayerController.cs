@@ -87,7 +87,9 @@ public class PlayerController : MonoBehaviour
     {
         if (hit.transform)
         {
-            Destroy(hit.transform.gameObject);
+            int targetID = int.Parse(hit.transform.name.Split('_')[1]);
+
+            ClientManager.instance.EmitKillReq(targetID);
         }
     }
 

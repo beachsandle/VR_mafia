@@ -168,6 +168,11 @@ public class InGameManager : MonoBehaviour
         }
     }
 
+    public void KillPlayer(int deadID)
+    {
+        players[deadID].GetComponent<Player>().Dead();
+    }
+
     #region Phase
     public void StartDay()
     {

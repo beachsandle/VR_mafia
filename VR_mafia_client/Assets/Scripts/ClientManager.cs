@@ -112,6 +112,8 @@ public class ClientManager : MonoBehaviour
         socket.On(PacketType.START_FINAL_VOTING, OnStartFinalVoting);
         socket.On(PacketType.FINAL_VOTE_RES, OnFinalVoteRes);
         socket.On(PacketType.FINAL_VOTING_RESULT, OnFinalVotingResult);
+        socket.On(PacketType.KILL_RES, OnKillRes);
+        socket.On(PacketType.DIE_EVENT, OnDieEvent);
 
         SceneManager.LoadScene("Lobby");
     }
@@ -328,5 +330,26 @@ public class ClientManager : MonoBehaviour
 
         InGameManager.instance.DisplayFinalVotingResult(data.Kicking_id, data.voteCount);
     }
+
+    public void EmitKillReq(int targetID)
+    {
+        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
+    }
+    private void OnKillRes(Packet packet)
+    {
+        var data = new KillResDada(packet.Bytes);
+        
+        if (data.Result)
+        {
+            // 총알 없애기
+        }
+    }
+    private void OnDieEvent(Packet packet)
+    {
+        var data = new DieEventData(packet.Bytes);
+
+        InGameManager.instance.KillPlayer(data.Dead_id);
+    }
+
     #endregion
 }
