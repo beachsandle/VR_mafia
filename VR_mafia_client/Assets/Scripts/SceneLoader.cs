@@ -4,16 +4,16 @@ using UnityEngine;
 using MyPacket;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour
+public class SceneLoader : MonoBehaviour
 {
-    private static GameManager instance;
-    public static GameManager Instance
+    private static SceneLoader instance;
+    public static SceneLoader Instance
     {
         get
         {
             if (!instance)
             {
-                instance = FindObjectOfType(typeof(GameManager)) as GameManager;
+                instance = FindObjectOfType(typeof(SceneLoader)) as SceneLoader;
             }
 
             return instance;
@@ -48,6 +48,12 @@ public class GameManager : MonoBehaviour
         RoomName = "";
         Users = new List<UserInfo>();
     }
+    public void IntroToLobby(int pid)
+    {
+        PlayerId = pid;
+        UserName = "Player" + PlayerId;
+        SceneManager.LoadScene("Lobby");
+    }
 
     public void LobbyToWaitingRoom(string userName, string roomName, List<UserInfo> users = null)
     {
@@ -63,12 +69,6 @@ public class GameManager : MonoBehaviour
     {
         return (RoomName, Users);
     }
-
-    public void InitPlayerInfo(int pid)
-    {
-        PlayerId = pid;
-        UserName = "Player" + PlayerId;
-    }
     public void WaitingRoomToLobby()
     {
         Users.Clear();
@@ -80,5 +80,9 @@ public class GameManager : MonoBehaviour
         Users = users;
         Mafias = mafias;
         SceneManager.LoadScene("InGame");
+    }
+    public (int, bool, int[], List<UserInfo>) GetInGameInfo()
+    {
+        return (PlayerId, IsMafia, Mafias, Users);
     }
 }
