@@ -252,7 +252,7 @@ GameObject:
   - component: {fileID: 325854488}
   - component: {fileID: 325854489}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: SceneLoader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -281,7 +281,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 325854487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9146eb16b6c72a24186650b18c5a19d7, type: 3}
+  m_Script: {fileID: 11500000, guid: fd17e4b5ba6539f49b2d45555f39458d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &385083114
@@ -994,7 +994,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c1f4568e2926f47b5de12fe697cb27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoBegin: 0
+  autoBegin: 1
   informationText: {fileID: 1483119052}
   hostIpInputField: {fileID: 1467204623}
   portInputField: {fileID: 597210670}
@@ -1522,9 +1522,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostIp: 15.164.217.28
   port: 55759
-  playerID: 0
-  userName: 
-  roomName: 
   isMafia: 0
 --- !u!4 &1629618744
 Transform:

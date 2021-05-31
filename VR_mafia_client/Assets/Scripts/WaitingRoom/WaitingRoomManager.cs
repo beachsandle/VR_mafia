@@ -33,9 +33,7 @@ public class WaitingRoomManager : MonoBehaviour
     void Start()
     {
         socket = ClientManager.Instance.Socket;
-        (var roomName, var users) = GameManager.Instance.GetWaitingRoomInfo();
-        SetRoomName(roomName);
-        this.users = users;
+        (roomNameText.text, users) = SceneLoader.Instance.GetWaitingRoomInfo();
         for (int i = 0; i < users.Count; i++)
         {
             SetPlayerInfo(i);
@@ -74,7 +72,7 @@ public class WaitingRoomManager : MonoBehaviour
     private void OnRoomDestroyEvent(Packet packet)
     {
         ClearWaitingRoomEvent();
-        GameManager.Instance.WaitingRoomToLobby();
+        SceneLoader.Instance.WaitingRoomToLobby();
     }
     public void EmitLeaveReq()
     {
@@ -88,7 +86,7 @@ public class WaitingRoomManager : MonoBehaviour
         if (data.Result)
         {
             ClearWaitingRoomEvent();
-            GameManager.Instance.WaitingRoomToLobby();
+            SceneLoader.Instance.WaitingRoomToLobby();
         }
     }
     private void OnLeaveEvent(Packet packet)
@@ -106,7 +104,7 @@ public class WaitingRoomManager : MonoBehaviour
         var data = new GameStartData(packet.Bytes);
         Debug.Log("Start");
         ClearWaitingRoomEvent();
-        GameManager.Instance.WaitingRoomToInGame(data.IsMafia, data.Mafias, users);
+        SceneLoader.Instance.WaitingRoomToInGame(data.IsMafia, data.Mafias, users);
     }
     #endregion
     public void AddPlayer(UserInfo user)
@@ -138,11 +136,6 @@ public class WaitingRoomManager : MonoBehaviour
     {
         playerTRs[playerNum].Find("Name").GetComponent<Text>().text = users[playerNum].Name;
         playerTRs[playerNum].Find("Image").GetComponent<Image>().color = Global.colors[playerNum];
-    }
-
-    private void SetRoomName(string roomName)
-    {
-        roomNameText.text = roomName;
     }
 
     void OnStartButton()

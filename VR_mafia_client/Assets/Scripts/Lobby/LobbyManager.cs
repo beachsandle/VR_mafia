@@ -52,7 +52,7 @@ public class LobbyManager : MonoBehaviour
     }
     private void InitPlayerName()
     {
-        userName = GameManager.Instance.UserName;
+        userName = SceneLoader.Instance.UserName;
         playerName.text = userName;
         EmitSetNameReq(userName);
     }
@@ -115,7 +115,7 @@ public class LobbyManager : MonoBehaviour
         if (data.Result)
         {
             ClearLobbyEvent();
-            GameManager.Instance.LobbyToWaitingRoom(userName, roomName);
+            SceneLoader.Instance.LobbyToWaitingRoom(userName, roomName);
         }
     }
 
@@ -129,7 +129,7 @@ public class LobbyManager : MonoBehaviour
         if (data.Result)
         {
             ClearLobbyEvent();
-            GameManager.Instance.LobbyToWaitingRoom(userName, "RoomName", data.Users);
+            SceneLoader.Instance.LobbyToWaitingRoom(userName, "RoomName", data.Users);
         }
     }
     #endregion
