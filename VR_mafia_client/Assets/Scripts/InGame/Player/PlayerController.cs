@@ -51,13 +51,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (InGameManager.instance.phaseChange || InGameManager.instance.isVoting) return;
+        if (InGameManager.Instance.phaseChange || InGameManager.Instance.isVoting) return;
 
         Move();
         Rotate();
-        ClientManager.instance.EmitMove(transform.position, transform.rotation);
+        InGameManager.Instance.EmitMoveReq(transform.position, transform.rotation);
 
-        if (InGameManager.instance.menuState) return;
+        if (InGameManager.Instance.menuState) return;
 
         FindTarget();
 
@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour
         {
             int targetID = int.Parse(hit.transform.name.Split('_')[1]);
 
-            ClientManager.instance.EmitKillReq(targetID);
+            InGameManager.Instance.EmitKillReq(targetID);
         }
     }
 
@@ -113,7 +113,7 @@ public class PlayerController : MonoBehaviour
 
     void Rotate()
     {
-        if (InGameManager.instance.menuState) return;
+        if (InGameManager.Instance.menuState) return;
 
         rotX += Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
         rotY += Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
@@ -125,6 +125,15 @@ public class PlayerController : MonoBehaviour
 
         transform.eulerAngles = new Vector3(0f, rotY, 0);
         HEAD.transform.eulerAngles = new Vector3(-rotX, rotY, 0f);
+    }
+
+    public void MoveTo(Vector3 pos)
+    {
+        CC.enabled = false;
+        moveDirection = Vector3.zero;
+        transform.position = pos;
+        CC.enabled = true;
+        InGameManager.Instance.EmitMoveReq(transform.position, transform.rotation);
     }
     #endregion
 }

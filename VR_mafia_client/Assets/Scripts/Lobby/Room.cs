@@ -18,7 +18,7 @@ public class Room : MonoBehaviour, IPointerClickHandler
     {
         if (Time.time - last < interval)
         {
-            ClientManager.instance.EmitJoinRoomReq(roomId);
+            LobbyManager.instance.EmitJoinRoomReq(roomId);
         }
         LobbyManager.instance.roomList.select = roomId;
 

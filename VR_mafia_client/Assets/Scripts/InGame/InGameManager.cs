@@ -6,17 +6,19 @@ using MyPacket;
 
 public class InGameManager : MonoBehaviour
 {
-    private static InGameManager _instance;
-    public static InGameManager instance
+    private MySocket socket;
+
+    private static InGameManager instance;
+    public static InGameManager Instance
     {
         get
         {
-            if (!_instance)
+            if (!instance)
             {
-                _instance = FindObjectOfType(typeof(InGameManager)) as InGameManager;
+                instance = FindObjectOfType(typeof(InGameManager)) as InGameManager;
             }
 
-            return _instance;
+            return instance;
         }
     }
 
@@ -25,10 +27,12 @@ public class InGameManager : MonoBehaviour
     [SerializeField]
     private GameObject playerObj;
 
+    private GameObject playerObjects;
     private bool isMafia;
     public bool phaseChange;
     public bool isVoting;
     public bool suffrage;
+    private Transform spawnPos;
 
     [Header("UI")]
     [SerializeField] private Text roleText;
@@ -48,18 +52,18 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private GameObject finalVotingPanel;
     private Text finalTimeText;
 
-    public Dictionary<int, GameObject> players; // id, object
-    public List<int> playerOrder;
-    private GameObject playerObjects; // 임시
-    public Player myInfo;
+    private List<Player> players;
+    private Dictionary<int, Player> playerDict; // id, object
+    private Player myInfo;
+
 
     private void Awake()
     {
-        if (_instance == null)
+        if (instance == null)
         {
-            _instance = this;
+            instance = this;
         }
-        else if (_instance != this)
+        else if (instance != this)
         {
             Destroy(gameObject);
         }
@@ -67,14 +71,11 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
-        playerObjects = GameObject.Find("PlayerObjects");
-
-        players = new Dictionary<int, GameObject>();
-        playerOrder = new List<int>();
-        isMafia = ClientManager.instance.isMafia;
+        socket = ClientManager.Instance.Socket;
 
         SpawnPlayers();
 
+        InitInGameEvent();
         InitMenuPanel();
         InitVotingPanel();
         InitFinalVotingPanel();
@@ -83,7 +84,6 @@ public class InGameManager : MonoBehaviour
 
         FadeInOut.instance.FadeIn();
     }
-
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -92,15 +92,153 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
+    void InitInGameEvent()
+    {
+        socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
+        socket.On(PacketType.DAY_START, OnDayStart);
+        socket.On(PacketType.NIGHT_START, OnNightStart);
+        socket.On(PacketType.START_VOTING, OnStartVoting);
+        socket.On(PacketType.VOTE_RES, OnVoteRes);
+        socket.On(PacketType.VOTING_RESULT, OnVotingResult);
+        socket.On(PacketType.START_DEFENSE, OnStartDefense);
+        socket.On(PacketType.START_FINAL_VOTING, OnStartFinalVoting);
+        socket.On(PacketType.FINAL_VOTE_RES, OnFinalVoteRes);
+        socket.On(PacketType.FINAL_VOTING_RESULT, OnFinalVotingResult);
+        socket.On(PacketType.KILL_RES, OnKillRes);
+        socket.On(PacketType.DIE_EVENT, OnDieEvent);
+    }
+    void ClearInGameEvent()
+    {
+        socket.Clear(PacketType.MOVE_EVENT);
+        socket.Clear(PacketType.DAY_START);
+        socket.Clear(PacketType.NIGHT_START);
+        socket.Clear(PacketType.START_VOTING);
+        socket.Clear(PacketType.VOTE_RES);
+        socket.Clear(PacketType.VOTING_RESULT);
+        socket.Clear(PacketType.START_DEFENSE);
+        socket.Clear(PacketType.START_FINAL_VOTING);
+        socket.Clear(PacketType.FINAL_VOTE_RES);
+        socket.Clear(PacketType.FINAL_VOTING_RESULT);
+        socket.Clear(PacketType.KILL_RES);
+        socket.Clear(PacketType.DIE_EVENT);
+    }
+
+    #region InGame Event
+    private void OnMoveEvent(Packet packet)
+    {
+        var data = new MoveEventData(packet.Bytes);
+
+        UpdatePlayerTransform(data);
+    }
+    public void EmitMoveReq(Vector3 pos, Quaternion rot)
+    {
+        socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)).ToBytes());
+    }
+    private Location MakeLocation(Vector3 pos, Quaternion rot)
+    {
+        var position = new V3(pos.x, pos.y, pos.z);
+        var rotation = new V3(rot.eulerAngles.x, rot.eulerAngles.y, rot.eulerAngles.z);
+
+        return new Location(position, rotation);
+    }
+
+    private void OnDayStart(Packet packet)
+    {
+        StartDay();
+    }
+    private void OnNightStart(Packet packet)
+    {
+        StartNight();
+    }
+
+    private void OnStartVoting(Packet packet)
+    {
+        var data = new StartVotingData(packet.Bytes);
+
+        OnVotingPanel(data.Voting_time);
+    }
+    public void EmitVoteReq(int targetID)
+    {
+        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
+    }
+    private void OnVoteRes(Packet packet)
+    {
+        var data = new VoteResData(packet.Bytes);
+
+        if (data.Result)
+        {
+            suffrage = false;
+        }
+    }
+    private void OnVotingResult(Packet packet)
+    {
+        var data = new VotingResultData(packet.Bytes);
+
+        DisplayVotingResult(data.elected_id, data.result);
+    }
+
+    private void OnStartDefense(Packet packet)
+    {
+        var data = new StartDefenseData(packet.Bytes);
+
+        StartDefense(data.Elected_id, data.Defense_time);
+    }
+
+    private void OnStartFinalVoting(Packet packet)
+    {
+        var data = new StartFinalVotingData(packet.Bytes);
+
+        StartFinalVoting(data.Voting_time);
+    }
+    public void EmitFinalVoteReq(bool agree)
+    {
+        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
+    }
+    private void OnFinalVoteRes(Packet packet)
+    {
+        var data = new FinalVoteResData(packet.Bytes);
+
+        if (data.Result)
+        {
+            suffrage = false;
+        }
+    }
+    private void OnFinalVotingResult(Packet packet)
+    {
+        var data = new FinalVotingResultData(packet.Bytes);
+
+        DisplayFinalVotingResult(data.Kicking_id, data.voteCount);
+    }
+
+    public void EmitKillReq(int targetID)
+    {
+        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
+    }
+    private void OnKillRes(Packet packet)
+    {
+        var data = new KillResDada(packet.Bytes);
+
+        if (data.Result)
+        {
+            // 총알 없애기
+        }
+    }
+    private void OnDieEvent(Packet packet)
+    {
+        var data = new DieEventData(packet.Bytes);
+
+        KillPlayer(data.Dead_id);
+    }
+    #endregion
 
     public void UpdatePlayerTransform(MoveEventData data)
     {
-        if (data.Player_id == ClientManager.instance.playerID) return;
+        if (data.Player_id == SceneLoader.Instance.PlayerId) return;
 
         V3 pos = data.Location.position;
         V3 rot = data.Location.rotation;
 
-        Transform TR = players[data.Player_id].transform;
+        Transform TR = playerDict[data.Player_id].transform;
         TR.position = new Vector3(pos.x, pos.y, pos.z);
         TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
@@ -115,62 +253,53 @@ public class InGameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+    private void SpawnPlayer(int idx, UserInfo u)
+    {
+        var p = Instantiate(playerObj).GetComponent<Player>();
+        p.InitPlayerInfo(idx, u);
 
+        p.name = "Player_" + u.Id;
+        p.transform.position = spawnPos.GetChild(idx).position;
+        p.transform.parent = playerObjects.transform;
+
+        players.Add(p);
+        playerDict[u.Id] = p;
+    }
+    private void SetMyPlayer(int myId)
+    {
+        myInfo = playerDict[myId];
+        myInfo.gameObject.AddComponent<PlayerController>();
+
+        Camera.main.transform.parent = myInfo.transform.Find("Head");
+        Camera.main.transform.localPosition = new Vector3(0, 0, 0);
+    }
     private void SpawnPlayers()
     {
-        Transform spawnPos = GameObject.Find("SpawnPosition").transform;
-        int idx = 0;
+        players = new List<Player>();
+        playerDict = new Dictionary<int, Player>();
+        spawnPos = GameObject.Find("SpawnPosition").transform;
+        playerObjects = GameObject.Find("PlayerObjects");
 
-        foreach (UserInfo u in ClientManager.instance.users)
+        (var myId, var isMafia, var mafias, var userInfos) = SceneLoader.Instance.GetInGameInfo();
+        this.isMafia = isMafia;
+
+        for (int i = 0; i < userInfos.Count; i++)
+            SpawnPlayer(i, userInfos[i]);
+
+        SetMyPlayer(myId);
+
+        if (isMafia)
         {
-            playerOrder.Add(u.Id);
-
-            GameObject p = Instantiate(playerObj);
-            p.name = "Player_" + u.Id;
-            p.transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
-            p.transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[idx];
-            p.transform.position = spawnPos.GetChild(idx).position;
-            p.transform.parent = playerObjects.transform;
-
-            p.GetComponent<Player>().InitPlayerInfo(idx, u);
-            if (u.Id == ClientManager.instance.playerID)
-            {
-                myInfo = p.GetComponent<Player>();
-                p.AddComponent<PlayerController>();
-
-                roleText.text = isMafia ? "마피아" : "시민";
-                StartInformation(string.Format("당신은 {0}입니다", roleText.text));
-
-                Camera.main.transform.parent = p.transform.Find("Head");
-                Camera.main.transform.localPosition = new Vector3(0, 0, 0);
-            }
-
-            players.Add(u.Id, p);
-            idx++;
+            foreach (int mid in mafias)
+                playerDict[mid].IsMafia = true;
         }
+
+        roleText.text = isMafia ? "마피아" : "시민";
+        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
     }
-
-    private void GatherPlayers()
-    {
-        Transform spawnPos = GameObject.Find("SpawnPosition").transform;
-
-        for (int i = 0; i < playerOrder.Count; i++)
-        {
-            if (playerOrder[i] == ClientManager.instance.playerID)
-            {
-                GameObject myObject = players[playerOrder[i]];
-                myObject.GetComponent<PlayerController>().ControllerEnabled = false;
-                myObject.transform.position = spawnPos.GetChild(i).position;
-                myObject.GetComponent<PlayerController>().ControllerEnabled = true;
-
-                ClientManager.instance.EmitMove(myObject.transform.position, myObject.transform.rotation);
-            }
-        }
-    }
-
     public void KillPlayer(int deadID)
     {
-        players[deadID].GetComponent<Player>().Dead();
+        playerDict[deadID].GetComponent<Player>().Dead();
     }
 
     #region Phase
@@ -188,13 +317,13 @@ public class InGameManager : MonoBehaviour
     {
         phaseChange = true;
 
-        //FadeInOut.instance.FadeIn();
-
         StartInformation("밤이 되었습니다.");
-        FadeInOut.instance.FadeAll(() => { GatherPlayers(); }, () => { phaseChange = false; });
-        //GatherPlayers();
-
-        //phaseChange = false;
+        FadeInOut.instance.FadeAll(
+            () =>
+            {
+                myInfo.GetComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
+            },
+            () => { phaseChange = false; });
     }
     #endregion
 
@@ -267,7 +396,7 @@ public class InGameManager : MonoBehaviour
             int pNum = i + 1;
 
             Transform buttonTR = votingContent.GetChild(pNum);
-            if (pNum <= players.Count)
+            if (pNum <= playerDict.Count)
             {
                 buttonTR.Find("Image").GetComponent<Image>().color = Global.colors[i];
                 buttonTR.GetComponent<Button>().onClick.AddListener(() => { OnVoteButton(pNum); }); // local 변수 써야함 건들지 말 것
@@ -286,17 +415,17 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage && myInfo.IsAlive)
         {
-            string s = playerObjects.transform.GetChild(pNum - 1).name;
-            ClientManager.instance.EmitVoteReq(int.Parse(s.Replace("Player_", "")));
+            int targetID = players[pNum - 1].ID;
+            EmitVoteReq(targetID);
         }
     }
 
     private void UpdateVotingContent()
     {
         var votingContent = votingPanel.transform.GetChild(0);
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < playerDict.Count; i++)
         {
-            if (!players[playerOrder[i]].GetComponent<Player>().IsAlive)
+            if (!players[i].GetComponent<Player>().IsAlive)
             {
                 var btn = votingContent.GetChild(i + 1).GetComponent<Button>();
                 btn.interactable = false;
@@ -340,27 +469,19 @@ public class InGameManager : MonoBehaviour
         timeText.enabled = false;
 
         var votingContent = votingPanel.transform.GetChild(0);
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < playerDict.Count; i++)
         {
             votingContent.GetChild(i + 1).Find("Count Text").GetComponent<Text>().text = "";
         }
 
-        for (int i = 0; i < result.Length; i++)
+        foreach ((int id, int count) in result)
         {
-            int id = result[i].pid;
-            for (int j = 0; j < result.Length; j++)
+            var p = playerDict[id];
+            Text countText = votingContent.GetChild(p.Number).Find("Count Text").GetComponent<Text>();
+            countText.text = count.ToString();
+            if (id == electedId)
             {
-                if (id == playerOrder[j])
-                {
-                    Text countText = votingContent.GetChild(j + 1).Find("Count Text").GetComponent<Text>();
-                    countText.text = result[i].count.ToString();
-                    if (id == electedId)
-                    {
-                        votingContent.GetChild(j + 1).GetComponent<Button>().image.color = Color.red;
-                    }
-
-                    break;
-                }
+                votingContent.GetChild(p.Number).GetComponent<Button>().image.color = Color.red;
             }
         }
 
@@ -370,7 +491,7 @@ public class InGameManager : MonoBehaviour
         }
         else
         {
-            StartInformation($"{players[electedId].GetComponent<Player>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
+            StartInformation($"{playerDict[electedId].GetComponent<Player>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
         }
     }
     #endregion
@@ -399,7 +520,7 @@ public class InGameManager : MonoBehaviour
     {
         if (suffrage && myInfo.IsAlive)
         {
-            ClientManager.instance.EmitFinalVoteReq(isPros);
+            EmitFinalVoteReq(isPros);
         }
     }
 
@@ -408,17 +529,9 @@ public class InGameManager : MonoBehaviour
         isVoting = true;
         ShowCursor();
 
-        for (int i = 0; i < players.Count; i++)
-        {
-            if (playerOrder[i] == id)
-            {
-                Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
-                imageTR.GetComponent<Image>().color = Global.colors[i];
-                imageTR.GetComponentInChildren<Text>().text = players[id].GetComponent<Player>().Name;
-
-                break;
-            }
-        }
+        Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
+        imageTR.GetComponent<Image>().color = Global.colors[playerDict[id].Number-1];
+        imageTR.GetComponentInChildren<Text>().text = playerDict[id].Name;
 
         finalVotingPanel.SetActive(true);
     }
@@ -475,7 +588,7 @@ public class InGameManager : MonoBehaviour
 
         if (id != -1)
         {
-            Player p = players[id].GetComponent<Player>();
+            Player p = playerDict[id].GetComponent<Player>();
 
             StartInformation($"{p.Name}님이 {count}명의 동의로 추방되었습니다.");
             p.Dead();
