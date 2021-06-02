@@ -44,12 +44,13 @@ public class ClientManager : MonoBehaviour
 
         try
         {
-            client = new TcpClient(hostIp, port);
-            Socket = new MySocket(client);
-            Socket.On(PacketType.CONNECT, OnConnect);
-            Socket.On(PacketType.DISCONNECT, OnDisconnect);
-            Socket.Listen(false);
-            Socket.Emit(PacketType.CONNECT);
+            var client = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            client.Connect(hostIp, port);
+            socket = new MySocket(client);
+            socket.On(PacketType.CONNECT, OnConnect);
+            socket.On(PacketType.DISCONNECT, OnDisconnect);
+            socket.Listen(false);
+            socket.Emit(PacketType.CONNECT);
             socketReady = true;
         }
         catch (Exception e)

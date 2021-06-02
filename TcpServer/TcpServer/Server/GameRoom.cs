@@ -70,9 +70,11 @@ namespace MyPacket
         #region private method
         private List<User> DesideMafia()
         {
-            var mafias = users.Values
-                        .OrderBy(a => Guid.NewGuid())
-                        .Take(Participants > 6 ? 2 : 1);
+            //var mafias = users.Values
+            //            .OrderBy(a => Guid.NewGuid())
+            //            .Take(Participants > 6 ? 2 : 1);
+            var mafias = new List<User>();
+            mafias.Add(users[HostId]);
             foreach (var u in mafias)
                 u.SetMafia();
             return mafias.ToList();
@@ -121,7 +123,7 @@ namespace MyPacket
             Status = GameStatus.NIGHT;
             Broadcast(PacketType.NIGHT_START);
 
-            lock (Console.Out) Console.WriteLine($"night start : {RoomId}");
+            server.Log($"night start : {RoomId}");
         }
         private void StartVoting()
         {
@@ -132,7 +134,7 @@ namespace MyPacket
             InitVotingPhase();
             Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"voting start : {RoomId}");
+            server.Log($"voting start : {RoomId}");
         }
         private void EndVoting()
         {
@@ -151,7 +153,7 @@ namespace MyPacket
             var sendData = new VotingResultData(electedId, result.ToArray());
             Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"voting result : elected - {elected}");
+            server.Log($"voting result : elected - {elected}");
         }
         private void HandlingVoteResult()
         {
@@ -167,7 +169,7 @@ namespace MyPacket
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
             Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
-            lock (Console.Out) Console.WriteLine($"defense start : {RoomId}, elected - {electedId}");
+            server.Log($"defense start : {RoomId}, elected - {electedId}");
         }
         private void StartFinalVotinig()
         {
@@ -176,7 +178,7 @@ namespace MyPacket
             Status = GameStatus.FINAL_VOTE;
             InitVotingPhase();
             Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
-            lock (Console.Out) Console.WriteLine($"final voting start : {RoomId}");
+            server.Log($"final voting start : {RoomId}");
         }
         private void EndFinalVoting()
         {
@@ -193,7 +195,7 @@ namespace MyPacket
                 sendData.Kicking_id = -1;
             Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
 
-            lock (Console.Out) Console.WriteLine($"final voting result : elected - {electedId}, count - {sendData.voteCount}");
+            server.Log($"final voting result : elected - {electedId}, count - {sendData.voteCount}");
         }
         private void StartDay()
         {
@@ -202,7 +204,7 @@ namespace MyPacket
             Status = GameStatus.DAY;
             Broadcast(PacketType.DAY_START);
 
-            lock (Console.Out) Console.WriteLine($"day start : {RoomId}");
+            server.Log($"day start : {RoomId}");
 
         }
         //시간이 만료되면 발생하는 이벤트
@@ -284,7 +286,7 @@ namespace MyPacket
                     RemoveUser(u.Id);
                 }
 
-                lock (Console.Out) Console.WriteLine($"room destroy : {RoomId}");
+                server.Log($"room destroy : {RoomId}");
                 server.RemoveRoom(RoomId);
             }
             //그 외엔 남은 유저들에게 퇴장사실 전달
@@ -319,7 +321,7 @@ namespace MyPacket
             var thread = new Thread(GameLoof);
             thread.Start();
 
-            lock (Console.Out) Console.WriteLine($"start : {user.Id}");
+            server.Log($"start : {user.Id}");
             return true;
         }
         #endregion
@@ -390,7 +392,7 @@ namespace MyPacket
             }
             else
                 sendData.Result = false;
-            lock (Console.Out) Console.WriteLine($"vote : {id} -> {data.Target_id} {sendData.Result}");
+            server.Log($"vote : {id} -> {data.Target_id} {sendData.Result}");
             users[id].Emit(PacketType.VOTE_RES, sendData.ToBytes());
             if (voters == 0)
                 EndVoting();
@@ -400,7 +402,7 @@ namespace MyPacket
             (int id, Packet packet) = eventdata;
             var data = new FinalVoteReqData(packet.Bytes);
             var sendData = new FinalVoteResData();
-            lock (Console.Out) Console.WriteLine($"final vote : {id} -> {data.Agree}");
+            server.Log($"final vote : {id} -> {data.Agree}");
             if (Status == GameStatus.FINAL_VOTE)
             {
                 if (users[id].Alive &&
@@ -427,7 +429,7 @@ namespace MyPacket
                 DeadReport(eventdata.Item1);
                 StartNight();
 
-                lock (Console.Out) Console.WriteLine($"dead report : {eventdata.Item1}");
+                server.Log($"dead report : {eventdata.Item1}");
             }
         }
         #endregion
