@@ -8,7 +8,7 @@ namespace MyPacket
     /// 패킷의 헤더
     /// </summary>
     [Serializable]
-    public struct PacketHeader
+    public class PacketHeader
     {
         public static readonly int SIZE = 8;
         public PacketType Type { get; set; }
@@ -20,7 +20,12 @@ namespace MyPacket
                 return Size != 0;
             }
         }
-        public PacketHeader(PacketType type = PacketType.NONE, int size = 0)
+        public PacketHeader(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public PacketHeader(PacketType type, int size)
         {
             Type = type;
             Size = size;

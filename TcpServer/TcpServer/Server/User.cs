@@ -25,7 +25,7 @@ namespace MyPacket
         #endregion
 
         #region constructor
-        public User(TcpClient client, GameServer server) : base(client)
+        public User(Socket socket, GameServer server) : base(socket)
         {
             Id = playerId++;
             Name = $"Player{Id:X}";
@@ -119,7 +119,7 @@ namespace MyPacket
         }
         private void OnDisconnect(Packet packet)
         {
-            Close();
+            if (Status == GameStatus.NONE) return;
             switch (Status)
             {
                 case GameStatus.WAITTING:
@@ -129,6 +129,7 @@ namespace MyPacket
                     Room.RemoveUser(Id);
                     break;
             }
+            Status = GameStatus.NONE;
             server.RemoveUser(Id);
             server.Log($"disconnect : {Id}, {Name}");
         }

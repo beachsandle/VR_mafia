@@ -60,7 +60,8 @@ public class ClientManager : MonoBehaviour
 
         try
         {
-            client = new TcpClient(hostIp, port);
+            var client = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            client.Connect(hostIp, port);
             socket = new MySocket(client);
             socket.On(PacketType.CONNECT, OnConnect);
             socket.On(PacketType.DISCONNECT, OnDisconnect);
