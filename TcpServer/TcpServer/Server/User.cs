@@ -115,7 +115,7 @@ namespace MyPacket
                 Status = GameStatus.LOBBY;
                 Emit(PacketType.CONNECT, new ConnectData(Id).ToBytes());
             }
-            lock (Console.Out) Console.WriteLine($"connect : {Id}");
+            server.Log($"connect : {Id}");
         }
         private void OnDisconnect(Packet packet)
         {
@@ -130,7 +130,7 @@ namespace MyPacket
                     break;
             }
             server.RemoveUser(Id);
-            lock (Console.Out) Console.WriteLine($"disconnect : {Id}, {Name}");
+            server.Log($"disconnect : {Id}, {Name}");
         }
         private void OnSetNameReq(Packet packet)
         {
@@ -147,7 +147,7 @@ namespace MyPacket
             //결과 전송
             Emit(PacketType.SET_NAME_RES, sendData.ToBytes());
             if (sendData.Result)
-                lock (Console.Out) Console.WriteLine($"setname : {Id}, {Name}");
+                server.Log($"setname : {Id}, {Name}");
         }
         private void OnRoomListReq(Packet packet)
         {
@@ -160,7 +160,7 @@ namespace MyPacket
             //결과 전송
             Emit(PacketType.ROOM_LIST_RES, sendData.ToBytes());
             if (sendData.Result)
-                lock (Console.Out) Console.WriteLine($"room list req : {Id}");
+                server.Log($"room list req : {Id}");
         }
         private void OnCreateRoomReq(Packet packet)
         {
@@ -178,7 +178,7 @@ namespace MyPacket
             //결과 전송
             Emit(PacketType.CREATE_ROOM_RES, sendData.ToBytes());
             if (sendData.Result)
-                lock (Console.Out) Console.WriteLine($"create room req : {Id}");
+                server.Log($"create room req : {Id}, {data.RoomName}");
         }
         private void OnJoinRoomReq(Packet packet)
         {
@@ -197,7 +197,7 @@ namespace MyPacket
             //결과 전송
             Emit(PacketType.JOIN_ROOM_RES, sendData.ToBytes());
             if (sendData.Result)
-                lock (Console.Out) Console.WriteLine($"join room : {Id}");
+                server.Log($"join room : {Id}");
         }
         private void OnLeaveRoomReq(Packet packet)
         {
@@ -206,7 +206,7 @@ namespace MyPacket
                 Room.Leave(this));
             Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
             if (sendData.Result)
-                lock (Console.Out) Console.WriteLine($"leave : {Id}");
+                server.Log($"leave : {Id}");
         }
         private void OnGameStartReq(Packet packet)
         {

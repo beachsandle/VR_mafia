@@ -15,6 +15,7 @@ namespace MyPacket
         private readonly TcpListener server;
         private readonly Dictionary<int, User> userMap = new Dictionary<int, User>();
         private readonly Dictionary<int, GameRoom> roomMap = new Dictionary<int, GameRoom>();
+        private readonly Queue<string> logQueue = new Queue<string>();
         #endregion
         #region constructor
         public GameServer(TcpListener server)
@@ -27,8 +28,8 @@ namespace MyPacket
         public void Start()
         {
             server.Start();
-
-            lock (Console.Out) lock (Console.Out) Console.WriteLine("server start");
+            new Thread(LogThread).Start();
+            Log("server start");
             while (true)
             {
                 var client = server.AcceptTcpClient();
@@ -53,6 +54,20 @@ namespace MyPacket
         {
             roomMap.Remove(roomId);
         }
+        public List<GameRoomInfo> GetRoomInfos()
+        {
+            return (from r in roomMap.Values
+                    where r.Status == GameStatus.WAITTING
+                    select r.GetInfo()).ToList();
+        }
+        public void Log(string log)
+        {
+            lock (logQueue)
+            {
+                logQueue.Enqueue(log);
+                Monitor.Pulse(logQueue);
+            }
+        }
         #endregion
         #region private method
         private void UserInit(TcpClient client)
@@ -62,11 +77,17 @@ namespace MyPacket
             userMap[user.Id] = user;
             user.Listen(true);
         }
-        public List<GameRoomInfo> GetRoomInfos()
+        private void LogThread()
         {
-            return (from r in roomMap.Values
-                    where r.Status == GameStatus.WAITTING
-                    select r.GetInfo()).ToList();
+            while (true)
+            {
+                lock (logQueue)
+                {
+                    if (logQueue.Count == 0)
+                        Monitor.Wait(logQueue);
+                    Console.WriteLine(logQueue.Dequeue());
+                }
+            }
         }
         #endregion
     }
