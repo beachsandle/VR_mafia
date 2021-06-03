@@ -101,7 +101,7 @@ public class LobbyManager : MonoBehaviour
             var r = data.Rooms[i];
 
             Debug.Log(r.Name);
-            roomList.CreateRoom(r.Name, r.HostId.ToString(), r.Participants, r.Id);
+            roomList.CreateRoom(r.Name, r.Host.Name, r.Participants, r.Id);
         }
     }
 
