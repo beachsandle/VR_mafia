@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace MyPacket
 {
@@ -48,12 +48,8 @@ namespace MyPacket
             Users = new List<UserInfo>();
             while (idx < bytes.Length)
             {
-                var size = BitConverter.ToInt32(bytes, idx);
-                var temp = new byte[size - 4];
-                Array.Copy(bytes, idx + 4, temp, 0, size - 4);
-                var user = new UserInfo();
-                user.FromBytes(temp);
-                idx += size;
+                var user = new UserInfo(bytes.Skip(idx).ToArray());
+                idx += user.Size;
                 Users.Add(user);
             }
         }

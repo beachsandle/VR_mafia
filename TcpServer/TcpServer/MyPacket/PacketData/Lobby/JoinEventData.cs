@@ -31,8 +31,7 @@ namespace MyPacket
         }
         public void FromBytes(byte[] bytes)
         {
-            Info = new UserInfo();
-            Info.FromBytes(bytes.Skip(4).ToArray());
+            Info = new UserInfo(bytes);
         }
     }
 }

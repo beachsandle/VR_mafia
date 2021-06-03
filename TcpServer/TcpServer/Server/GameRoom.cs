@@ -297,7 +297,7 @@ namespace MyPacket
         //게임방의 정보를 반환
         public GameRoomInfo GetInfo()
         {
-            return new GameRoomInfo(RoomId, HostId, Participants, Name);
+            return new GameRoomInfo(RoomId, Participants, users[HostId].GetInfo(), Name);
         }
 
         //유저들의 정보를 반환
