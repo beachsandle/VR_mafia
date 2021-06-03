@@ -18,10 +18,20 @@ namespace MyPacket
         public GameRoom Room { get; private set; }
         public bool IsMafia { get; private set; } = false;
         public bool Alive { get; private set; } = true;
+        public bool IsDeadBody { get; private set; } = false;
+        public bool HasBullet { get; private set; } = false;
         public bool Voted { get; private set; } = false;
         public int VoteCount { get; private set; } = 0;
         public GameStatus Status { get; private set; } = GameStatus.CONNECT;
         public Location Transform { get; private set; } = new Location();
+
+        public bool KillReady
+        {
+            get
+            {
+                return Alive && IsMafia && HasBullet;
+            }
+        }
         #endregion
 
         #region constructor
@@ -60,6 +70,7 @@ namespace MyPacket
         public void SetMafia()
         {
             IsMafia = true;
+            HasBullet = true;
         }
         public void ResetVoteStatus()
         {
@@ -79,10 +90,32 @@ namespace MyPacket
         {
             Transform = transform;
         }
-        public void Dead()
+        public void Execute()
         {
             ResetVoteStatus();
             Alive = false;
+        }
+        public void Killed()
+        {
+            Alive = false;
+            IsDeadBody = true;
+        }
+        public bool Kill(User target)
+        {
+            if (Alive && IsMafia && HasBullet)
+            {
+                if (target.Alive && !target.IsMafia)
+                {
+                    HasBullet = false;
+                    target.Killed();
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void Reported()
+        {
+            IsDeadBody = false;
         }
         #endregion
 
