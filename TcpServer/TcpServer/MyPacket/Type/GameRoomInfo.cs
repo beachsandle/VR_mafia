@@ -9,21 +9,25 @@ namespace MyPacket
     public class GameRoomInfo
     {
         public int Id { get; set; }
-        public int HostId { get; set; }
         public int Participants { get; set; }
+        public UserInfo Host { get; set; }
         public string Name { get; set; } = "";
         public int Size
         {
             get
             {
-                return sizeof(int) * 4 + Encoding.UTF8.GetBytes(Name).Length; ;
+                return sizeof(int) * 3 + Host.Size + Encoding.UTF8.GetBytes(Name).Length; ;
             }
         }
-        public GameRoomInfo() { }
-        public GameRoomInfo(int id, int hostId, int num, string name)
+        public GameRoomInfo(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+        public GameRoomInfo(int id, int num, UserInfo host, string name)
         {
             Id = id;
-            HostId = hostId;
+            Host = host;
             Participants = num;
             Name = name;
         }
@@ -32,17 +36,18 @@ namespace MyPacket
             return new ByteBuilder(Size)
                 .Append(Size)
                 .Append(Id)
-                .Append(HostId)
                 .Append(Participants)
+                .Append(Host.ToBytes())
                 .Append(Name)
                 .Get();
         }
         public void FromBytes(byte[] bytes)
         {
-            Id = BitConverter.ToInt32(bytes, 0);
-            HostId = BitConverter.ToInt32(bytes, 4);
+            int size = BitConverter.ToInt32(bytes, 0);
+            Id = BitConverter.ToInt32(bytes, 4);
             Participants = BitConverter.ToInt32(bytes, 8);
-            Name = Encoding.UTF8.GetString(bytes, 12, bytes.Length - 12);
+            Host = new UserInfo(bytes.Skip(12).ToArray());
+            Name = Encoding.UTF8.GetString(bytes, 12 + Host.Size, size - 12 - Host.Size);
         }
     }
 }

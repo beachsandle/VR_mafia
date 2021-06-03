@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace MyPacket
 {
@@ -53,12 +53,8 @@ namespace MyPacket
             Rooms = new List<GameRoomInfo>();
             while (idx < bytes.Length)
             {
-                var size = BitConverter.ToInt32(bytes, idx);
-                var temp = new byte[size - 4];
-                Array.Copy(bytes, idx + 4, temp, 0, size - 4);
-                var room = new GameRoomInfo();
-                room.FromBytes(temp);
-                idx += size;
+                var room = new GameRoomInfo(bytes.Skip(idx).ToArray());
+                idx += room.Size;
                 Rooms.Add(room);
             }
         }

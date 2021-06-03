@@ -17,7 +17,12 @@ namespace MyPacket
                 return sizeof(int) * 2 + Encoding.UTF8.GetBytes(Name).Length; ;
             }
         }
-        public UserInfo() { }
+        public UserInfo(byte[] bytes = null)
+        {
+            if (bytes != null)
+                FromBytes(bytes);
+        }
+
         public UserInfo(int id, string name)
         {
             Id = id;
@@ -33,8 +38,9 @@ namespace MyPacket
         }
         public void FromBytes(byte[] bytes)
         {
-            Id = BitConverter.ToInt32(bytes, 0);
-            Name = Encoding.UTF8.GetString(bytes, 4, bytes.Length - 4);
+            int size = BitConverter.ToInt32(bytes, 0);
+            Id = BitConverter.ToInt32(bytes, 4);
+            Name = Encoding.UTF8.GetString(bytes, 8, size - 8);
         }
     }
 }
