@@ -22,8 +22,6 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    //private Global.GameStatus gameStatus;
-
     [SerializeField]
     private GameObject playerObj;
 
@@ -79,6 +77,8 @@ public class InGameManager : MonoBehaviour
         InitMenuPanel();
         InitVotingPanel();
         InitFinalVotingPanel();
+
+        UIManager.instance.InitUI(isMafia);
 
         HideCursor();
 
@@ -228,6 +228,17 @@ public class InGameManager : MonoBehaviour
         var data = new DieEventData(packet.Bytes);
 
         KillPlayer(data.Dead_id);
+    }
+
+    public void EmitDeadReport(int deadID)
+    {
+        socket.Emit(PacketType.DEAD_REPORT, new DeadReportData(deadID, 0).ToBytes());
+    }
+    private void OnDeadReport(Packet packet)
+    {
+        var data = new DeadReportData(packet.Bytes);
+
+        // 애니메이션 재생
     }
     #endregion
 

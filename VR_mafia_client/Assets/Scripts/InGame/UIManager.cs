@@ -20,16 +20,20 @@ public class UIManager : MonoBehaviour
     }
 
     public GameObject killUI;
+    public GameObject deadReportUI;
 
     void Start()
     {
 
     }
 
-    //void Update()
-    //{
-        
-    //}
+    public void InitUI(bool isMafia)
+    {
+        if (!isMafia)
+        {
+            killUI.SetActive(false);
+        }
+    }
 
     public void CanKill(bool canKill)
     {
@@ -37,5 +41,13 @@ public class UIManager : MonoBehaviour
             killUI.GetComponent<Image>().color = Color.red;
         else
             killUI.GetComponent<Image>().color = Color.white;
+    }
+
+    public void CanDeadReport(bool canDeadReport)
+    {
+        if (canDeadReport)
+            deadReportUI.GetComponent<Image>().color = Color.red;
+        else
+            deadReportUI.GetComponent<Image>().color = Color.white;
     }
 }
