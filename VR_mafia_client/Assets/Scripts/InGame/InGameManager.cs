@@ -281,7 +281,7 @@ public class InGameManager : MonoBehaviour
         myInfo = playerDict[myId];
         myInfo.gameObject.AddComponent<PlayerController>();
 
-        Camera.main.transform.parent = myInfo.transform.Find("Head");
+        Camera.main.transform.parent = myInfo.transform.Find("Helmet_LOD0");
         Camera.main.transform.localPosition = new Vector3(0, 0, 0);
     }
     private void SpawnPlayers()

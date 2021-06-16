@@ -894,7 +894,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2c9edcf964aa34f90cde092e5fbc4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerObj: {fileID: 3325488367929111906, guid: 23c8f804cccdb3e48b65ac14d9c7711f,
+  playerObj: {fileID: 1154340952758670609, guid: 1b9c10c5ed91b304987f8f258911e734,
     type: 3}
   phaseChange: 0
   isVoting: 0

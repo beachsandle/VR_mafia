@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     private bool canKill = false;
     private bool canDeadReport = false;
 
+    //private Animator anim;
+
     [Header("Status")]
     public float moveSpeed = 4.0F;
     public float jumpSpeed = 8.0F;
@@ -46,9 +48,10 @@ public class PlayerController : MonoBehaviour
             Debug.Log("CC is empty..!");
         }
         myInfo = GetComponent<Player>();
+        //anim = GetComponent<Animator>();
 
-        HEAD = transform.GetChild(0);
-        BODY = transform.GetChild(1);
+        HEAD = transform.Find("Helmet_LOD0");
+        BODY = transform.Find("Space Explorer_LOD0");
         InactiveMyRay();
 
         layermask = (1 << (int)Global.Layers.Player); // Layer : player
@@ -129,6 +132,14 @@ public class PlayerController : MonoBehaviour
         if (CC.isGrounded)
         {
             moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+            //if (moveDirection != Vector3.zero)
+            //{
+            //    anim.SetBool("walk", true);
+            //}
+            //else
+            //{
+            //    anim.SetBool("walk", false);
+            //}
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
 
