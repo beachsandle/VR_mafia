@@ -18,8 +18,8 @@ public class Player : MonoBehaviour
         IsAlive = true;
         IsMafia = false;
 
-        transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
-        transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
+        //transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
+        //transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
     }
 
     public void Dead()
