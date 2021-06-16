@@ -7,6 +7,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public CharacterController CC;
+    private Player myInfo;
     private Transform HEAD;
     private Transform BODY;
     private Vector3 moveDirection = Vector3.zero;
@@ -14,6 +15,8 @@ public class PlayerController : MonoBehaviour
 
     private RaycastHit hit;
     private int layermask;
+    private bool canKill = false;
+    private bool canDeadReport = false;
 
     [Header("Status")]
     public float moveSpeed = 4.0F;
@@ -42,11 +45,12 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("CC is empty..!");
         }
+        myInfo = GetComponent<Player>();
 
         HEAD = transform.GetChild(0);
         BODY = transform.GetChild(1);
 
-        layermask = (1 << 10);
+        layermask = (1 << 10); // Layer : player
     }
 
     void Update()
@@ -65,33 +69,52 @@ public class PlayerController : MonoBehaviour
         {
             Kill();
         }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            DeadReport();
+        }
     }
 
+
+    #region 상호작용
     void FindTarget()
     {
         if (Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
         {
             Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
 
-            UIManager.instance.CanKill(true);
+            if(myInfo.IsMafia) canKill = true;
+            if(!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
         }
         else
         {
             Debug.DrawRay(transform.position, transform.forward * range, Color.red);
 
-            UIManager.instance.CanKill(false);
+            if(myInfo.IsMafia) canKill = false;
+            canDeadReport = false;
         }
+
+        UIManager.instance.CanKill(canKill);
+        UIManager.instance.CanDeadReport(canDeadReport);
     }
 
     void Kill()
     {
-        if (hit.transform)
+        if (canKill)
         {
-            int targetID = int.Parse(hit.transform.name.Split('_')[1]);
-
+            int targetID = hit.transform.GetComponent<Player>().ID;
             InGameManager.Instance.EmitKillReq(targetID);
         }
     }
+    void DeadReport()
+    {
+        if (canDeadReport)
+        {
+            int deadID = hit.transform.GetComponent<Player>().ID;
+            InGameManager.Instance.EmitDeadReport(deadID);
+        }
+    }
+    #endregion
 
     #region 움직임 관련
     void Move()
