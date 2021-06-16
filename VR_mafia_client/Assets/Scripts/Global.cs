@@ -27,4 +27,11 @@ public static class Global
         FINAL_VOTE,
         END
     }
+
+    public enum Layers
+    {
+        Default,
+        IgnoreRaycast = 2,
+        Player = 10
+    }
 }

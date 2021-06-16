@@ -49,8 +49,9 @@ public class PlayerController : MonoBehaviour
 
         HEAD = transform.GetChild(0);
         BODY = transform.GetChild(1);
+        InactiveMyRay();
 
-        layermask = (1 << 10); // Layer : player
+        layermask = (1 << (int)Global.Layers.Player); // Layer : player
     }
 
     void Update()
@@ -75,20 +76,27 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void InactiveMyRay()
+    {
+        gameObject.layer = (int)Global.Layers.IgnoreRaycast;
+        HEAD.gameObject.layer = (int)Global.Layers.IgnoreRaycast;
+        BODY.gameObject.layer = (int)Global.Layers.IgnoreRaycast;
+    }
 
     #region 상호작용
     void FindTarget()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out hit, range, layermask))
+        if (Physics.Raycast(HEAD.transform.position, HEAD.transform.forward, out hit, range, layermask))
         {
-            Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
+            Debug.Log(hit.transform.name);
+            Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
 
             if(myInfo.IsMafia) canKill = true;
             if(!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
         }
         else
         {
-            Debug.DrawRay(transform.position, transform.forward * range, Color.red);
+            Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * range, Color.red);
 
             if(myInfo.IsMafia) canKill = false;
             canDeadReport = false;
