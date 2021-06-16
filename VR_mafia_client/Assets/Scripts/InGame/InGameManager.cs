@@ -22,8 +22,6 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    //private Global.GameStatus gameStatus;
-
     [SerializeField]
     private GameObject playerObj;
 
@@ -234,7 +232,6 @@ public class InGameManager : MonoBehaviour
 
     public void EmitDeadReport(int deadID)
     {
-        Debug.Log("DeadReport->deadID : " + deadID);
         socket.Emit(PacketType.DEAD_REPORT, new DeadReportData(deadID, 0).ToBytes());
     }
     private void OnDeadReport(Packet packet)

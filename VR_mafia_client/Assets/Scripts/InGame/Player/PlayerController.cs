@@ -88,7 +88,6 @@ public class PlayerController : MonoBehaviour
     {
         if (Physics.Raycast(HEAD.transform.position, HEAD.transform.forward, out hit, range, layermask))
         {
-            Debug.Log(hit.transform.name);
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
 
             if(myInfo.IsMafia) canKill = true;
