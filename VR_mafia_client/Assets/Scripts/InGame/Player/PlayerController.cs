@@ -86,6 +86,7 @@ public class PlayerController : MonoBehaviour
     }
     void HideMyCharacter()
     {
+        transform.Find("Head_1_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
         HEAD.GetComponent<SkinnedMeshRenderer>().enabled = false;
         BODY.GetComponent<SkinnedMeshRenderer>().enabled = false;
     }
@@ -135,6 +136,7 @@ public class PlayerController : MonoBehaviour
     {
         if (CC.isGrounded)
         {
+            anim.SetBool("jump", false);
             moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
             if (moveDirection != Vector3.zero)
             {
@@ -150,6 +152,7 @@ public class PlayerController : MonoBehaviour
             if (Input.GetButton("Jump"))
             {
                 moveDirection.y = jumpSpeed;
+                anim.SetBool("jump", true);
             }
         }
         moveDirection.y -= gravity * Time.deltaTime;
