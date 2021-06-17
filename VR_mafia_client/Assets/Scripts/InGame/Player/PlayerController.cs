@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     private bool canKill = false;
     private bool canDeadReport = false;
 
-    //private Animator anim;
+    private Animator anim;
 
     [Header("Status")]
     public float moveSpeed = 4.0F;
@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
             Debug.Log("CC is empty..!");
         }
         myInfo = GetComponent<Player>();
-        //anim = GetComponent<Animator>();
+        anim = GetComponent<Animator>();
 
         HEAD = transform.Find("Helmet_LOD0");
         BODY = transform.Find("Space Explorer_LOD0");
