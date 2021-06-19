@@ -212,21 +212,25 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
+        Debug.Log("KillReq : " + targetID);
+
         socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
     }
     private void OnKillRes(Packet packet)
     {
-        var data = new KillResDada(packet.Bytes);
+        //TODO: 메시지 확인
 
+        var data = new KillResDada(packet.Bytes);
+        Debug.Log("KillRes : " + data.Result);
         if (data.Result)
         {
-            // 총알 없애기
+            // Kill 쿨타임
         }
     }
     private void OnDieEvent(Packet packet)
     {
         var data = new DieEventData(packet.Bytes);
-
+        Debug.Log("DieEvent : " + data.Dead_id);
         KillPlayer(data.Dead_id);
     }
 

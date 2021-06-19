@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviour
         Move();
         Rotate();
         InGameManager.Instance.EmitMoveReq(transform.position, transform.rotation);
-
+        
         if (InGameManager.Instance.menuState) return;
 
         FindTarget();
