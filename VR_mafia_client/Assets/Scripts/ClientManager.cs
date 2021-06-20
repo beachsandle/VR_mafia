@@ -1,10 +1,7 @@
 ﻿using MyPacket;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class ClientManager : MonoBehaviour
 {

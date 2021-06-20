@@ -22,15 +22,14 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    [SerializeField]
-    private GameObject playerObj;
-
+    [SerializeField] private GameObject playerObj;
     private GameObject playerObjects;
-    private bool isMafia;
-    public bool phaseChange;
-    public bool isVoting;
-    public bool suffrage;
     private Transform spawnPos;
+    private bool isMafia;
+
+    [HideInInspector] public bool phaseChange;
+    [HideInInspector] public bool isVoting;
+    [HideInInspector] public bool suffrage;
 
     [Header("UI")]
     [SerializeField] private Text roleText;
@@ -77,7 +76,7 @@ public class InGameManager : MonoBehaviour
         InitVotingPanel();
         InitFinalVotingPanel();
 
-        UIManager.instance.InitUI(isMafia);
+        UIManager.Instance.InitUI(isMafia);
 
         HideCursor();
 
@@ -91,6 +90,7 @@ public class InGameManager : MonoBehaviour
             SetActiveMenuPanel(menuState);
         }
     }
+
     void InitInGameEvent()
     {
         socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
@@ -105,6 +105,7 @@ public class InGameManager : MonoBehaviour
         socket.On(PacketType.FINAL_VOTING_RESULT, OnFinalVotingResult);
         socket.On(PacketType.KILL_RES, OnKillRes);
         socket.On(PacketType.DIE_EVENT, OnDieEvent);
+        socket.On(PacketType.DEAD_REPORT, OnDeadReport);
     }
     void ClearInGameEvent()
     {
@@ -120,6 +121,7 @@ public class InGameManager : MonoBehaviour
         socket.Clear(PacketType.FINAL_VOTING_RESULT);
         socket.Clear(PacketType.KILL_RES);
         socket.Clear(PacketType.DIE_EVENT);
+        socket.Clear(PacketType.DEAD_REPORT);
     }
 
     #region InGame Event
@@ -223,7 +225,7 @@ public class InGameManager : MonoBehaviour
         Debug.Log("KillRes : " + data.Result);
         if (data.Result)
         {
-            UIManager.instance.UpdateKillUI();
+            UIManager.Instance.UpdateKillUI();
         }
     }
     private void OnDieEvent(Packet packet)
@@ -245,44 +247,6 @@ public class InGameManager : MonoBehaviour
     }
     #endregion
 
-    public void UpdatePlayerTransform(MoveEventData data)
-    {
-        if (data.Player_id == myInfo.ID) return;
-
-        V3 pos = data.Location.position;
-        V3 rot = data.Location.rotation;
-
-        Player p = playerDict[data.Player_id];
-        Transform TR = playerDict[data.Player_id].transform;
-        Vector3 currPos = TR.position;
-        TR.position = new Vector3(pos.x, pos.y, pos.z);
-        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
-
-        UpdatePlayerAnimation(p, currPos, TR.position);
-    }
-    private void UpdatePlayerAnimation(Player p, Vector3 currPos, Vector3 nextPos)
-    {
-        Animator anim = p.transform.GetComponent<Animator>();
-
-        //CharacterController CC = p.transform.GetComponent<CharacterController>();
-        //if (!CC.isGrounded)
-        //{
-        //    anim.SetBool("jump", true);
-        //}
-        //else
-        //{
-        //    anim.SetBool("jump", false);
-        //}
-
-        if ((currPos.x != nextPos.x) || (currPos.z != nextPos.z))
-        {
-            anim.SetBool("run", true);
-        }
-        else
-        {
-            anim.SetBool("run", false);
-        }
-    }
 
     private void ShowCursor()
     {
@@ -336,6 +300,44 @@ public class InGameManager : MonoBehaviour
 
         roleText.text = isMafia ? "마피아" : "시민";
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
+    }
+    public void UpdatePlayerTransform(MoveEventData data)
+    {
+        if (data.Player_id == myInfo.ID) return;
+
+        V3 pos = data.Location.position;
+        V3 rot = data.Location.rotation;
+
+        Player p = playerDict[data.Player_id];
+        Transform TR = playerDict[data.Player_id].transform;
+        Vector3 currPos = TR.position;
+        TR.position = new Vector3(pos.x, pos.y, pos.z);
+        TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+
+        UpdatePlayerAnimation(p, currPos, TR.position);
+    }
+    private void UpdatePlayerAnimation(Player p, Vector3 currPos, Vector3 nextPos)
+    {
+        Animator anim = p.transform.GetComponent<Animator>();
+
+        //CharacterController CC = p.transform.GetComponent<CharacterController>();
+        //if (!CC.isGrounded)
+        //{
+        //    anim.SetBool("jump", true);
+        //}
+        //else
+        //{
+        //    anim.SetBool("jump", false);
+        //}
+
+        if ((currPos.x != nextPos.x) || (currPos.z != nextPos.z))
+        {
+            anim.SetBool("run", true);
+        }
+        else
+        {
+            anim.SetBool("run", false);
+        }
     }
     public void KillPlayer(int deadID)
     {

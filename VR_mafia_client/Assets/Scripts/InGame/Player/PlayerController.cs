@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Player))]
@@ -10,8 +8,10 @@ public class PlayerController : MonoBehaviour
 {
     public CharacterController CC;
     private Player myInfo;
+    private Animator anim;
     private Transform HEAD;
     private Transform BODY;
+
     private Vector3 moveDirection = Vector3.zero;
     private float rotX, rotY;
 
@@ -19,8 +19,6 @@ public class PlayerController : MonoBehaviour
     private int layermask;
     private bool onKillTarget = false;
     private bool canDeadReport = false;
-
-    private Animator anim;
 
     [Header("Status")]
     public float moveSpeed = 6.0F;
@@ -50,10 +48,10 @@ public class PlayerController : MonoBehaviour
 
         HEAD = transform.Find("Helmet_LOD0");
         BODY = transform.Find("Space Explorer_LOD0");
+
+        layermask = (1 << (int)Global.Layers.Player);
         InactiveMyRay();
         HideMyCharacter();
-
-        layermask = (1 << (int)Global.Layers.Player); // Layer : player
     }
 
     void Update()
@@ -111,19 +109,20 @@ public class PlayerController : MonoBehaviour
 
         if (myInfo.IsMafia)
         {
-            UIManager.instance.KillCheckUI(onKillTarget);
+            UIManager.Instance.KillCheckUI(onKillTarget);
         }
-        UIManager.instance.DeadReportUI(canDeadReport);
+        UIManager.Instance.DeadReportUI(canDeadReport);
     }
 
     void Kill()
     {
-        if (onKillTarget && UIManager.instance.canKill)
+        if (onKillTarget && UIManager.Instance.canKill)
         {
             int targetID = hit.transform.GetComponent<Player>().ID;
             InGameManager.Instance.EmitKillReq(targetID);
         }
     }
+
     void DeadReport()
     {
         if (canDeadReport)
