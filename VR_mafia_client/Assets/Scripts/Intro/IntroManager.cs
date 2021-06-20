@@ -18,6 +18,14 @@ public class IntroManager : MonoBehaviour
             OnConnectButton();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            OnConnectButton();
+        }
+    }
+
     public void DisplayText(string s)
     {
         informationText.text = s;

@@ -50,6 +50,22 @@ public class LobbyManager : MonoBehaviour
 
         EmitRoomListReq();
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (changeNamePanel.activeSelf)
+            {
+                OnChangeNameOKButton();
+            }
+            else if (createRoomPanel.activeSelf)
+            {
+                OnCreateRoomOKButton();
+            }
+        }
+    }
+
     private void InitPlayerName()
     {
         userName = SceneLoader.Instance.UserName;
@@ -70,6 +86,7 @@ public class LobbyManager : MonoBehaviour
         socket.Clear(PacketType.CREATE_ROOM_RES);
         socket.Clear(PacketType.JOIN_ROOM_RES);
     }
+
     #region Lobby Event
     private void EmitSetNameReq(string userName)
     {
@@ -152,6 +169,33 @@ public class LobbyManager : MonoBehaviour
         EmitRoomListReq();
     }
 
+    #region ChangeNamePanel
+    void InitChangeNamePanel()
+    {
+        changeNamePanel.SetActive(true);
+
+        changeNamePanel.transform.GetChild(0).Find("OK Button").GetComponent<Button>().onClick.AddListener(OnChangeNameOKButton);
+        changeNamePanel.transform.GetChild(0).Find("NO Button").GetComponent<Button>().onClick.AddListener(OnChangeNameNOButton);
+        nameInputField.characterLimit = 10;
+
+        changeNamePanel.SetActive(false);
+    }
+    void OnChangeNameButton()
+    {
+        nameInputField.text = playerName.text;
+        changeNamePanel.SetActive(true);
+    }
+    void OnChangeNameOKButton()
+    {
+        EmitSetNameReq(nameInputField.text);
+        changeNamePanel.SetActive(false);
+    }
+    void OnChangeNameNOButton()
+    {
+        changeNamePanel.SetActive(false);
+    }
+    #endregion
+
     #region CreateRoomPanel
     void InitCreateRoomPanel()
     {
@@ -178,33 +222,6 @@ public class LobbyManager : MonoBehaviour
     void OnCreateRoomNOButton()
     {
         createRoomPanel.SetActive(false);
-    }
-    #endregion
-
-    #region ChangeNamePanel
-    void InitChangeNamePanel()
-    {
-        changeNamePanel.SetActive(true);
-
-        changeNamePanel.transform.GetChild(0).Find("OK Button").GetComponent<Button>().onClick.AddListener(OnChangeNameOKButton);
-        changeNamePanel.transform.GetChild(0).Find("NO Button").GetComponent<Button>().onClick.AddListener(OnChangeNameNOButton);
-        nameInputField.characterLimit = 10;
-
-        changeNamePanel.SetActive(false);
-    }
-    void OnChangeNameButton()
-    {
-        nameInputField.text = playerName.text;
-        changeNamePanel.SetActive(true);
-    }
-    void OnChangeNameOKButton()
-    {
-        EmitSetNameReq(nameInputField.text);
-        changeNamePanel.SetActive(false);
-    }
-    void OnChangeNameNOButton()
-    {
-        changeNamePanel.SetActive(false);
     }
     #endregion
 }
