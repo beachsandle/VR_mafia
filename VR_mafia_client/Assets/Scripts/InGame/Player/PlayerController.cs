@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Player))]
@@ -10,17 +8,17 @@ public class PlayerController : MonoBehaviour
 {
     public CharacterController CC;
     private Player myInfo;
+    private Animator anim;
     private Transform HEAD;
     private Transform BODY;
+
     private Vector3 moveDirection = Vector3.zero;
     private float rotX, rotY;
 
     private RaycastHit hit;
     private int layermask;
-    private bool canKill = false;
+    private bool onKillTarget = false;
     private bool canDeadReport = false;
-
-    private Animator anim;
 
     [Header("Status")]
     public float moveSpeed = 6.0F;
@@ -50,10 +48,10 @@ public class PlayerController : MonoBehaviour
 
         HEAD = transform.Find("Helmet_LOD0");
         BODY = transform.Find("Space Explorer_LOD0");
+
+        layermask = (1 << (int)Global.Layers.Player);
         InactiveMyRay();
         HideMyCharacter();
-
-        layermask = (1 << (int)Global.Layers.Player); // Layer : player
     }
 
     void Update()
@@ -98,29 +96,33 @@ public class PlayerController : MonoBehaviour
         {
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
 
-            if(myInfo.IsMafia) canKill = true;
+            if(myInfo.IsMafia) onKillTarget = true;
             if(!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
         }
         else
         {
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * range, Color.red);
 
-            if(myInfo.IsMafia) canKill = false;
+            if(myInfo.IsMafia) onKillTarget = false;
             canDeadReport = false;
         }
 
-        UIManager.instance.CanKill(canKill);
-        UIManager.instance.CanDeadReport(canDeadReport);
+        if (myInfo.IsMafia)
+        {
+            UIManager.Instance.KillCheckUI(onKillTarget);
+        }
+        UIManager.Instance.DeadReportUI(canDeadReport);
     }
 
     void Kill()
     {
-        if (canKill)
+        if (onKillTarget && UIManager.Instance.canKill)
         {
             int targetID = hit.transform.GetComponent<Player>().ID;
             InGameManager.Instance.EmitKillReq(targetID);
         }
     }
+
     void DeadReport()
     {
         if (canDeadReport)

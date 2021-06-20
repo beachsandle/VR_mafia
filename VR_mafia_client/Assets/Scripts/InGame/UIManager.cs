@@ -1,53 +1,80 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    private static UIManager _instance;
-    public static UIManager instance
+    private static UIManager instance;
+    public static UIManager Instance
     {
         get
         {
-            if (_instance == null)
+            if (!instance)
             {
-                _instance = FindObjectOfType<UIManager>();
+                instance = FindObjectOfType(typeof(UIManager)) as UIManager;
             }
 
-            return _instance;
+            return instance;
         }
     }
 
-    public GameObject killUI;
-    public GameObject deadReportUI;
+    public GameObject killIcon;
+    private Image killFillImage;
+    private Image killCheckUI;
+    [HideInInspector] public bool canKill;
 
-    void Start()
-    {
-
-    }
+    public Image deadReportImage;
 
     public void InitUI(bool isMafia)
     {
-        if (!isMafia)
+        if (isMafia)
         {
-            killUI.SetActive(false);
+            Transform killIconTR = killIcon.transform;
+            killFillImage = killIconTR.Find("Fill Image").GetComponent<Image>();
+            killCheckUI = killIconTR.Find("Kill Check UI").GetComponent<Image>();
+            canKill = true;
+        }
+        else
+        {
+            killIcon.SetActive(false);
         }
     }
 
-    public void CanKill(bool canKill)
+    public void KillCheckUI(bool onKillTarget)
     {
-        if (canKill)
-            killUI.GetComponent<Image>().color = Color.red;
+        if (onKillTarget)
+            killCheckUI.color = Color.red;
         else
-            killUI.GetComponent<Image>().color = Color.white;
+            killCheckUI.color = Color.white;
+    }
+    public void UpdateKillUI()
+    {
+        StartCoroutine(UpdateCoolTime(killFillImage, 5f));
     }
 
-    public void CanDeadReport(bool canDeadReport)
+    public void DeadReportUI(bool canDeadReport)
     {
         if (canDeadReport)
-            deadReportUI.GetComponent<Image>().color = Color.red;
+            deadReportImage.color = Color.red;
         else
-            deadReportUI.GetComponent<Image>().color = Color.white;
+            deadReportImage.color = Color.white;
+    }
+
+    IEnumerator UpdateCoolTime(Image fill, float coolTime)
+    {
+        float ct = coolTime;
+        canKill = false;
+
+        fill.fillAmount = 1f;
+        while(0 < ct)
+        {
+            ct -= 0.5f;
+            fill.fillAmount = ct / coolTime;
+
+            yield return new WaitForSeconds(0.5f);
+        }
+        fill.fillAmount = 0f;
+
+        canKill = true;
     }
 }
