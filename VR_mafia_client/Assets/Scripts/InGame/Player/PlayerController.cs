@@ -118,7 +118,7 @@ public class PlayerController : MonoBehaviour
 
     void Kill()
     {
-        if (onKillTarget)
+        if (onKillTarget && UIManager.instance.canKill)
         {
             int targetID = hit.transform.GetComponent<Player>().ID;
             InGameManager.Instance.EmitKillReq(targetID);

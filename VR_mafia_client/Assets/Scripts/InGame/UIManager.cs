@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour
     public GameObject killIcon;
     private Image killFillImage;
     private Image killCheckUI;
+    [HideInInspector] public bool canKill;
 
     public Image deadReportImage;
 
@@ -32,6 +33,7 @@ public class UIManager : MonoBehaviour
             Transform killIconTR = killIcon.transform;
             killFillImage = killIconTR.Find("Fill Image").GetComponent<Image>();
             killCheckUI = killIconTR.Find("Kill Check UI").GetComponent<Image>();
+            canKill = true;
         }
         else
         {
@@ -39,9 +41,9 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void KillCheckUI(bool canKill)
+    public void KillCheckUI(bool onKillTarget)
     {
-        if (canKill)
+        if (onKillTarget)
             killCheckUI.color = Color.red;
         else
             killCheckUI.color = Color.white;
@@ -62,6 +64,7 @@ public class UIManager : MonoBehaviour
     IEnumerator UpdateCoolTime(Image fill, float coolTime)
     {
         float ct = coolTime;
+        canKill = false;
 
         fill.fillAmount = 1f;
         while(0 < ct)
@@ -72,5 +75,7 @@ public class UIManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
         fill.fillAmount = 0f;
+
+        canKill = true;
     }
 }
