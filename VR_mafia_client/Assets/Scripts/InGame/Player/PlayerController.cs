@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Player))]
+[RequireComponent(typeof(Animator))]
 
 public class PlayerController : MonoBehaviour
 {
@@ -18,10 +20,10 @@ public class PlayerController : MonoBehaviour
     private bool canKill = false;
     private bool canDeadReport = false;
 
-    //private Animator anim;
+    private Animator anim;
 
     [Header("Status")]
-    public float moveSpeed = 4.0F;
+    public float moveSpeed = 6.0F;
     public float jumpSpeed = 8.0F;
     public float rotateSpeed = 100.0F;
     public float gravity = 20.0F;
@@ -43,16 +45,13 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         CC = GetComponent<CharacterController>();
-        if (!CC)
-        {
-            Debug.Log("CC is empty..!");
-        }
         myInfo = GetComponent<Player>();
-        //anim = GetComponent<Animator>();
+        anim = GetComponent<Animator>();
 
         HEAD = transform.Find("Helmet_LOD0");
         BODY = transform.Find("Space Explorer_LOD0");
         InactiveMyRay();
+        HideMyCharacter();
 
         layermask = (1 << (int)Global.Layers.Player); // Layer : player
     }
@@ -64,7 +63,7 @@ public class PlayerController : MonoBehaviour
         Move();
         Rotate();
         InGameManager.Instance.EmitMoveReq(transform.position, transform.rotation);
-
+        
         if (InGameManager.Instance.menuState) return;
 
         FindTarget();
@@ -84,6 +83,12 @@ public class PlayerController : MonoBehaviour
         gameObject.layer = (int)Global.Layers.IgnoreRaycast;
         HEAD.gameObject.layer = (int)Global.Layers.IgnoreRaycast;
         BODY.gameObject.layer = (int)Global.Layers.IgnoreRaycast;
+    }
+    void HideMyCharacter()
+    {
+        transform.Find("Head_1_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
+        HEAD.GetComponent<SkinnedMeshRenderer>().enabled = false;
+        BODY.GetComponent<SkinnedMeshRenderer>().enabled = false;
     }
 
     #region 상호작용
@@ -131,21 +136,23 @@ public class PlayerController : MonoBehaviour
     {
         if (CC.isGrounded)
         {
+            anim.SetBool("jump", false);
             moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
-            //if (moveDirection != Vector3.zero)
-            //{
-            //    anim.SetBool("walk", true);
-            //}
-            //else
-            //{
-            //    anim.SetBool("walk", false);
-            //}
+            if (moveDirection != Vector3.zero)
+            {
+                anim.SetBool("run", true);
+            }
+            else
+            {
+                anim.SetBool("run", false);
+            }
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
 
             if (Input.GetButton("Jump"))
             {
                 moveDirection.y = jumpSpeed;
+                anim.SetBool("jump", true);
             }
         }
         moveDirection.y -= gravity * Time.deltaTime;

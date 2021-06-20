@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
     public string Name { get; private set; }
     public bool IsAlive { get; private set; }
     public bool IsMafia { get; set; }
+
     public void InitPlayerInfo(int index, UserInfo info)
     {
         Number = index + 1;
@@ -25,6 +26,7 @@ public class Player : MonoBehaviour
     public void Dead()
     {
         IsAlive = false;
-        transform.Find("Body").gameObject.SetActive(false);
+
+        GetComponent<Animator>().Play("death2");
     }
 }

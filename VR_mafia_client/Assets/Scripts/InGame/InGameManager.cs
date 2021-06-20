@@ -54,7 +54,6 @@ public class InGameManager : MonoBehaviour
     private Dictionary<int, Player> playerDict; // id, object
     private Player myInfo;
 
-
     private void Awake()
     {
         if (instance == null)
@@ -212,21 +211,25 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
+        Debug.Log("KillReq : " + targetID);
+
         socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
     }
     private void OnKillRes(Packet packet)
     {
-        var data = new KillResDada(packet.Bytes);
+        //TODO: 메시지 확인
 
+        var data = new KillResDada(packet.Bytes);
+        Debug.Log("KillRes : " + data.Result);
         if (data.Result)
         {
-            // 총알 없애기
+            // Kill 쿨타임
         }
     }
     private void OnDieEvent(Packet packet)
     {
         var data = new DieEventData(packet.Bytes);
-
+        Debug.Log("DieEvent : " + data.Dead_id);
         KillPlayer(data.Dead_id);
     }
 
@@ -244,14 +247,41 @@ public class InGameManager : MonoBehaviour
 
     public void UpdatePlayerTransform(MoveEventData data)
     {
-        if (data.Player_id == SceneLoader.Instance.PlayerId) return;
+        if (data.Player_id == myInfo.ID) return;
 
         V3 pos = data.Location.position;
         V3 rot = data.Location.rotation;
 
+        Player p = playerDict[data.Player_id];
         Transform TR = playerDict[data.Player_id].transform;
+        Vector3 currPos = TR.position;
         TR.position = new Vector3(pos.x, pos.y, pos.z);
         TR.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
+
+        UpdatePlayerAnimation(p, currPos, TR.position);
+    }
+    private void UpdatePlayerAnimation(Player p, Vector3 currPos, Vector3 nextPos)
+    {
+        Animator anim = p.transform.GetComponent<Animator>();
+
+        //CharacterController CC = p.transform.GetComponent<CharacterController>();
+        //if (!CC.isGrounded)
+        //{
+        //    anim.SetBool("jump", true);
+        //}
+        //else
+        //{
+        //    anim.SetBool("jump", false);
+        //}
+
+        if ((currPos.x != nextPos.x) || (currPos.z != nextPos.z))
+        {
+            anim.SetBool("run", true);
+        }
+        else
+        {
+            anim.SetBool("run", false);
+        }
     }
 
     private void ShowCursor()
@@ -268,7 +298,6 @@ public class InGameManager : MonoBehaviour
     {
         var p = Instantiate(playerObj).GetComponent<Player>();
         p.InitPlayerInfo(idx, u);
-
         p.name = "Player_" + u.Id;
         p.transform.position = spawnPos.GetChild(idx).position;
         p.transform.parent = playerObjects.transform;
