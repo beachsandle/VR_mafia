@@ -19,35 +19,58 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public GameObject killUI;
-    public GameObject deadReportUI;
+    public GameObject killIcon;
+    private Image killFillImage;
+    private Image killCheckUI;
 
-    void Start()
-    {
-
-    }
+    public Image deadReportImage;
 
     public void InitUI(bool isMafia)
     {
-        if (!isMafia)
+        if (isMafia)
         {
-            killUI.SetActive(false);
+            Transform killIconTR = killIcon.transform;
+            killFillImage = killIconTR.Find("Fill Image").GetComponent<Image>();
+            killCheckUI = killIconTR.Find("Kill Check UI").GetComponent<Image>();
+        }
+        else
+        {
+            killIcon.SetActive(false);
         }
     }
 
-    public void CanKill(bool canKill)
+    public void KillCheckUI(bool canKill)
     {
         if (canKill)
-            killUI.GetComponent<Image>().color = Color.red;
+            killCheckUI.color = Color.red;
         else
-            killUI.GetComponent<Image>().color = Color.white;
+            killCheckUI.color = Color.white;
+    }
+    public void UpdateKillUI()
+    {
+        StartCoroutine(UpdateCoolTime(killFillImage, 5f));
     }
 
-    public void CanDeadReport(bool canDeadReport)
+    public void DeadReportUI(bool canDeadReport)
     {
         if (canDeadReport)
-            deadReportUI.GetComponent<Image>().color = Color.red;
+            deadReportImage.color = Color.red;
         else
-            deadReportUI.GetComponent<Image>().color = Color.white;
+            deadReportImage.color = Color.white;
+    }
+
+    IEnumerator UpdateCoolTime(Image fill, float coolTime)
+    {
+        float ct = coolTime;
+
+        fill.fillAmount = 1f;
+        while(0 < ct)
+        {
+            ct -= 0.5f;
+            fill.fillAmount = ct / coolTime;
+
+            yield return new WaitForSeconds(0.5f);
+        }
+        fill.fillAmount = 0f;
     }
 }

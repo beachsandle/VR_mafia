@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
 
     private RaycastHit hit;
     private int layermask;
-    private bool canKill = false;
+    private bool onKillTarget = false;
     private bool canDeadReport = false;
 
     private Animator anim;
@@ -98,24 +98,27 @@ public class PlayerController : MonoBehaviour
         {
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
 
-            if(myInfo.IsMafia) canKill = true;
+            if(myInfo.IsMafia) onKillTarget = true;
             if(!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
         }
         else
         {
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * range, Color.red);
 
-            if(myInfo.IsMafia) canKill = false;
+            if(myInfo.IsMafia) onKillTarget = false;
             canDeadReport = false;
         }
 
-        UIManager.instance.CanKill(canKill);
-        UIManager.instance.CanDeadReport(canDeadReport);
+        if (myInfo.IsMafia)
+        {
+            UIManager.instance.KillCheckUI(onKillTarget);
+        }
+        UIManager.instance.DeadReportUI(canDeadReport);
     }
 
     void Kill()
     {
-        if (canKill)
+        if (onKillTarget)
         {
             int targetID = hit.transform.GetComponent<Player>().ID;
             InGameManager.Instance.EmitKillReq(targetID);

@@ -223,7 +223,7 @@ public class InGameManager : MonoBehaviour
         Debug.Log("KillRes : " + data.Result);
         if (data.Result)
         {
-            // Kill 쿨타임
+            UIManager.instance.UpdateKillUI();
         }
     }
     private void OnDieEvent(Packet packet)
