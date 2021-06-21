@@ -28,5 +28,6 @@ public class Player : MonoBehaviour
         IsAlive = false;
 
         GetComponent<Animator>().Play("death2");
+        GetComponent<CharacterController>().enabled = false;
     }
 }

@@ -213,7 +213,6 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
-        Debug.Log("KillReq : " + targetID);
 
         socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
     }
@@ -222,7 +221,6 @@ public class InGameManager : MonoBehaviour
         //TODO: 메시지 확인
 
         var data = new KillResDada(packet.Bytes);
-        Debug.Log("KillRes : " + data.Result);
         if (data.Result)
         {
             UIManager.Instance.UpdateKillUI();
@@ -242,8 +240,16 @@ public class InGameManager : MonoBehaviour
     private void OnDeadReport(Packet packet)
     {
         var data = new DeadReportData(packet.Bytes);
+        
+        // 애니메이션 재생
 
-        // 애니메이션 재생, 시체 지우기
+        foreach(Player p in players)
+        {
+            if (!p.IsAlive)
+            {
+                Destroy(p.gameObject);
+            }
+        }
     }
     #endregion
 
