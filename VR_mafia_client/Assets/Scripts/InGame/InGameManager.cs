@@ -213,13 +213,10 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
-
         socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
     }
     private void OnKillRes(Packet packet)
     {
-        //TODO: 메시지 확인
-
         var data = new KillResDada(packet.Bytes);
         if (data.Result)
         {
@@ -229,7 +226,7 @@ public class InGameManager : MonoBehaviour
     private void OnDieEvent(Packet packet)
     {
         var data = new DieEventData(packet.Bytes);
-        Debug.Log("DieEvent : " + data.Dead_id);
+
         KillPlayer(data.Dead_id);
     }
 
@@ -247,12 +244,11 @@ public class InGameManager : MonoBehaviour
         {
             if (!p.IsAlive)
             {
-                Destroy(p.gameObject);
+                p.MakeGhost();
             }
         }
     }
     #endregion
-
 
     private void ShowCursor()
     {
@@ -482,7 +478,7 @@ public class InGameManager : MonoBehaviour
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < playerDict.Count; i++)
         {
-            if (!players[i].GetComponent<Player>().IsAlive)
+            if (!players[i].IsAlive)
             {
                 var btn = votingContent.GetChild(i + 1).GetComponent<Button>();
                 btn.interactable = false;

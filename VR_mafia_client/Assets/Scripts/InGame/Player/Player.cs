@@ -28,6 +28,17 @@ public class Player : MonoBehaviour
         IsAlive = false;
 
         GetComponent<Animator>().Play("death2");
-        GetComponent<CharacterController>().enabled = false;
+        Destroy(GetComponent<CharacterController>());
+    }
+
+    public void MakeGhost()
+    {
+        Destroy(GetComponent<Animator>());
+
+        foreach(Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+        gameObject.AddComponent<GhostController>();
     }
 }
