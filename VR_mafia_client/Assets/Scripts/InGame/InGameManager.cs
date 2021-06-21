@@ -213,16 +213,11 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
-        Debug.Log("KillReq : " + targetID);
-
         socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
     }
     private void OnKillRes(Packet packet)
     {
-        //TODO: 메시지 확인
-
         var data = new KillResDada(packet.Bytes);
-        Debug.Log("KillRes : " + data.Result);
         if (data.Result)
         {
             UIManager.Instance.UpdateKillUI();
@@ -231,7 +226,7 @@ public class InGameManager : MonoBehaviour
     private void OnDieEvent(Packet packet)
     {
         var data = new DieEventData(packet.Bytes);
-        Debug.Log("DieEvent : " + data.Dead_id);
+
         KillPlayer(data.Dead_id);
     }
 
@@ -242,11 +237,18 @@ public class InGameManager : MonoBehaviour
     private void OnDeadReport(Packet packet)
     {
         var data = new DeadReportData(packet.Bytes);
+        
+        // 애니메이션 재생
 
-        // 애니메이션 재생, 시체 지우기
+        foreach(Player p in players)
+        {
+            if (!p.IsAlive)
+            {
+                p.MakeGhost();
+            }
+        }
     }
     #endregion
-
 
     private void ShowCursor()
     {
@@ -281,6 +283,16 @@ public class InGameManager : MonoBehaviour
         Camera.main.transform.parent = playerDict[id].transform.Find("Helmet_LOD0");
         Camera.main.transform.localPosition = new Vector3(0, 0, 0);
     }
+    public int NextCamera(int target)
+    {
+        while (players[(target % players.Count)].IsAlive)
+        {
+            target++;
+        }
+
+        SetCamera(players[target].ID);
+        return target + 1;
+    }
     private void SpawnPlayers()
     {
         players = new List<Player>();
@@ -305,7 +317,7 @@ public class InGameManager : MonoBehaviour
         roleText.text = isMafia ? "마피아" : "시민";
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
     }
-    public void UpdatePlayerTransform(MoveEventData data)
+    private void UpdatePlayerTransform(MoveEventData data)
     {
         if (data.Player_id == myInfo.ID) return;
 
@@ -343,7 +355,7 @@ public class InGameManager : MonoBehaviour
             anim.SetBool("run", false);
         }
     }
-    public void KillPlayer(int deadID)
+    private void KillPlayer(int deadID)
     {
         playerDict[deadID].GetComponent<Player>().Dead();
 
@@ -476,7 +488,7 @@ public class InGameManager : MonoBehaviour
         var votingContent = votingPanel.transform.GetChild(0);
         for (int i = 0; i < playerDict.Count; i++)
         {
-            if (!players[i].GetComponent<Player>().IsAlive)
+            if (!players[i].IsAlive)
             {
                 var btn = votingContent.GetChild(i + 1).GetComponent<Button>();
                 btn.interactable = false;
