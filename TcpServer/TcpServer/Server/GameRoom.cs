@@ -92,10 +92,6 @@ namespace MyPacket
             }
             voters = maxVoters;
         }
-        private void DeadReport(int id)
-        {
-
-        }
         #endregion
 
         #region life cycle
@@ -188,7 +184,7 @@ namespace MyPacket
             Status = GameStatus.FINAL_VOTE_END;
             if (sendData.voteCount * 2 >= maxVoters)
             {
-                users[electedId].Dead();
+                users[electedId].Execute();
                 --live;
             }
             else
@@ -357,6 +353,7 @@ namespace MyPacket
             On(PacketType.VOTE_REQ, OnVoteReq);
             On(PacketType.FINAL_VOTE_REQ, OnFinalVoteReq);
             On(PacketType.DEAD_REPORT, OnDeadReport);
+            On(PacketType.KILL_REQ, OnKillReq);
         }
         //공백 핸들러
         private void EmptyHandler((int, Packet) data) { }
@@ -424,13 +421,37 @@ namespace MyPacket
         }
         private void OnDeadReport((int, Packet) eventdata)
         {
+            (_, Packet packet) = eventdata;
+            var data = new DeadReportData(packet.Bytes);
+
             if (Status == GameStatus.DAY)
             {
-                DeadReport(eventdata.Item1);
-                StartNight();
-
-                server.Log($"dead report : {eventdata.Item1}");
+                if (users[data.Reporter_id].Alive && users[data.Dead_id].IsDeadBody)
+                {
+                    users[data.Dead_id].Reported();
+                    Broadcast(PacketType.DEAD_REPORT, data.ToBytes());
+                    StartNight();
+                    server.Log($"dead report : {data.Reporter_id} -> {data.Dead_id}");
+                }
             }
+        }
+        private void OnKillReq((int, Packet) eventdata)
+        {
+            (int id, Packet packet) = eventdata;
+            var data = new KillReqDada(packet.Bytes);
+            var sendData = new KillResDada(false);
+
+            if (Status == GameStatus.DAY &&
+                users.ContainsKey(data.Target_id) &&
+                users[id].Kill(users[data.Target_id]))
+            {
+                --live;
+                sendData.Result = true;
+            }
+
+            users[id].Emit(PacketType.KILL_RES, sendData.ToBytes());
+            if (sendData.Result)
+                Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id).ToBytes());
         }
         #endregion
     }
