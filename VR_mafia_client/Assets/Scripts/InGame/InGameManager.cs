@@ -243,7 +243,7 @@ public class InGameManager : MonoBehaviour
     {
         var data = new DeadReportData(packet.Bytes);
 
-        // 애니메이션 재생
+        // 애니메이션 재생, 시체 지우기
     }
     #endregion
 
@@ -274,7 +274,11 @@ public class InGameManager : MonoBehaviour
         myInfo = playerDict[myId];
         myInfo.gameObject.AddComponent<PlayerController>();
 
-        Camera.main.transform.parent = myInfo.transform.Find("Helmet_LOD0");
+        SetCamera(myId);
+    }
+    private void SetCamera(int id)
+    {
+        Camera.main.transform.parent = playerDict[id].transform.Find("Helmet_LOD0");
         Camera.main.transform.localPosition = new Vector3(0, 0, 0);
     }
     private void SpawnPlayers()
@@ -342,6 +346,11 @@ public class InGameManager : MonoBehaviour
     public void KillPlayer(int deadID)
     {
         playerDict[deadID].GetComponent<Player>().Dead();
+
+        if(deadID == myInfo.ID)
+        {
+            Destroy(myInfo.GetComponent<PlayerController>());
+        }
     }
 
     #region Phase
