@@ -283,6 +283,16 @@ public class InGameManager : MonoBehaviour
         Camera.main.transform.parent = playerDict[id].transform.Find("Helmet_LOD0");
         Camera.main.transform.localPosition = new Vector3(0, 0, 0);
     }
+    public int NextCamera(int target)
+    {
+        while (players[(target % players.Count)].IsAlive)
+        {
+            target++;
+        }
+
+        SetCamera(players[target].ID);
+        return target + 1;
+    }
     private void SpawnPlayers()
     {
         players = new List<Player>();
@@ -307,7 +317,7 @@ public class InGameManager : MonoBehaviour
         roleText.text = isMafia ? "마피아" : "시민";
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
     }
-    public void UpdatePlayerTransform(MoveEventData data)
+    private void UpdatePlayerTransform(MoveEventData data)
     {
         if (data.Player_id == myInfo.ID) return;
 
@@ -345,7 +355,7 @@ public class InGameManager : MonoBehaviour
             anim.SetBool("run", false);
         }
     }
-    public void KillPlayer(int deadID)
+    private void KillPlayer(int deadID)
     {
         playerDict[deadID].GetComponent<Player>().Dead();
 
