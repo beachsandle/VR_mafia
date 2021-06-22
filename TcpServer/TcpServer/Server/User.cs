@@ -9,6 +9,7 @@ namespace MyPacket
     {
         #region field
         private static int playerId = 1;
+        private static readonly int NAME_SIZE = 8;
         private readonly GameServer server;
         #endregion
 
@@ -118,7 +119,12 @@ namespace MyPacket
             IsDeadBody = false;
         }
         #endregion
-
+        #region private method
+        private bool ValidName(string name)
+        {
+            return name.Replace(" ", "") != "" && name.Length < NAME_SIZE;
+        }
+        #endregion
         #region eventhandler
 
         //유저의 이벤트 핸들러 등록
@@ -171,7 +177,7 @@ namespace MyPacket
             var data = new SetNameReqData(packet.Bytes);
             var sendData = new SetNameResData();
             //로비일 경우 이름 변경
-            if (Status == GameStatus.LOBBY)
+            if (Status == GameStatus.LOBBY && ValidName(data.UserName))
             {
                 Name = data.UserName;
                 sendData.UserName = data.UserName;
@@ -201,7 +207,7 @@ namespace MyPacket
             var data = new CreateRoomReqData(packet.Bytes);
             var sendData = new CreateRoomResData();
             //로비일 경우 방을 생성하고 대기실로 입장
-            if (Status == GameStatus.LOBBY)
+            if (Status == GameStatus.LOBBY && ValidName(data.RoomName))
             {
                 Room = server.CreateRoom(this, data.RoomName);
                 Room.Join(this);
