@@ -9,14 +9,11 @@ public class VotingPanel : MonoBehaviour
     {
         var votingContent = transform.GetChild(0);
 
-        for (int i = 0; i < votingContent.childCount; i++)
+        foreach (var btn in votingContent.GetComponentsInChildren<Button>())
         {
-            var content = votingContent.GetChild(i);
-            if (content.GetComponent<Button>())
-            {
-                content.GetComponent<Button>().image.color = Color.white;
-                content.Find("Count Text").GetComponent<Text>().text = "0";
-            }
+            btn.transform.Find("Text").GetComponent<Text>().color = Color.white;
+            btn.transform.Find("Count Text").GetComponent<Text>().text = "0";
+            btn.transform.Find("Selected UI").gameObject.SetActive(false);
         }
     }
 }

@@ -307,7 +307,7 @@ namespace MyPacket
             //대기실이고, 방장일 경우에만 게임 시작 가능
             if (user.Status != GameStatus.WAITTING || HostId != user.Id)
                 return false;
-            if (users.Count < 4) return false;
+            //if (users.Count < 4) return false;
             Status = GameStatus.DAY;
             live = users.Count;
             var mafias = DesideMafia();

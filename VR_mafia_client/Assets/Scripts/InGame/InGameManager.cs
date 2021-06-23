@@ -384,7 +384,10 @@ public class InGameManager : MonoBehaviour
         FadeInOut.instance.FadeAll(
             () =>
             {
-                myInfo.GetComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
+                if (myInfo.IsAlive)
+                {
+                    myInfo.GetComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
+                }
             },
             () => { phaseChange = false; });
     }
@@ -461,6 +464,7 @@ public class InGameManager : MonoBehaviour
             Transform buttonTR = votingContent.GetChild(pNum);
             if (pNum <= playerDict.Count)
             {
+                buttonTR.Find("Text").GetComponent<Text>().text = players[i].Name;
                 buttonTR.GetComponent<Image>().color = Global.colors[i];
                 buttonTR.GetComponent<Button>().onClick.AddListener(() => { OnVoteButton(pNum); }); // local 변수 써야함 건들지 말 것
             }
@@ -544,7 +548,8 @@ public class InGameManager : MonoBehaviour
             countText.text = count.ToString();
             if (id == electedId)
             {
-                votingContent.GetChild(p.Number).GetComponent<Button>().image.color = Color.red;
+                votingContent.GetChild(p.Number).Find("Text").GetComponent<Text>().color = Color.red;
+                votingContent.GetChild(p.Number).Find("Selected UI").gameObject.SetActive(true);
             }
         }
 
