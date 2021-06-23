@@ -231,7 +231,7 @@ namespace MyPacket
                 if (eventQueue.Count == 0)
                     Thread.Sleep(1);
                 EventHandling();
-                TimeFlow();
+                //TimeFlow();
                 if (currentTime < 0)
                     Timeout();
             }

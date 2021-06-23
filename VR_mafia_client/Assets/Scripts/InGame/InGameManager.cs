@@ -244,7 +244,7 @@ public class InGameManager : MonoBehaviour
         {
             if (!p.IsAlive)
             {
-                p.MakeGhost();
+                p.MakeEmpty();
             }
         }
     }
@@ -283,15 +283,27 @@ public class InGameManager : MonoBehaviour
         Camera.main.transform.parent = playerDict[id].transform.Find("Helmet_LOD0");
         Camera.main.transform.localPosition = new Vector3(0, 0, 0);
     }
-    public int NextCamera(int target)
+    public int NextCamera(int targetNum)
     {
-        while (players[(target % players.Count)].IsAlive)
+        while (!players[(targetNum % players.Count)].IsAlive)
         {
-            target++;
+            targetNum++;
         }
 
-        SetCamera(players[target].ID);
-        return target + 1;
+        int nextTargetIdx = targetNum % players.Count;
+        SetCamera(players[nextTargetIdx].ID);
+        if(nextTargetIdx != (targetNum - 1))
+        {
+            CharacterSetActive(players[targetNum - 1], true);
+            CharacterSetActive(players[nextTargetIdx], false);
+        }
+        return (nextTargetIdx + 1);
+    }
+    private void CharacterSetActive(Player p, bool b)
+    {
+        p.transform.Find("Head_1_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
+        p.transform.Find("Helmet_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
+        p.transform.Find("Space Explorer_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
     }
     private void SpawnPlayers()
     {
@@ -357,12 +369,7 @@ public class InGameManager : MonoBehaviour
     }
     private void KillPlayer(int deadID)
     {
-        playerDict[deadID].GetComponent<Player>().Dead();
-
-        if(deadID == myInfo.ID)
-        {
-            Destroy(myInfo.GetComponent<PlayerController>());
-        }
+        playerDict[deadID].GetComponent<Player>().Dead(deadID == myInfo.ID);
     }
 
     #region Phase
@@ -659,7 +666,7 @@ public class InGameManager : MonoBehaviour
             Player p = playerDict[id].GetComponent<Player>();
 
             StartInformation($"{p.Name}님이 {count}명의 동의로 추방되었습니다.");
-            p.Dead();
+            p.Dead(id == myInfo.ID);
         }
         else
         {
