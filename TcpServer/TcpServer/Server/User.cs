@@ -9,7 +9,6 @@ namespace MyPacket
     {
         #region field
         private static int playerId = 1;
-        private static readonly int NAME_SIZE = 8;
         private readonly GameServer server;
         #endregion
 
@@ -19,10 +18,20 @@ namespace MyPacket
         public GameRoom Room { get; private set; }
         public bool IsMafia { get; private set; } = false;
         public bool Alive { get; private set; } = true;
+        public bool IsDeadBody { get; private set; } = false;
+        public bool HasBullet { get; private set; } = false;
         public bool Voted { get; private set; } = false;
         public int VoteCount { get; private set; } = 0;
         public GameStatus Status { get; private set; } = GameStatus.CONNECT;
         public Location Transform { get; private set; } = new Location();
+
+        public bool KillReady
+        {
+            get
+            {
+                return Alive && IsMafia && HasBullet;
+            }
+        }
         #endregion
 
         #region constructor
@@ -61,6 +70,7 @@ namespace MyPacket
         public void SetMafia()
         {
             IsMafia = true;
+            HasBullet = true;
         }
         public void ResetVoteStatus()
         {
@@ -80,18 +90,35 @@ namespace MyPacket
         {
             Transform = transform;
         }
-        public void Dead()
+        public void Execute()
         {
             ResetVoteStatus();
             Alive = false;
         }
-        #endregion
-        #region private method
-        private bool ValidName(string name)
+        public void Killed()
         {
-            return name.Replace(" ", "") != "" && name.Length < NAME_SIZE;
+            Alive = false;
+            IsDeadBody = true;
+        }
+        public bool Kill(User target)
+        {
+            if (Alive && IsMafia && HasBullet)
+            {
+                if (target.Alive && !target.IsMafia)
+                {
+                    HasBullet = false;
+                    target.Killed();
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void Reported()
+        {
+            IsDeadBody = false;
         }
         #endregion
+
         #region eventhandler
 
         //유저의 이벤트 핸들러 등록
@@ -125,7 +152,7 @@ namespace MyPacket
         }
         private void OnDisconnect(Packet packet)
         {
-            Close();
+            if (Status == GameStatus.NONE) return;
             switch (Status)
             {
                 case GameStatus.WAITTING:
@@ -135,6 +162,7 @@ namespace MyPacket
                     Room.RemoveUser(Id);
                     break;
             }
+            Status = GameStatus.NONE;
             server.RemoveUser(Id);
             server.Log($"disconnect : {Id}, {Name}");
         }
@@ -143,7 +171,7 @@ namespace MyPacket
             var data = new SetNameReqData(packet.Bytes);
             var sendData = new SetNameResData();
             //로비일 경우 이름 변경
-            if (Status == GameStatus.LOBBY && ValidName(data.UserName))
+            if (Status == GameStatus.LOBBY)
             {
                 Name = data.UserName;
                 sendData.UserName = data.UserName;
@@ -173,7 +201,7 @@ namespace MyPacket
             var data = new CreateRoomReqData(packet.Bytes);
             var sendData = new CreateRoomResData();
             //로비일 경우 방을 생성하고 대기실로 입장
-            if (Status == GameStatus.LOBBY && ValidName(data.RoomName))
+            if (Status == GameStatus.LOBBY)
             {
                 Room = server.CreateRoom(this, data.RoomName);
                 Room.Join(this);
