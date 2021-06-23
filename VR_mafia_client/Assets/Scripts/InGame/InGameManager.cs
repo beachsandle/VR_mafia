@@ -461,7 +461,7 @@ public class InGameManager : MonoBehaviour
             Transform buttonTR = votingContent.GetChild(pNum);
             if (pNum <= playerDict.Count)
             {
-                buttonTR.Find("Image").GetComponent<Image>().color = Global.colors[i];
+                buttonTR.GetComponent<Image>().color = Global.colors[i];
                 buttonTR.GetComponent<Button>().onClick.AddListener(() => { OnVoteButton(pNum); }); // local 변수 써야함 건들지 말 것
             }
             else
