@@ -1,7 +1,10 @@
 ﻿using MyPacket;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ClientManager : MonoBehaviour
 {
@@ -41,8 +44,7 @@ public class ClientManager : MonoBehaviour
 
         try
         {
-            var client = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            client.Connect(hostIp, port);
+            var client = new TcpClient(hostIp, port);
             Socket = new MySocket(client);
             Socket.On(PacketType.CONNECT, OnConnect);
             Socket.On(PacketType.DISCONNECT, OnDisconnect);

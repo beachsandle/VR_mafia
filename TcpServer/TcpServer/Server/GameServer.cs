@@ -32,8 +32,8 @@ namespace MyPacket
             Log("server start");
             while (true)
             {
-                var socket = server.AcceptSocket();
-                UserInit(socket);
+                var client = server.AcceptTcpClient();
+                UserInit(client);
             }
         }
         public GameRoom CreateRoom(User user, string roomName)
@@ -70,10 +70,10 @@ namespace MyPacket
         }
         #endregion
         #region private method
-        private void UserInit(Socket socket)
+        private void UserInit(TcpClient client)
         {
 
-            var user = new User(socket, this);
+            var user = new User(client, this);
             userMap[user.Id] = user;
             user.Listen(true);
         }

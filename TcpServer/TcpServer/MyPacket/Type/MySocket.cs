@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
-using System.Linq;
 
 namespace MyPacket
 {
@@ -12,9 +11,11 @@ namespace MyPacket
         public delegate void MessageHandler(Packet packet);
         #endregion
         #region field
-        protected Socket socket;
-        protected Queue<Packet> readQueue = new Queue<Packet>();
+        protected TcpClient client;
+        protected NetworkStream stream;
         protected Dictionary<PacketType, MessageHandler> handlerMap = new Dictionary<PacketType, MessageHandler>();
+        protected Queue<Packet> readQueue = new Queue<Packet>();
+        protected byte[] buffer;
         #endregion
         #region property
         public bool IsAsync { get; set; }
@@ -27,9 +28,12 @@ namespace MyPacket
         }
         #endregion
         #region constructor
-        public MySocket(Socket socket)
+        public MySocket(TcpClient client)
         {
-            this.socket = socket;
+            this.client = client;
+            stream = client.GetStream();
+            stream.Flush();
+            buffer = new byte[1024];
             InitHandlerMap();
         }
         #endregion
@@ -42,43 +46,54 @@ namespace MyPacket
                 handlerMap[type] = EmptyHandler;
             }
         }
-        //열거자에서 패킷을 읽고 패킷의 크기를 반환
-        private int ReadPacket(IEnumerable<byte> buffer)
+        //클라이언트와 연결이 종료되기 전까지 패킷을 읽고 처리 또는 저장
+        private void ReadMessage()
         {
-            var header = new PacketHeader(buffer.Take(8).ToArray());
-            var bytes = header.HasData ?
-                buffer.Skip(8).Take(header.Size).ToArray() : null;
-            var packet = new Packet(header, bytes);
+            try
+            {
+                while (stream.CanRead)
+                {
+                    ReadPacket();
+                }
+            }
+            //연결이 종료될 경우 disconnect 핸들러 호출
+            catch (System.IO.IOException)
+            {
+                handlerMap[PacketType.DISCONNECT](new Packet());
+            }
+        }
+        //스트림에서 패킷을 읽고 버퍼에 저장
+        private void ReadPacket()
+        {
+            var header = new PacketHeader();
+            //먼저 헤더 크기만큼 읽고 버퍼에 저장
+            stream.Read(buffer, 0, PacketHeader.SIZE);
+            header.FromBytes(buffer);
+
+            //버퍼의 크기가 데이터의 크기보다 작으면 확장
+            if (buffer.Length < header.Size)
+                buffer = new byte[buffer.Length * 2];
+
+            //데이터 크기만큼 읽고 버퍼에 저장
+            if (header.Size != 0)
+                stream.Read(buffer, 0, header.Size);
+
+            //비동기적인 경우 바로 핸들러를 호출하고 아닐 경우 큐에 저장
+            var packet = new Packet(header, buffer);
             if (IsAsync)
                 handlerMap[header.Type](packet);
             else
                 readQueue.Enqueue(packet);
-            return packet.Size;
-        }
-        //비동기 핸들러
-        private void OnRecieved(object sender, SocketAsyncEventArgs e)
-        {
-            var target = e.Buffer.Skip(e.Offset).Take(e.BytesTransferred);
-            for (int i = e.Offset; i < e.BytesTransferred;)
-            {
-                int cnt = ReadPacket(target);
-                target.Skip(cnt);
-                i += cnt;
-            }
-            if (e.BytesTransferred != 0)
-                (sender as Socket).ReceiveAsync(e);
-            else
-                Close();
         }
         //공백 핸들러
         private void EmptyHandler(Packet packet) { }
         #endregion
         #region public method
-        //on disconnect 호출
+        //클라이언트와 스트림의 연결을 해제
         public void Close()
         {
-            handlerMap[PacketType.DISCONNECT](new Packet());
-            socket.Close();
+            stream.Close();
+            client.Close();
         }
         //이벤트 핸들러 등록
         public void On(PacketType type, MessageHandler handler)
@@ -98,8 +113,13 @@ namespace MyPacket
         //메시지 전송
         public void Emit(PacketType type, byte[] bytes = null)
         {
-            var packet = new Packet(type, bytes);
-            socket.Send(packet.ToBytes());
+            if (stream.CanWrite)
+            {
+                var packet = new Packet(type, bytes);
+                stream.Write(packet.ToBytes(), 0, packet.Size);
+            }
+            else
+                handlerMap[PacketType.DISCONNECT](new Packet());
         }
         //readQueue에서 메시지 하나를 읽고 처리
         public void Handle()
@@ -114,11 +134,8 @@ namespace MyPacket
         public void Listen(bool isAsync)
         {
             IsAsync = isAsync;
-            var e = new SocketAsyncEventArgs();
-            e.SetBuffer(new byte[1024], 0, 1024);
-            e.Completed += OnRecieved;
-            e.UserToken = this;
-            socket.ReceiveAsync(e);
+            var readThread = new Thread(ReadMessage);
+            readThread.Start();
         }
         #endregion
     }
