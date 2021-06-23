@@ -1115,7 +1115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &865664231
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2133,7 +2133,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1873006928
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2282,7 +2282,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1913033439
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2425,7 +2425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+  m_Color: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5294118}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2704,6 +2704,32 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1275793199}
     m_Modifications:
+    - target: {fileID: 2339135392936130367, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: bc63fae29270c6c438ce47807e5ae5ed,
+        type: 3}
+    - target: {fileID: 2339135392936130367, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.5294118
+      objectReference: {fileID: 0}
+    - target: {fileID: 2339135392936130367, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.29803923
+      objectReference: {fileID: 0}
+    - target: {fileID: 2339135392936130367, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.29803923
+      objectReference: {fileID: 0}
+    - target: {fileID: 2339135392936130367, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.29803923
+      objectReference: {fileID: 0}
     - target: {fileID: 2339135393283519740, guid: 97051b990b20360468081d4872a27265,
         type: 3}
       propertyPath: m_Name
@@ -2712,7 +2738,7 @@ PrefabInstance:
     - target: {fileID: 2339135393283519740, guid: 97051b990b20360468081d4872a27265,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2339135393283519741, guid: 97051b990b20360468081d4872a27265,
         type: 3}
