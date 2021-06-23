@@ -384,7 +384,10 @@ public class InGameManager : MonoBehaviour
         FadeInOut.instance.FadeAll(
             () =>
             {
-                myInfo.GetComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
+                if (myInfo.IsAlive)
+                {
+                    myInfo.GetComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
+                }
             },
             () => { phaseChange = false; });
     }
