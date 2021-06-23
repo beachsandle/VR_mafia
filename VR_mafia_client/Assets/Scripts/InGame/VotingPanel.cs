@@ -13,6 +13,7 @@ public class VotingPanel : MonoBehaviour
         {
             btn.transform.Find("Text").GetComponent<Text>().color = Color.white;
             btn.transform.Find("Count Text").GetComponent<Text>().text = "0";
+            btn.transform.Find("Selected UI").gameObject.SetActive(false);
         }
     }
 }

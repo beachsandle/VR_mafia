@@ -549,6 +549,7 @@ public class InGameManager : MonoBehaviour
             if (id == electedId)
             {
                 votingContent.GetChild(p.Number).Find("Text").GetComponent<Text>().color = Color.red;
+                votingContent.GetChild(p.Number).Find("Selected UI").gameObject.SetActive(true);
             }
         }
 
