@@ -23,22 +23,33 @@ public class Player : MonoBehaviour
         //transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
     }
 
-    public void Dead()
+    public void Dead(bool isMe)
     {
         IsAlive = false;
-
         GetComponent<Animator>().Play("death2");
+
+        if (isMe)
+        {
+            MakeGhost();
+        }
         Destroy(GetComponent<CharacterController>());
+
+        gameObject.AddComponent<BoxCollider>().isTrigger = true;
+    }
+    private void MakeGhost()
+    {
+        Destroy(GetComponent<PlayerController>());
+
+        gameObject.AddComponent<GhostController>();
     }
 
-    public void MakeGhost()
+    public void MakeEmpty()
     {
         Destroy(GetComponent<Animator>());
 
-        foreach(Transform child in transform)
+        foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
         }
-        gameObject.AddComponent<GhostController>();
     }
 }
