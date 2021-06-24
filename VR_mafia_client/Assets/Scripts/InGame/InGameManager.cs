@@ -274,7 +274,7 @@ public class InGameManager : MonoBehaviour
     private void SetMyPlayer(int myId)
     {
         myInfo = playerDict[myId];
-        myInfo.gameObject.AddComponent<PlayerController>();
+        myInfo.gameObject.AddComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
 
         SetCamera(myId);
     }
