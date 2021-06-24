@@ -26,6 +26,7 @@ public class Player : MonoBehaviour
     public void Dead(bool isMe)
     {
         IsAlive = false;
+        GetComponent<Animator>().applyRootMotion = true;
         GetComponent<Animator>().Play("death2");
 
         if (isMe)
