@@ -21,8 +21,8 @@ public class PlayerController : MonoBehaviour
     private bool canDeadReport = false;
 
     [Header("Status")]
-    public float moveSpeed = 6.0F;
-    public float jumpSpeed = 8.0F;
+    public float moveSpeed = 5.0F;
+    public float jumpSpeed = 7.0F;
     public float rotateSpeed = 100.0F;
     public float gravity = 20.0F;
     public float range = 5.0F;
@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Awake()
     {
         CC = GetComponent<CharacterController>();
         myInfo = GetComponent<Player>();
@@ -48,7 +48,9 @@ public class PlayerController : MonoBehaviour
 
         HEAD = transform.Find("Helmet_LOD0");
         BODY = transform.Find("Space Explorer_LOD0");
-
+    }
+    void Start()
+    {
         layermask = (1 << (int)Global.Layers.Player);
         InactiveMyRay();
         HideMyCharacter();
@@ -61,7 +63,7 @@ public class PlayerController : MonoBehaviour
         Move();
         Rotate();
         InGameManager.Instance.EmitMoveReq(transform.position, transform.rotation);
-        
+
         if (InGameManager.Instance.menuState) return;
 
         FindTarget();
@@ -96,14 +98,14 @@ public class PlayerController : MonoBehaviour
         {
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
 
-            if(myInfo.IsMafia) onKillTarget = true;
-            if(!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
+            if (myInfo.IsMafia) onKillTarget = true;
+            if (!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
         }
         else
         {
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * range, Color.red);
 
-            if(myInfo.IsMafia) onKillTarget = false;
+            if (myInfo.IsMafia) onKillTarget = false;
             canDeadReport = false;
         }
 
@@ -139,7 +141,7 @@ public class PlayerController : MonoBehaviour
         if (CC.isGrounded)
         {
             anim.SetBool("jump", false);
-            moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+            moveDirection = new Vector3(Input.GetAxis("Horizontal") * 0.7f, 0f, Input.GetAxis("Vertical"));
             if (moveDirection != Vector3.zero)
             {
                 anim.SetBool("run", true);
