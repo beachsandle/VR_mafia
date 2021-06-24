@@ -101,26 +101,21 @@ public class WaitingRoomManager : MonoBehaviour
     }
     private void OnGameStart(Packet packet)
     {
-        var data = new GameStartData(packet.Bytes);
         Debug.Log("Start");
+        var data = new GameStartData(packet.Bytes);
         ClearWaitingRoomEvent();
         SceneLoader.Instance.WaitingRoomToInGame(data.IsMafia, data.Mafias, users);
     }
     #endregion
     public void AddPlayer(UserInfo user)
     {
-        //TODO: SetPlayerInfo()로 교체
-        //SetPlayerInfo(ClientManager.instance.users.Count);
-
         users.Add(user);
-        playerTRs[users.Count - 1].Find("Name").GetComponent<Text>().text = user.Name;
-        playerTRs[users.Count - 1].Find("Image").GetComponent<Image>().color = Global.colors[users.Count - 1];
+        SetPlayerInfo(users.Count - 1);
     }
 
     public void RemovePlayer(int playerId)
     {
         users.Remove(users.Find(info => info.Id == playerId));
-        // TODO: 플레이어 빈 공간 채워주기
         for (int i = 0; i < users.Count; i++)
         {
             SetPlayerInfo(i);
