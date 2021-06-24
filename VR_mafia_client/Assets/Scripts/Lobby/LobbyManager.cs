@@ -213,7 +213,6 @@ public class LobbyManager : MonoBehaviour
     }
     void OnCreateRoomOKButton()
     {
-        //TODO: 나중에 방이름 정규식
         roomName = roomNameInputField.text;
         EmitCreateRoomReq();
         createRoomPanel.SetActive(false);
