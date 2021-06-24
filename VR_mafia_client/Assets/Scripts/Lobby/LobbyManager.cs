@@ -112,7 +112,6 @@ public class LobbyManager : MonoBehaviour
         var data = new RoomListResData(packet.Bytes);
 
         roomList.Clear();
-        //TODO: HostId에서 HostName으로 받을 수 있게 변경
         for (int i = 0; i < data.Rooms.Count; i++)
         {
             var r = data.Rooms[i];
@@ -146,7 +145,7 @@ public class LobbyManager : MonoBehaviour
         if (data.Result)
         {
             ClearLobbyEvent();
-            SceneLoader.Instance.LobbyToWaitingRoom(userName, "RoomName", data.Users);
+            SceneLoader.Instance.LobbyToWaitingRoom(userName, roomList.select.name, data.Users);
         }
     }
     #endregion
@@ -161,7 +160,7 @@ public class LobbyManager : MonoBehaviour
 
     void OnJoinButton()
     {
-        EmitJoinRoomReq(roomList.select);
+        EmitJoinRoomReq(roomList.select.id);
     }
 
     void OnRefreshButton()
