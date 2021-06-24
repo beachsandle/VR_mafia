@@ -76,3 +76,4 @@ ClientTest/**/debug
 TcpServer/**/debug
 VR_mafia_client/Assets/Scripts/MyPacket
 VR_mafia_client/Assets/no9_Game_Sounds
+**/Assets/Photon

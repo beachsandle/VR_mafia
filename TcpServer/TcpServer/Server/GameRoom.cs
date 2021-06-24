@@ -22,6 +22,7 @@ namespace MyPacket
         private int live = 0;
         private readonly GameServer server;
         private readonly Dictionary<int, User> users = new Dictionary<int, User>();
+        private readonly List<int> userOrder = new List<int>();
         private readonly Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
         private readonly Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
         private readonly Stopwatch timer = new Stopwatch();
@@ -252,6 +253,7 @@ namespace MyPacket
             if (Participants == Maximum)
                 return false;
             users[user.Id] = user;
+            userOrder.Add(user.Id);
             var data = new JoinEventData(user.GetInfo());
             Broadcast(PacketType.JOIN_EVENT, data.ToBytes(), user);
             return true;
@@ -262,6 +264,7 @@ namespace MyPacket
             if (users[userId].Alive)
                 --live;
             users.Remove(userId);
+            userOrder.Remove(userId);
         }
         //유저 퇴장 처리
         public bool Leave(User user)
@@ -299,7 +302,7 @@ namespace MyPacket
         //유저들의 정보를 반환
         public List<UserInfo> GetUserInfos()
         {
-            return (from u in users.Values select u.GetInfo()).ToList();
+            return (from id in userOrder select users[id].GetInfo()).ToList();
         }
         //게임 시작
         public bool GameStart(User user)
