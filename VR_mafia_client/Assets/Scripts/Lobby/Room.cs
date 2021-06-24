@@ -16,13 +16,13 @@ public class Room : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData pointerEventData)
     {
+        LobbyManager.instance.roomList.select.id = roomId;
+        LobbyManager.instance.roomList.select.name = roomName.text;
+
         if (Time.time - last < interval)
         {
             LobbyManager.instance.EmitJoinRoomReq(roomId);
         }
-        LobbyManager.instance.roomList.select = roomId;
-
-        Debug.Log(name + "Selected");
 
         last = Time.time;
     }

@@ -5,18 +5,16 @@ using UnityEngine;
 
 public class RoomList : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject roomObject;
-
+    [SerializeField] private GameObject roomObject;
     private GameObject content;
 
-
-    public int select;
+    public (int id,string name) select;
 
     void Start()
     {
         content = transform.GetChild(0).GetChild(0).gameObject;
     }
+
     public void Clear()
     {
         for (int i = 0, end = content.transform.childCount; i < end; ++i)
