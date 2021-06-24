@@ -35,9 +35,9 @@ public class ClientManager : MonoBehaviour
     {
         CloseSocket();
     }
-    public bool ConnectToServer()
+    public void ConnectToServer()
     {
-        if (socketReady) return true;
+        if (socketReady) return;
 
         if (hostIp == null) hostIp = "127.0.0.1";
         if (port == 0) port = 8080;
@@ -55,11 +55,7 @@ public class ClientManager : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("Socket Error" + e.Message);
-
-            return false;
         }
-
-        return true;
     }
 
     private void OnConnect(Packet packet)
