@@ -49,9 +49,9 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private GameObject finalVotingPanel;
     private Text finalTimeText;
 
-    private List<Player> players;
-    private Dictionary<int, Player> playerDict; // id, object
-    private Player myInfo;
+    private List<PlayerCharacter> players;
+    private Dictionary<int, PlayerCharacter> playerDict; // id, object
+    private PlayerCharacter myInfo;
 
     private void Awake()
     {
@@ -242,7 +242,7 @@ public class InGameManager : MonoBehaviour
 
         // 애니메이션 재생
 
-        foreach (Player p in players)
+        foreach (PlayerCharacter p in players)
         {
             if (!p.IsAlive)
             {
@@ -269,7 +269,7 @@ public class InGameManager : MonoBehaviour
     }
     private void SpawnPlayer(int idx, UserInfo u)
     {
-        var p = Instantiate(playerObj).GetComponent<Player>();
+        var p = Instantiate(playerObj).GetComponent<PlayerCharacter>();
         p.InitPlayerInfo(idx, u);
         p.name = "Player_" + u.Id;
         p.transform.position = spawnPos.GetChild(idx).position;
@@ -306,7 +306,7 @@ public class InGameManager : MonoBehaviour
         }
         return (nextTargetIdx + 1);
     }
-    private void CharacterSetActive(Player p, bool b)
+    private void CharacterSetActive(PlayerCharacter p, bool b)
     {
         p.transform.Find("Head_1_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
         p.transform.Find("Helmet_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
@@ -314,8 +314,8 @@ public class InGameManager : MonoBehaviour
     }
     private void SpawnPlayers()
     {
-        players = new List<Player>();
-        playerDict = new Dictionary<int, Player>();
+        players = new List<PlayerCharacter>();
+        playerDict = new Dictionary<int, PlayerCharacter>();
         spawnPos = GameObject.Find("SpawnPosition").transform;
         playerObjects = GameObject.Find("PlayerObjects");
 
@@ -343,7 +343,7 @@ public class InGameManager : MonoBehaviour
         V3 pos = data.Location.position;
         V3 rot = data.Location.rotation;
 
-        Player p = playerDict[data.Player_id];
+        PlayerCharacter p = playerDict[data.Player_id];
         Transform TR = playerDict[data.Player_id].transform;
         Vector3 currPos = TR.position;
         TR.position = new Vector3(pos.x, pos.y, pos.z);
@@ -351,7 +351,7 @@ public class InGameManager : MonoBehaviour
 
         UpdatePlayerAnimation(p, currPos, TR.position);
     }
-    private void UpdatePlayerAnimation(Player p, Vector3 currPos, Vector3 nextPos)
+    private void UpdatePlayerAnimation(PlayerCharacter p, Vector3 currPos, Vector3 nextPos)
     {
         Animator anim = p.transform.GetComponent<Animator>();
 
@@ -376,7 +376,7 @@ public class InGameManager : MonoBehaviour
     }
     private void KillPlayer(int deadID)
     {
-        playerDict[deadID].GetComponent<Player>().Dead(deadID == myInfo.ID);
+        playerDict[deadID].GetComponent<PlayerCharacter>().Dead(deadID == myInfo.ID);
     }
 
     #region Phase
@@ -573,7 +573,7 @@ public class InGameManager : MonoBehaviour
         }
         else
         {
-            StartInformation($"{playerDict[electedId].GetComponent<Player>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
+            StartInformation($"{playerDict[electedId].GetComponent<PlayerCharacter>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
         }
     }
     #endregion
@@ -670,7 +670,7 @@ public class InGameManager : MonoBehaviour
 
         if (id != -1)
         {
-            Player p = playerDict[id].GetComponent<Player>();
+            PlayerCharacter p = playerDict[id].GetComponent<PlayerCharacter>();
 
             StartInformation($"{p.Name}님이 {count}명의 동의로 추방되었습니다.");
             p.Dead(id == myInfo.ID);
