@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="MyPacket\PacketData\InGame\DeadReportData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\DieEventData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\GameEndData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVoteReqData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVoteResData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\VotingResultData.cs" />

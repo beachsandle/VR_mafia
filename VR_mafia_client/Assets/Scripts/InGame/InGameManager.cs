@@ -106,6 +106,7 @@ public class InGameManager : MonoBehaviour
         socket.On(PacketType.KILL_RES, OnKillRes);
         socket.On(PacketType.DIE_EVENT, OnDieEvent);
         socket.On(PacketType.DEAD_REPORT, OnDeadReport);
+        socket.On(PacketType.GAME_END, OnGameEnd);
     }
     void ClearInGameEvent()
     {
@@ -122,6 +123,7 @@ public class InGameManager : MonoBehaviour
         socket.Clear(PacketType.KILL_RES);
         socket.Clear(PacketType.DIE_EVENT);
         socket.Clear(PacketType.DEAD_REPORT);
+        socket.Clear(PacketType.GAME_END);
     }
 
     #region InGame Event
@@ -237,16 +239,21 @@ public class InGameManager : MonoBehaviour
     private void OnDeadReport(Packet packet)
     {
         var data = new DeadReportData(packet.Bytes);
-        
+
         // 애니메이션 재생
 
-        foreach(Player p in players)
+        foreach (Player p in players)
         {
             if (!p.IsAlive)
             {
                 p.MakeEmpty();
             }
         }
+    }
+    private void OnGameEnd(Packet packet)
+    {
+        var data = new GameEndData(packet.Bytes);
+        Debug.Log("게임 종료" + (data.MafiaWin ? "마피아 승" : "시민 승"));
     }
     #endregion
 
@@ -292,7 +299,7 @@ public class InGameManager : MonoBehaviour
 
         int nextTargetIdx = targetNum % players.Count;
         SetCamera(players[nextTargetIdx].ID);
-        if(nextTargetIdx != (targetNum - 1))
+        if (nextTargetIdx != (targetNum - 1))
         {
             CharacterSetActive(players[targetNum - 1], true);
             CharacterSetActive(players[nextTargetIdx], false);
@@ -605,7 +612,7 @@ public class InGameManager : MonoBehaviour
         ShowCursor();
 
         Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
-        imageTR.GetComponent<Image>().color = Global.colors[playerDict[id].Number-1];
+        imageTR.GetComponent<Image>().color = Global.colors[playerDict[id].Number - 1];
         imageTR.GetComponentInChildren<Text>().text = playerDict[id].Name;
 
         finalVotingPanel.SetActive(true);

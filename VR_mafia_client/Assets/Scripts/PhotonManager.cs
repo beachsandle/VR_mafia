@@ -23,9 +23,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         DontDestroyOnLoad(gameObject);
     }
-    private void Start() {
-        Connect();        
-    }
     public void Connect()
         {
             // we check if we are connected or not, we join if we are , else we initiate the connection to the server.

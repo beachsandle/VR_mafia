@@ -52,6 +52,7 @@ public class SceneLoader : MonoBehaviour
     {
         PlayerId = pid;
         UserName = "Player" + PlayerId;
+        PhotonManager.Instance.Connect();
         SceneManager.LoadScene("Lobby");
     }
 

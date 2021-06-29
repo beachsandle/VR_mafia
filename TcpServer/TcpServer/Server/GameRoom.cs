@@ -20,6 +20,7 @@ namespace MyPacket
         private int maxVoters = 0;
         private int electedId = -1;
         private int live = 0;
+        private int liveMafia = 0;
         private readonly GameServer server;
         private readonly Dictionary<int, User> users = new Dictionary<int, User>();
         private readonly List<int> userOrder = new List<int>();
@@ -187,6 +188,8 @@ namespace MyPacket
             {
                 users[electedId].Execute();
                 --live;
+                if (users[electedId].IsMafia)
+                    --liveMafia;
             }
             else
                 sendData.Kicking_id = -1;
@@ -221,6 +224,27 @@ namespace MyPacket
             prevTime = 0;
             timer.Restart();
         }
+        private void CheckGameEnd()
+        {
+            if (liveMafia == 0)
+            {
+                var citizen = (from u in users
+                               where !u.Value.IsMafia
+                               select u.Value.Id).ToArray();
+                Status = GameStatus.END;
+                Broadcast(PacketType.GAME_END, new GameEndData(false, citizen).ToBytes());
+                server.Log("시민 승");
+            }
+            else if (live <= liveMafia * 2)
+            {
+                var mafias = (from u in users
+                              where u.Value.IsMafia
+                              select u.Value.Id).ToArray();
+                Status = GameStatus.END;
+                Broadcast(PacketType.GAME_END, new GameEndData(true, mafias).ToBytes());
+                server.Log("마피아 승");
+            }
+        }
         //게임로직을 담당하는 루프
         private void GameLoof()
         {
@@ -235,8 +259,10 @@ namespace MyPacket
                 //TimeFlow();
                 if (currentTime < 0)
                     Timeout();
+                CheckGameEnd();
             }
             timer.Stop();
+            server.RemoveRoom(RoomId);
         }
         #endregion
 
@@ -262,7 +288,11 @@ namespace MyPacket
         public void RemoveUser(int userId)
         {
             if (users[userId].Alive)
+            {
                 --live;
+                if (users[userId].IsMafia)
+                    --liveMafia;
+            }
             users.Remove(userId);
             userOrder.Remove(userId);
         }
@@ -314,6 +344,7 @@ namespace MyPacket
             Status = GameStatus.DAY;
             live = users.Count;
             var mafias = DesideMafia();
+            liveMafia = mafias.Count;
             foreach (var u in users.Values)
             {
                 u.GameStart(u.IsMafia, mafias);

@@ -52,6 +52,8 @@ namespace MyPacket
         FINAL_VOTE_RES,
         FINAL_VOTE_REQ,
         FINAL_VOTING_RESULT,
+        KILL_READY,
+        GAME_END,
         //
         END
     }
