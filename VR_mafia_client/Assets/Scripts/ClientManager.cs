@@ -1,4 +1,4 @@
-﻿using MyPacket;
+using MyPacket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +51,6 @@ public class ClientManager : MonoBehaviour
             Socket.Listen(false);
             Socket.Emit(PacketType.CONNECT);
             socketReady = true;
-            PhotonManager.Instance.Connect();
         }
         catch (Exception e)
         {

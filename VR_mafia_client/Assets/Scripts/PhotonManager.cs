@@ -18,21 +18,22 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
     #endregion
-
+    public Dictionary<string,int> UserMap = new Dictionary<string, int>();
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
     }
-    public void Connect()
+    public void Connect(int userId)
+    {
+        // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
+        if (!PhotonNetwork.IsConnected)
         {
-            // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
-            if (!PhotonNetwork.IsConnected)
-            {
-                // #Critical, we must first and foremost connect to Photon Online Server.
-                PhotonNetwork.GameVersion = "1.0";
-                PhotonNetwork.ConnectUsingSettings();
-            }
+            // #Critical, we must first and foremost connect to Photon Online Server.
+            PhotonNetwork.GameVersion = "1.0";
+            PhotonNetwork.NickName = userId.ToString();
+            PhotonNetwork.ConnectUsingSettings();
         }
+    }
     public void JoinRoom(int roomId)
     {
         PhotonNetwork.JoinOrCreateRoom(roomId.ToString(), null, null);
@@ -45,16 +46,20 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("Join room success");
+        Debug.Log("[Photon Manager] : Join room success");
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        Debug.Log("Join Room fail");
+        Debug.Log("[Photon Manager] : Join Room fail");
         Application.Quit();
     }
     public override void OnLeftRoom()
     {
-        Debug.Log("Leave Room");
+        Debug.Log("[Photon Manager] : Leave Room");
     }
-
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        UserMap[newPlayer.UserId]=int.Parse(newPlayer.NickName);
+        Debug.Log("[Photon Manager] : join user "+newPlayer.NickName);
+    }
 }
