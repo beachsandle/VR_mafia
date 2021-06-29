@@ -54,6 +54,7 @@ namespace MyPacket
                 while (stream.CanRead)
                 {
                     ReadPacket();
+                    Thread.Sleep(1);
                 }
             }
             //연결이 종료될 경우 disconnect 핸들러 호출

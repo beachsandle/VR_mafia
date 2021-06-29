@@ -205,6 +205,7 @@ namespace MyPacket
             {
                 Room = server.CreateRoom(this, data.RoomName);
                 Room.Join(this);
+                sendData.RoomId = Room.RoomId;
                 Status = GameStatus.WAITTING;
             }
             else

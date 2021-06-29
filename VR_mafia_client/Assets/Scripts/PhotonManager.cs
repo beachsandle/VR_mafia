@@ -13,18 +13,37 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         get
         {
             if (instance == null)
-            {
                 instance = GameObject.FindObjectOfType<PhotonManager>();
-                DontDestroyOnLoad(instance.gameObject);
-            }
             return instance;
         }
     }
     #endregion
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+    private void Start() {
+        Connect();        
+    }
+    public void Connect()
+        {
+            // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
+            if (!PhotonNetwork.IsConnected)
+            {
+                // #Critical, we must first and foremost connect to Photon Online Server.
+                PhotonNetwork.GameVersion = "1.0";
+                PhotonNetwork.ConnectUsingSettings();
+            }
+        }
     public void JoinRoom(int roomId)
     {
         PhotonNetwork.JoinOrCreateRoom(roomId.ToString(), null, null);
+    }
+
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
     }
 
     public override void OnJoinedRoom()
@@ -35,6 +54,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Join Room fail");
         Application.Quit();
+    }
+    public override void OnLeftRoom()
+    {
+        Debug.Log("Leave Room");
     }
 
 }
