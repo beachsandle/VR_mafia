@@ -18,7 +18,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
     #endregion
-    public Dictionary<string,int> UserMap = new Dictionary<string, int>();
+    public Dictionary<string, int> UserMap = new Dictionary<string, int>();
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -36,7 +36,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public void JoinRoom(int roomId)
     {
-        PhotonNetwork.JoinOrCreateRoom(roomId.ToString(), null, null);
+        PhotonNetwork.JoinOrCreateRoom(roomId.ToString(), new RoomOptions() { PublishUserId = true }, null);
     }
 
     public void LeaveRoom()
@@ -59,7 +59,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        UserMap[newPlayer.UserId]=int.Parse(newPlayer.NickName);
-        Debug.Log("[Photon Manager] : join user "+newPlayer.NickName);
+        UserMap[newPlayer.UserId] = int.Parse(newPlayer.NickName);
+        Debug.Log("[Photon Manager] : join user " + newPlayer.NickName +" id :"+ newPlayer.UserId);
     }
 }
