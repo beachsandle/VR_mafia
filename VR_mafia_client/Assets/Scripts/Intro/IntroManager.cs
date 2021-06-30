@@ -10,9 +10,14 @@ public class IntroManager : MonoBehaviour
     [SerializeField] private InputField portInputField;
     [SerializeField] private Button connectButton;
 
+    [SerializeField] private string ip;
+    [SerializeField] private string port;
+
     void Start()
     {
         connectButton.onClick.AddListener(OnConnectButton);
+        hostIpInputField.text = ip;
+        portInputField.text = port;
         if (autoBegin)
             OnConnectButton();
     }
