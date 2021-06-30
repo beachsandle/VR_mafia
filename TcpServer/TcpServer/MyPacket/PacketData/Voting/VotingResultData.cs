@@ -9,7 +9,7 @@ namespace MyPacket
     public class VotingResultData : IPacketData
     {
         public int elected_id = -1;
-        public (int id, int count)[] result = null;
+        public Tuple<int, int>[] result = null;
         public int Size
         {
             get
@@ -25,7 +25,7 @@ namespace MyPacket
         }
 
 
-        public VotingResultData(int id, (int, int)[] result)
+        public VotingResultData(int id, Tuple<int, int>[] result)
         {
             elected_id = id;
             this.result = result;
@@ -35,20 +35,21 @@ namespace MyPacket
         public void FromBytes(byte[] bytes)
         {
             elected_id = BitConverter.ToInt32(bytes, 0);
-            result = new (int, int)[bytes.Length / 8];
+            result = new Tuple<int, int>[bytes.Length / 8];
             for (int i = 0; i < result.Length; ++i)
             {
-                result[i].id = BitConverter.ToInt32(bytes, i * 8 + 4);
-                result[i].count = BitConverter.ToInt32(bytes, i * 8 + 8);
+                int id = BitConverter.ToInt32(bytes, i * 8 + 4);
+                int count = BitConverter.ToInt32(bytes, i * 8 + 8);
+                result[i] = Tuple.Create(id, count);
             }
         }
 
         public byte[] ToBytes()
         {
             var bb = new ByteBuilder(Size).Append(elected_id);
-            foreach ((int id, int count) in result)
+            foreach (var t in result)
             {
-                bb.Append(id).Append(count);
+                bb.Append(t.Item1).Append(t.Item2);
             }
             return bb.Get();
         }

@@ -9,7 +9,7 @@ namespace MyPacket
     public class GameRoom
     {
         #region delegate
-        private delegate void EventHandler((int, Packet) eventData);
+        private delegate void EventHandler(Tuple<int, Packet> eventData);
         #endregion
 
         #region field
@@ -24,7 +24,7 @@ namespace MyPacket
         private readonly GameServer server;
         private readonly Dictionary<int, User> users = new Dictionary<int, User>();
         private readonly List<int> userOrder = new List<int>();
-        private readonly Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
+        private readonly Queue<Tuple<int, Packet>> eventQueue = new Queue<Tuple<int, Packet>>();
         private readonly Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
         private readonly Stopwatch timer = new Stopwatch();
         #endregion
@@ -101,7 +101,7 @@ namespace MyPacket
         {
             while (eventQueue.Count > 0)
             {
-                (int, Packet) data;
+                Tuple<int, Packet> data;
                 lock (eventQueue)
                     data = eventQueue.Dequeue();
                 handlerMap[data.Item2.Header.Type](data);
@@ -141,13 +141,13 @@ namespace MyPacket
             Status = GameStatus.VOTE_END;
             var result = from u in users.Values
                          orderby u.VoteCount descending
-                         select (u.Id, u.VoteCount);
+                         select Tuple.Create(u.Id, u.VoteCount);
             var elected = result.First();
             //최대 득표수가 1이거나 동수일 경우
-            if (elected.VoteCount < 2 ||
-                elected.VoteCount == result.ElementAt(1).VoteCount)
-                elected.Id = -1;
-            electedId = elected.Id;
+            if (elected.Item2 < 2 ||
+                elected.Item2 == result.ElementAt(1).Item2)
+                elected = Tuple.Create(-1, 0);
+            electedId = elected.Item1;
             var sendData = new VotingResultData(electedId, result.ToArray());
             Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
 
@@ -271,7 +271,7 @@ namespace MyPacket
         public void Enqueue(int id, Packet packet)
         {
             lock (eventQueue)
-                eventQueue.Enqueue((id, packet));
+                eventQueue.Enqueue(Tuple.Create(id, packet));
         }
         //유저 참가 처리
         public bool Join(User user)
@@ -391,11 +391,12 @@ namespace MyPacket
             On(PacketType.KILL_REQ, OnKillReq);
         }
         //공백 핸들러
-        private void EmptyHandler((int, Packet) data) { }
+        private void EmptyHandler(Tuple<int, Packet> data) { }
         //move 이벤트 핸들러
-        private void OnMoveReq((int, Packet) eventdata)
+        private void OnMoveReq(Tuple<int, Packet> eventdata)
         {
-            (var id, var packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             if (!users.ContainsKey(id))
                 return;
             var data = new MoveReqData(packet.Bytes);
@@ -403,9 +404,10 @@ namespace MyPacket
             users[id].MoveTo(data.location);
             Broadcast(PacketType.MOVE_EVENT, sendData.ToBytes(), users[id]);
         }
-        private void OnVoteReq((int, Packet) eventdata)
+        private void OnVoteReq(Tuple<int, Packet> eventdata)
         {
-            (int id, Packet packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             var data = new VoteReqData(packet.Bytes);
             var sendData = new VoteResData();
             if (Status == GameStatus.VOTE)
@@ -429,9 +431,10 @@ namespace MyPacket
             if (voters == 0)
                 EndVoting();
         }
-        private void OnFinalVoteReq((int, Packet) eventdata)
+        private void OnFinalVoteReq(Tuple<int, Packet> eventdata)
         {
-            (int id, Packet packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             var data = new FinalVoteReqData(packet.Bytes);
             var sendData = new FinalVoteResData();
             server.Log($"final vote : {id} -> {data.Agree}");
@@ -454,9 +457,9 @@ namespace MyPacket
             if (voters == 0)
                 EndFinalVoting();
         }
-        private void OnDeadReport((int, Packet) eventdata)
+        private void OnDeadReport(Tuple<int, Packet> eventdata)
         {
-            (_, Packet packet) = eventdata;
+            var packet = eventdata.Item2;
             var data = new DeadReportData(packet.Bytes);
 
             if (Status == GameStatus.DAY)
@@ -470,9 +473,10 @@ namespace MyPacket
                 }
             }
         }
-        private void OnKillReq((int, Packet) eventdata)
+        private void OnKillReq(Tuple<int, Packet> eventdata)
         {
-            (int id, Packet packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             var data = new KillReqDada(packet.Bytes);
             var sendData = new KillResDada(false);
 

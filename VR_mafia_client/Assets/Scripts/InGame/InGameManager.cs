@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -545,8 +547,9 @@ public class InGameManager : MonoBehaviour
         votingPanel.SetActive(false);
     }
 
-    public void DisplayVotingResult(int electedId, (int pid, int count)[] result)
+    public void DisplayVotingResult(int electedId, Tuple<int, int>[] resultTuple)
     {
+        (int id, int count)[] result = (from t in resultTuple select t.ToValueTuple()).ToArray();
         timeText.enabled = false;
 
         var votingContent = votingPanel.transform.GetChild(0);
