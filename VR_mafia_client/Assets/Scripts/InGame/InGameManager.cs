@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MyPacket;
+using Dissonance;
+using Dissonance.Integrations.PhotonUnityNetworking2;
 
 public class InGameManager : MonoBehaviour
 {
@@ -25,6 +27,8 @@ public class InGameManager : MonoBehaviour
     }
 
     [SerializeField] private GameObject playerObj;
+    [SerializeField] private PhotonCommsNetwork net;
+    [SerializeField] private DissonanceComms comms;
     private GameObject playerObjects;
     private Transform spawnPos;
     private bool isMafia;
@@ -69,6 +73,7 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
+
         socket = ClientManager.Instance.Socket;
 
         SpawnPlayers();
@@ -80,9 +85,15 @@ public class InGameManager : MonoBehaviour
 
         UIManager.Instance.InitUI(isMafia);
 
-        HideCursor();
+        net.PlayerJoined += (string name, CodecSettings setting) =>
+        {
+            Debug.Log($"player joined : {name}");
+            if (name == net.PlayerName)
+                socket.Emit(PacketType.PLAYER_LOAD, new PlayerLoadData(net.PlayerName));
+        };
 
-        FadeInOut.instance.FadeIn();
+        //HideCursor();
+
     }
     void Update()
     {
@@ -95,6 +106,7 @@ public class InGameManager : MonoBehaviour
 
     void InitInGameEvent()
     {
+        socket.On(PacketType.ALL_PLAYER_LOADED, OnAllPlayerLoaded);
         socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
         socket.On(PacketType.DAY_START, OnDayStart);
         socket.On(PacketType.NIGHT_START, OnNightStart);
@@ -129,6 +141,34 @@ public class InGameManager : MonoBehaviour
     }
 
     #region InGame Event
+    private void OnAllPlayerLoaded(Packet packet)
+    {
+        var map = new Dictionary<string, PlayerCharacter>();
+        var a = comms.Players;
+        var data = new AllPlayerLoadedData(packet.Bytes);
+        foreach ((int id, string pid) in data.PhotonIdArr)
+        {
+            var vobj = comms.FindPlayer(pid);
+            if (vobj.IsLocalPlayer)
+            {
+
+            }
+            else
+            {
+                var b = vobj.Playback;
+            }
+            map[pid] = playerDict[id];
+        }
+        foreach (var vobj in comms.Players)
+        {
+
+        }
+        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
+
+        HideCursor();
+
+        FadeInOut.instance.FadeIn();
+    }
     private void OnMoveEvent(Packet packet)
     {
         var data = new MoveEventData(packet.Bytes);
@@ -336,7 +376,6 @@ public class InGameManager : MonoBehaviour
         }
 
         roleText.text = isMafia ? "마피아" : "시민";
-        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
     }
     private void UpdatePlayerTransform(MoveEventData data)
     {

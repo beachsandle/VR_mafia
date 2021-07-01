@@ -14,7 +14,8 @@ namespace MyPacket
 
         #region property
         public int Id { get; private set; }
-        public string Name { get; private set; }
+        public string PhotonId { get; private set; } = "";
+        public string Name { get; private set; } = "";
         public GameRoom Room { get; private set; }
         public bool IsMafia { get; private set; } = false;
         public bool Alive { get; private set; } = true;
@@ -117,6 +118,12 @@ namespace MyPacket
         public void Reported()
         {
             IsDeadBody = false;
+        }
+
+        public void Load(string photonId)
+        {
+            Loaded = true;
+            PhotonId = photonId;
         }
         #endregion
 

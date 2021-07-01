@@ -47,6 +47,14 @@ public class SceneLoader : MonoBehaviour
         UserName = "";
         RoomName = "";
         Users = new List<UserInfo>();
+        PhotonManager.Instance.OnJoined += () =>
+        {
+            SceneManager.LoadScene("WaitingRoom");
+        };
+        PhotonManager.Instance.OnLeft += () =>
+        {
+            SceneManager.LoadScene("Lobby");
+        };
     }
     public void IntroToLobby(int pid)
     {
@@ -66,7 +74,6 @@ public class SceneLoader : MonoBehaviour
             Users = users;
 
         PhotonManager.Instance.JoinRoom(roomId);
-        SceneManager.LoadScene("WaitingRoom");
     }
     public (string, List<UserInfo>) GetWaitingRoomInfo()
     {
@@ -76,7 +83,6 @@ public class SceneLoader : MonoBehaviour
     {
         Users.Clear();
         PhotonManager.Instance.LeaveRoom();
-        SceneManager.LoadScene("Lobby");
     }
     public void WaitingRoomToInGame(bool isMafia, int[] mafias, List<UserInfo> users)
     {

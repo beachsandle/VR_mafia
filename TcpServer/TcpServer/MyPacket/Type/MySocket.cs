@@ -114,13 +114,20 @@ namespace MyPacket
         //메시지 전송
         public void Emit(PacketType type, IPacketData data = null)
         {
-            if (stream.CanWrite)
+            try
             {
-                var packet = new Packet(type, data);
-                stream.Write(packet.ToBytes(), 0, packet.Size);
+                if (stream.CanWrite)
+                {
+                    var packet = new Packet(type, data);
+                    stream.Write(packet.ToBytes(), 0, packet.Size);
+                }
+                else
+                    handlerMap[PacketType.DISCONNECT](new Packet());
             }
-            else
+            catch
+            {
                 handlerMap[PacketType.DISCONNECT](new Packet());
+            }
         }
         //readQueue에서 메시지 하나를 읽고 처리
         public void Handle()

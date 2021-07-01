@@ -995,6 +995,7 @@ MonoBehaviour:
   startButton: {fileID: 1758694173}
   leaveButton: {fileID: 1413976166}
   roomNameText: {fileID: 587248081}
+  nets: {fileID: 0}
 --- !u!1 &700733623
 GameObject:
   m_ObjectHideFlags: 0
@@ -1143,121 +1144,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 701565349}
   m_CullTransparentMesh: 0
---- !u!1001 &706589441
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 102228, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_Name
-      value: DissonanceSetup
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -10
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 420108, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: cc2b9f84f04070441acc55fd0b9f8797, type: 3}
---- !u!1 &706589442 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 102228, guid: cc2b9f84f04070441acc55fd0b9f8797,
-    type: 3}
-  m_PrefabInstance: {fileID: 706589441}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &706589443
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 706589442}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3737438748cf23f448d18cd2c6192e95, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _tokens:
-    _tokens: []
-  _roomName: Global
-  _useTrigger: 0
---- !u!114 &706589444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 706589442}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a066ddbf125f9546bcadc947418566b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _tokens:
-    _tokens: []
-  _channelTypeExpanded: 1
-  _metadataExpanded: 1
-  _activationModeExpanded: 1
-  _tokensExpanded: 1
-  _ampExpanded: 1
-  _activationFaderSettings:
-    _volume: 1
-    _fadeInTicks: 0
-    _fadeOutTicks: 1500000
-  _triggerFaderSettings:
-    _volume: 1
-    _fadeInTicks: 7500000
-    _fadeOutTicks: 11500000
-  _broadcastPosition: 1
-  _channelType: 0
-  _inputName: 
-  _mode: 1
-  _muted: 0
-  _playerId: 
-  _useTrigger: 0
-  _roomName: Global
-  _priority: -2
 --- !u!1 &723221831
 GameObject:
   m_ObjectHideFlags: 0
