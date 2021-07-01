@@ -47,6 +47,10 @@ public class SceneLoader : MonoBehaviour
         UserName = "";
         RoomName = "";
         Users = new List<UserInfo>();
+        PhotonManager.Instance.OnConnect += () =>
+        {
+            SceneManager.LoadScene("Lobby");
+        };
         PhotonManager.Instance.OnJoined += () =>
         {
             SceneManager.LoadScene("WaitingRoom");
@@ -61,7 +65,6 @@ public class SceneLoader : MonoBehaviour
         PlayerId = pid;
         UserName = "Player" + PlayerId;
         PhotonManager.Instance.Connect(pid);
-        SceneManager.LoadScene("Lobby");
     }
 
     public void LobbyToWaitingRoom(string userName, int roomId, string roomName, List<UserInfo> users = null)

@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using Dissonance;
+using Dissonance.Audio.Playback;
+using Dissonance.Integrations.PhotonUnityNetworking2;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -19,22 +23,30 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
     #endregion
+    [HideInInspector] public Action OnConnect;
     [HideInInspector] public Action OnJoined;
     [HideInInspector] public Action OnLeft;
+    [SerializeField] private GameObject TriggerPrefab;
+    private DissonanceComms comms;
+    private PhotonCommsNetwork net;
+
+    public string LocalPid => net.PlayerName;
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        comms = GetComponent<DissonanceComms>();
+        net = GetComponent<PhotonCommsNetwork>();
     }
     public void Connect(int userId)
     {
-        // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
-        if (!PhotonNetwork.IsConnected)
+        try
         {
             // #Critical, we must first and foremost connect to Photon Online Server.
             PhotonNetwork.GameVersion = "1.0";
             PhotonNetwork.NickName = userId.ToString();
             PhotonNetwork.ConnectUsingSettings();
         }
+        catch { }
     }
     public void JoinRoom(int roomId)
     {
@@ -44,12 +56,40 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
         catch { }
     }
-
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
     }
+    public VoicePlayerState FindPlayer(string pid)
+    {
+        return comms.FindPlayer(pid);
+    }
+    public void InitTrigger(GameObject localPlayer)
+    {
+        Instantiate(TriggerPrefab, localPlayer.transform);
+    }
+    async public void InitPlayBack(string pid, GameObject remotePlayer)
+    {
+        var pb = comms.FindPlayer(pid).Playback as VoicePlayback;
+        var audio = pb.GetComponent<AudioSource>();
+        pb.transform.parent = remotePlayer.transform;
+        pb.transform.localPosition = Vector3.zero;
+        audio.spatialize = true;
+        audio.spatialBlend = 1f;
+        await Task.Delay(1000);
+        //spatialBlend가 계속 초기화됨
+        //audio.minDistance = 1;
+    }
 
+    public void Mute(bool enable)
+    {
+        comms.IsMuted = enable;
+    }
+    public override void OnConnected()
+    {
+        Debug.Log("[Photon Manager] : connected");
+        OnConnect?.Invoke();
+    }
     public override void OnJoinedRoom()
     {
         Debug.Log("[Photon Manager] : Join room success");

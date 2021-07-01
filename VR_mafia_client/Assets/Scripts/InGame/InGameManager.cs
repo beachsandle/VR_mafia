@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MyPacket;
-using Dissonance;
-using Dissonance.Integrations.PhotonUnityNetworking2;
 
 public class InGameManager : MonoBehaviour
 {
@@ -27,8 +25,6 @@ public class InGameManager : MonoBehaviour
     }
 
     [SerializeField] private GameObject playerObj;
-    [SerializeField] private PhotonCommsNetwork net;
-    [SerializeField] private DissonanceComms comms;
     private GameObject playerObjects;
     private Transform spawnPos;
     private bool isMafia;
@@ -73,7 +69,6 @@ public class InGameManager : MonoBehaviour
 
     void Start()
     {
-
         socket = ClientManager.Instance.Socket;
 
         SpawnPlayers();
@@ -85,12 +80,7 @@ public class InGameManager : MonoBehaviour
 
         UIManager.Instance.InitUI(isMafia);
 
-        net.PlayerJoined += (string name, CodecSettings setting) =>
-        {
-            Debug.Log($"player joined : {name}");
-            if (name == net.PlayerName)
-                socket.Emit(PacketType.PLAYER_LOAD, new PlayerLoadData(net.PlayerName));
-        };
+        socket.Emit(PacketType.PLAYER_LOAD, new PlayerLoadData(PhotonManager.Instance.LocalPid));
 
         //HideCursor();
 
@@ -143,26 +133,20 @@ public class InGameManager : MonoBehaviour
     #region InGame Event
     private void OnAllPlayerLoaded(Packet packet)
     {
-        var map = new Dictionary<string, PlayerCharacter>();
-        var a = comms.Players;
+        var pm = PhotonManager.Instance;
         var data = new AllPlayerLoadedData(packet.Bytes);
         foreach ((int id, string pid) in data.PhotonIdArr)
         {
-            var vobj = comms.FindPlayer(pid);
-            if (vobj.IsLocalPlayer)
+            if (pid == pm.LocalPid)
             {
-
+                pm.InitTrigger(myInfo.gameObject);
             }
             else
             {
-                var b = vobj.Playback;
+                pm.InitPlayBack(pid, playerDict[id].gameObject);
             }
-            map[pid] = playerDict[id];
         }
-        foreach (var vobj in comms.Players)
-        {
 
-        }
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
 
         HideCursor();
