@@ -21,6 +21,7 @@ namespace MyPacket
         public bool IsDeadBody { get; private set; } = false;
         public bool HasBullet { get; private set; } = false;
         public bool Voted { get; private set; } = false;
+        public bool Loaded { get; private set; } = false;
         public int VoteCount { get; private set; } = 0;
         public GameStatus Status { get; private set; } = GameStatus.CONNECT;
         public Location Transform { get; private set; } = new Location();
@@ -59,7 +60,7 @@ namespace MyPacket
             if (isMafia)
                 sendData.Mafias = (from u in team select u.Id).ToArray();
             Status = GameStatus.INGAME;
-            Emit(PacketType.GAME_START, sendData.ToBytes());
+            Emit(PacketType.GAME_START, sendData);
         }
         //유저 정보 반환
         public UserInfo GetInfo()
@@ -146,7 +147,7 @@ namespace MyPacket
             if (Status == GameStatus.CONNECT)
             {
                 Status = GameStatus.LOBBY;
-                Emit(PacketType.CONNECT, new ConnectData(Id).ToBytes());
+                Emit(PacketType.CONNECT, new ConnectData(Id));
             }
             server.Log($"connect : {Id}");
         }
@@ -179,7 +180,7 @@ namespace MyPacket
             else
                 sendData.Result = false;
             //결과 전송
-            Emit(PacketType.SET_NAME_RES, sendData.ToBytes());
+            Emit(PacketType.SET_NAME_RES, sendData);
             if (sendData.Result)
                 server.Log($"setname : {Id}, {Name}");
         }
@@ -192,7 +193,7 @@ namespace MyPacket
             else
                 sendData.Result = false;
             //결과 전송
-            Emit(PacketType.ROOM_LIST_RES, sendData.ToBytes());
+            Emit(PacketType.ROOM_LIST_RES, sendData);
             if (sendData.Result)
                 server.Log($"room list req : {Id}");
         }
@@ -211,7 +212,7 @@ namespace MyPacket
             else
                 sendData.Result = false;
             //결과 전송
-            Emit(PacketType.CREATE_ROOM_RES, sendData.ToBytes());
+            Emit(PacketType.CREATE_ROOM_RES, sendData);
             if (sendData.Result)
                 server.Log($"create room req : {Id}, {data.RoomName}");
         }
@@ -230,7 +231,7 @@ namespace MyPacket
             else
                 sendData.Result = false;
             //결과 전송
-            Emit(PacketType.JOIN_ROOM_RES, sendData.ToBytes());
+            Emit(PacketType.JOIN_ROOM_RES, sendData);
             if (sendData.Result)
                 server.Log($"join room : {Id}");
         }
@@ -239,7 +240,7 @@ namespace MyPacket
             var sendData = new LeaveResData(
                 Status == GameStatus.WAITTING &&
                 Room.Leave(this));
-            Emit(PacketType.LEAVE_ROOM_RES, sendData.ToBytes());
+            Emit(PacketType.LEAVE_ROOM_RES, sendData);
             if (sendData.Result)
                 server.Log($"leave : {Id}");
         }

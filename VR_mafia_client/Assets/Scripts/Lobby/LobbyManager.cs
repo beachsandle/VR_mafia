@@ -91,7 +91,7 @@ public class LobbyManager : MonoBehaviour
     #region Lobby Event
     private void EmitSetNameReq(string userName)
     {
-        socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
+        socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName));
     }
     private void OnSetNameRes(Packet packet)
     {
@@ -124,7 +124,7 @@ public class LobbyManager : MonoBehaviour
 
     public void EmitCreateRoomReq()
     {
-        socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
+        socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName));
     }
     private void OnCreateRoomRes(Packet packet)
     {
@@ -139,7 +139,7 @@ public class LobbyManager : MonoBehaviour
     public void EmitJoinRoomReq(int roomId)
     {
         this.roomId = roomId;
-        socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
+        socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId));
     }
     private void OnJoinRoomRes(Packet packet)
     {

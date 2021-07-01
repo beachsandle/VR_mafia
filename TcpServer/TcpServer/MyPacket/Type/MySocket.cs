@@ -112,11 +112,11 @@ namespace MyPacket
             handlerMap[type] = EmptyHandler;
         }
         //메시지 전송
-        public void Emit(PacketType type, byte[] bytes = null)
+        public void Emit(PacketType type, IPacketData data = null)
         {
             if (stream.CanWrite)
             {
-                var packet = new Packet(type, bytes);
+                var packet = new Packet(type, data);
                 stream.Write(packet.ToBytes(), 0, packet.Size);
             }
             else

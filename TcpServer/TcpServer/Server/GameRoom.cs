@@ -130,7 +130,7 @@ namespace MyPacket
             Status = GameStatus.VOTE;
             electedId = -1;
             InitVotingPhase();
-            Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
+            Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME));
 
             server.Log($"voting start : {RoomId}");
         }
@@ -149,7 +149,7 @@ namespace MyPacket
                 elected = Tuple.Create(-1, 0);
             electedId = elected.Item1;
             var sendData = new VotingResultData(electedId, result.ToArray());
-            Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
+            Broadcast(PacketType.VOTING_RESULT, sendData);
 
             server.Log($"voting result : elected - {elected}");
         }
@@ -166,7 +166,7 @@ namespace MyPacket
             if (Status != GameStatus.VOTE_END) return;
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
-            Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
+            Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId));
             server.Log($"defense start : {RoomId}, elected - {electedId}");
         }
         private void StartFinalVotinig()
@@ -175,7 +175,7 @@ namespace MyPacket
             currentTime = FINAL_VOTE_TIME;
             Status = GameStatus.FINAL_VOTE;
             InitVotingPhase();
-            Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
+            Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME));
             server.Log($"final voting start : {RoomId}");
         }
         private void EndFinalVoting()
@@ -193,7 +193,7 @@ namespace MyPacket
             }
             else
                 sendData.Kicking_id = -1;
-            Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
+            Broadcast(PacketType.FINAL_VOTING_RESULT, sendData);
 
             server.Log($"final voting result : elected - {electedId}, count - {sendData.voteCount}");
         }
@@ -232,7 +232,7 @@ namespace MyPacket
                                where !u.Value.IsMafia
                                select u.Value.Id).ToArray();
                 Status = GameStatus.END;
-                Broadcast(PacketType.GAME_END, new GameEndData(false, citizen).ToBytes());
+                Broadcast(PacketType.GAME_END, new GameEndData(false, citizen));
                 server.Log("시민 승");
             }
             else if (live <= liveMafia * 2)
@@ -241,7 +241,7 @@ namespace MyPacket
                               where u.Value.IsMafia
                               select u.Value.Id).ToArray();
                 Status = GameStatus.END;
-                Broadcast(PacketType.GAME_END, new GameEndData(true, mafias).ToBytes());
+                Broadcast(PacketType.GAME_END, new GameEndData(true, mafias));
                 server.Log("마피아 승");
             }
         }
@@ -281,7 +281,7 @@ namespace MyPacket
             users[user.Id] = user;
             userOrder.Add(user.Id);
             var data = new JoinEventData(user.GetInfo());
-            Broadcast(PacketType.JOIN_EVENT, data.ToBytes(), user);
+            Broadcast(PacketType.JOIN_EVENT, data, user);
             return true;
         }
         //유저 제거
@@ -320,7 +320,7 @@ namespace MyPacket
             }
             //그 외엔 남은 유저들에게 퇴장사실 전달
             else
-                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
+                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id));
             return true;
         }
         //게임방의 정보를 반환
@@ -351,7 +351,6 @@ namespace MyPacket
             }
             var thread = new Thread(GameLoof);
             thread.Start();
-
             server.Log($"start : {user.Id}");
             return true;
         }
@@ -364,13 +363,13 @@ namespace MyPacket
             handlerMap[type] += handler;
         }
         //모든 유저에게 송신
-        private void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
+        private void Broadcast(PacketType type, IPacketData data = null, User sender = null)
         {
             foreach (var p in users.ToArray())
             {
                 if (sender?.Id == p.Value.Id)
                     continue;
-                p.Value.Emit(type, bytes);
+                p.Value.Emit(type, data);
             }
         }
         //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
@@ -402,7 +401,7 @@ namespace MyPacket
             var data = new MoveReqData(packet.Bytes);
             var sendData = new MoveEventData(id, data.location);
             users[id].MoveTo(data.location);
-            Broadcast(PacketType.MOVE_EVENT, sendData.ToBytes(), users[id]);
+            Broadcast(PacketType.MOVE_EVENT, sendData, users[id]);
         }
         private void OnVoteReq(Tuple<int, Packet> eventdata)
         {
@@ -427,7 +426,7 @@ namespace MyPacket
             else
                 sendData.Result = false;
             server.Log($"vote : {id} -> {data.Target_id} {sendData.Result}");
-            users[id].Emit(PacketType.VOTE_RES, sendData.ToBytes());
+            users[id].Emit(PacketType.VOTE_RES, sendData);
             if (voters == 0)
                 EndVoting();
         }
@@ -453,7 +452,7 @@ namespace MyPacket
             }
             else
                 sendData.Result = false;
-            users[id].Emit(PacketType.FINAL_VOTE_RES, sendData.ToBytes());
+            users[id].Emit(PacketType.FINAL_VOTE_RES, sendData);
             if (voters == 0)
                 EndFinalVoting();
         }
@@ -467,7 +466,7 @@ namespace MyPacket
                 if (users[data.Reporter_id].Alive && users[data.Dead_id].IsDeadBody)
                 {
                     users[data.Dead_id].Reported();
-                    Broadcast(PacketType.DEAD_REPORT, data.ToBytes());
+                    Broadcast(PacketType.DEAD_REPORT, data);
                     StartNight();
                     server.Log($"dead report : {data.Reporter_id} -> {data.Dead_id}");
                 }
@@ -488,9 +487,9 @@ namespace MyPacket
                 sendData.Result = true;
             }
 
-            users[id].Emit(PacketType.KILL_RES, sendData.ToBytes());
+            users[id].Emit(PacketType.KILL_RES, sendData);
             if (sendData.Result)
-                Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id).ToBytes());
+                Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id));
         }
         #endregion
     }

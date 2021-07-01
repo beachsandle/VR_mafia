@@ -137,7 +137,7 @@ public class InGameManager : MonoBehaviour
     }
     public void EmitMoveReq(Vector3 pos, Quaternion rot)
     {
-        socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)).ToBytes());
+        socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)));
     }
     private Location MakeLocation(Vector3 pos, Quaternion rot)
     {
@@ -164,7 +164,7 @@ public class InGameManager : MonoBehaviour
     }
     public void EmitVoteReq(int targetID)
     {
-        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
+        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID));
     }
     private void OnVoteRes(Packet packet)
     {
@@ -197,7 +197,7 @@ public class InGameManager : MonoBehaviour
     }
     public void EmitFinalVoteReq(bool agree)
     {
-        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
+        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree));
     }
     private void OnFinalVoteRes(Packet packet)
     {
@@ -217,7 +217,7 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
-        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
+        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID));
     }
     private void OnKillRes(Packet packet)
     {
@@ -236,7 +236,7 @@ public class InGameManager : MonoBehaviour
 
     public void EmitDeadReport(int deadID)
     {
-        socket.Emit(PacketType.DEAD_REPORT, new DeadReportData(deadID, 0).ToBytes());
+        socket.Emit(PacketType.DEAD_REPORT, new DeadReportData(deadID, 0));
     }
     private void OnDeadReport(Packet packet)
     {

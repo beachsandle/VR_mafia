@@ -15,9 +15,9 @@ namespace MyPacket
                 return PacketHeader.SIZE + Header.Size;
             }
         }
-        public Packet(PacketType type = PacketType.NONE, byte[] bytes = null)
+        public Packet(PacketType type = PacketType.NONE, IPacketData data = null)
         {
-            Bytes = bytes;
+            Bytes = data?.ToBytes();
             Header = new PacketHeader(type, Bytes?.Length ?? 0);
         }
         public Packet(PacketHeader header, byte[] bytes = null)
