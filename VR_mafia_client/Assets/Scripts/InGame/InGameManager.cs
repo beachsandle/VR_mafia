@@ -143,7 +143,7 @@ public class InGameManager : MonoBehaviour
             }
             else
             {
-                pm.InitPlayBack(pid, playerDict[id].gameObject);
+                pm.InitPlayBack(id, pid, playerDict[id].gameObject);
             }
         }
 
