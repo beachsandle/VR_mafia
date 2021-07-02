@@ -118,14 +118,17 @@ namespace MyPacket
         //유저 제거
         public void RemoveUser(int userId)
         {
+            // Todo: 
             if (!users.ContainsKey(userId))
                 return;
-            if (users[userId].Loaded)
+            var user = users[userId];
+            if (user.Loaded)
                 --loaded;
-            if (users[userId].Alive)
+            if (user.Alive)
             {
                 --live;
-                if (users[userId].IsMafia)
+                user.Killed();
+                if (user.IsMafia)
                     --liveMafia;
             }
             users.Remove(userId);

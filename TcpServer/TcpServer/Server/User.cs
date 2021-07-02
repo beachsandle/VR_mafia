@@ -161,6 +161,7 @@ namespace MyPacket
         private void OnDisconnect(Packet packet)
         {
             if (Status == GameStatus.NONE) return;
+            Status = GameStatus.NONE;
             switch (Status)
             {
                 case GameStatus.WAITTING:
@@ -170,7 +171,6 @@ namespace MyPacket
                     Room.RemoveUser(Id);
                     break;
             }
-            Status = GameStatus.NONE;
             server.RemoveUser(Id);
             server.Log($"disconnect : {Id}, {Name}");
         }
