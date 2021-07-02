@@ -18,6 +18,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
     private string userName;
+    private int roomId;
     private string roomName;
     public RoomList roomList;
 
@@ -90,7 +91,7 @@ public class LobbyManager : MonoBehaviour
     #region Lobby Event
     private void EmitSetNameReq(string userName)
     {
-        socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName).ToBytes());
+        socket.Emit(PacketType.SET_NAME_REQ, new SetNameReqData(userName));
     }
     private void OnSetNameRes(Packet packet)
     {
@@ -123,7 +124,7 @@ public class LobbyManager : MonoBehaviour
 
     public void EmitCreateRoomReq()
     {
-        socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName).ToBytes());
+        socket.Emit(PacketType.CREATE_ROOM_REQ, new CreateRoomReqData(roomName));
     }
     private void OnCreateRoomRes(Packet packet)
     {
@@ -131,13 +132,14 @@ public class LobbyManager : MonoBehaviour
         if (data.Result)
         {
             ClearLobbyEvent();
-            SceneLoader.Instance.LobbyToWaitingRoom(userName, roomName);
+            SceneLoader.Instance.LobbyToWaitingRoom(userName, data.RoomId, roomName);
         }
     }
 
     public void EmitJoinRoomReq(int roomId)
     {
-        socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId).ToBytes());
+        this.roomId = roomId;
+        socket.Emit(PacketType.JOIN_ROOM_REQ, new JoinRoomReqData(roomId));
     }
     private void OnJoinRoomRes(Packet packet)
     {
@@ -145,7 +147,7 @@ public class LobbyManager : MonoBehaviour
         if (data.Result)
         {
             ClearLobbyEvent();
-            SceneLoader.Instance.LobbyToWaitingRoom(userName, roomList.select.name, data.Users);
+            SceneLoader.Instance.LobbyToWaitingRoom(userName, roomId, roomList.select.name, data.Users);
         }
     }
     #endregion

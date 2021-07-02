@@ -5,7 +5,7 @@ using System.Text;
 namespace MyPacket
 {
     /// 패킷에 저장될 데이터
-    interface IPacketData
+    public interface IPacketData
     {
         // 데이터의 크기
         int Size { get; }

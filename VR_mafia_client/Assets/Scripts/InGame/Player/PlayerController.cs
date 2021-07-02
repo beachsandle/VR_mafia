@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(Player))]
+[RequireComponent(typeof(PlayerCharacter))]
 [RequireComponent(typeof(Animator))]
 
 public class PlayerController : MonoBehaviour
 {
     public CharacterController CC;
-    private Player myInfo;
+    private PlayerCharacter myInfo;
     private Animator anim;
     private Transform HEAD;
     private Transform BODY;
@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         CC = GetComponent<CharacterController>();
-        myInfo = GetComponent<Player>();
+        myInfo = GetComponent<PlayerCharacter>();
         anim = GetComponent<Animator>();
 
         HEAD = transform.Find("Helmet_LOD0");
@@ -99,7 +99,7 @@ public class PlayerController : MonoBehaviour
             Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
 
             if (myInfo.IsMafia) onKillTarget = true;
-            if (!hit.transform.GetComponent<Player>().IsAlive) canDeadReport = true;
+            if (!hit.transform.GetComponent<PlayerCharacter>().IsAlive) canDeadReport = true;
         }
         else
         {
@@ -120,7 +120,7 @@ public class PlayerController : MonoBehaviour
     {
         if (onKillTarget && UIManager.Instance.canKill)
         {
-            int targetID = hit.transform.GetComponent<Player>().ID;
+            int targetID = hit.transform.GetComponent<PlayerCharacter>().ID;
             InGameManager.Instance.EmitKillReq(targetID);
         }
     }
@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour
     {
         if (canDeadReport)
         {
-            int deadID = hit.transform.GetComponent<Player>().ID;
+            int deadID = hit.transform.GetComponent<PlayerCharacter>().ID;
             InGameManager.Instance.EmitDeadReport(deadID);
         }
     }

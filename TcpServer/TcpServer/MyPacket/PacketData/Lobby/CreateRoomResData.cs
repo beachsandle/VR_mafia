@@ -7,11 +7,12 @@ namespace MyPacket
     public class CreateRoomResData : IPacketData
     {
         public bool Result = true;
+        public int RoomId = -1;
         public int Size
         {
             get
             {
-                return 1;
+                return 5;
             }
         }
         public CreateRoomResData(byte[] bytes = null)
@@ -19,18 +20,20 @@ namespace MyPacket
             if (bytes != null)
                 FromBytes(bytes);
         }
-        public CreateRoomResData(bool result)
+        public CreateRoomResData(bool result, int roomId)
         {
             Result = result;
+            RoomId = roomId;
         }
         public byte[] ToBytes()
         {
-            return BitConverter.GetBytes(Result);
+            return new ByteBuilder(5).Append(Result).Append(RoomId).Get();
         }
 
         public void FromBytes(byte[] bytes)
         {
             Result = BitConverter.ToBoolean(bytes, 0);
+            RoomId = BitConverter.ToInt32(bytes, 1);
         }
     }
 }

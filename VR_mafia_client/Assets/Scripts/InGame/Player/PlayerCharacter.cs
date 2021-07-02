@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MyPacket;
 
-public class Player : MonoBehaviour
+public class PlayerCharacter : MonoBehaviour
 {
     public int Number { get; private set; }
     public int ID { get; private set; }

@@ -9,21 +9,23 @@ namespace MyPacket
     public class GameRoom
     {
         #region delegate
-        private delegate void EventHandler((int, Packet) eventData);
+        private delegate void EventHandler(Tuple<int, Packet> eventData);
         #endregion
 
         #region field
         private static int roomId = 1;
         private float currentTime = 0;
         private long prevTime = 0;
+        private int loaded = 0;
         private int voters = 0;
         private int maxVoters = 0;
         private int electedId = -1;
         private int live = 0;
+        private int liveMafia = 0;
         private readonly GameServer server;
         private readonly Dictionary<int, User> users = new Dictionary<int, User>();
         private readonly List<int> userOrder = new List<int>();
-        private readonly Queue<(int id, Packet packet)> eventQueue = new Queue<(int id, Packet packet)>();
+        private readonly Queue<Tuple<int, Packet>> eventQueue = new Queue<Tuple<int, Packet>>();
         private readonly Dictionary<PacketType, EventHandler> handlerMap = new Dictionary<PacketType, EventHandler>();
         private readonly Stopwatch timer = new Stopwatch();
         #endregion
@@ -95,17 +97,127 @@ namespace MyPacket
         }
         #endregion
 
+        #region public method
+        //이벤트 큐에 패킷 추가
+        public void Enqueue(int id, Packet packet)
+        {
+            lock (eventQueue)
+                eventQueue.Enqueue(Tuple.Create(id, packet));
+        }
+        //유저 참가 처리
+        public bool Join(User user)
+        {
+            if (Participants == Maximum)
+                return false;
+            users[user.Id] = user;
+            userOrder.Add(user.Id);
+            var data = new JoinEventData(user.GetInfo());
+            Broadcast(PacketType.JOIN_EVENT, data, user);
+            return true;
+        }
+        //유저 제거
+        public void RemoveUser(int userId)
+        {
+            // Todo: 
+            if (!users.ContainsKey(userId))
+                return;
+            var user = users[userId];
+            if (user.Loaded)
+                --loaded;
+            if (user.Alive)
+            {
+                --live;
+                user.Killed();
+                if (user.IsMafia)
+                    --liveMafia;
+            }
+            users.Remove(userId);
+            userOrder.Remove(userId);
+        }
+        //유저 퇴장 처리
+        public bool Leave(User user)
+        {
+            if (Status != GameStatus.WAITTING)
+                return false;
+            user.LeaveRoom();
+            RemoveUser(user.Id);
+            // 방장이 퇴장한 경우
+            if (HostId == user.Id)
+            {
+                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
+                Broadcast(PacketType.ROOM_DESTROY_EVENT);
+                //모든 유저 퇴장
+                foreach (var u in users.Values.ToArray())
+                {
+                    u.LeaveRoom();
+                    RemoveUser(u.Id);
+                }
+
+                server.Log($"room destroy : {RoomId}");
+                server.RemoveRoom(RoomId);
+            }
+            //그 외엔 남은 유저들에게 퇴장사실 전달
+            else
+                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id));
+            return true;
+        }
+        //게임방의 정보를 반환
+        public GameRoomInfo GetInfo()
+        {
+            return new GameRoomInfo(RoomId, Participants, users[HostId].GetInfo(), Name);
+        }
+
+        //유저들의 정보를 반환
+        public List<UserInfo> GetUserInfos()
+        {
+            return (from id in userOrder select users[id].GetInfo()).ToList();
+        }
+        //게임 시작
+        public bool GameStart(User user)
+        {
+            //대기실이고, 방장일 경우에만 게임 시작 가능
+            if (user.Status != GameStatus.WAITTING || HostId != user.Id)
+                return false;
+            //if (users.Count < 4) return false;
+            Status = GameStatus.INGAME;
+            live = users.Count;
+            var mafias = DesideMafia();
+            liveMafia = mafias.Count;
+            foreach (var u in users.Values)
+            {
+                u.GameStart(u.IsMafia, mafias);
+            }
+            var thread = new Thread(GameLoof);
+            thread.Start();
+            server.Log($"start : {user.Id}");
+            return true;
+        }
+        #endregion
+
         #region life cycle
         private void EventHandling()
         {
+            if (eventQueue.Count == 0)
+                Thread.Sleep(1);
             while (eventQueue.Count > 0)
             {
-                (int, Packet) data;
+                Tuple<int, Packet> data;
                 lock (eventQueue)
                     data = eventQueue.Dequeue();
                 handlerMap[data.Item2.Header.Type](data);
 
             }
+        }
+        private void WaitPlayerLoading()
+        {
+            while (loaded < Participants)
+            {
+                EventHandling();
+            }
+            Broadcast(PacketType.ALL_PLAYER_LOADED, new AllPlayerLoadedData(
+                (from u in users.Values
+                 select Tuple.Create(u.Id, u.PhotonId)).ToArray()));
+            server.Log("All Player Loaded");
         }
         private void TimeFlow()
         {
@@ -129,7 +241,7 @@ namespace MyPacket
             Status = GameStatus.VOTE;
             electedId = -1;
             InitVotingPhase();
-            Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME).ToBytes());
+            Broadcast(PacketType.START_VOTING, new StartVotingData((int)VOTE_TIME));
 
             server.Log($"voting start : {RoomId}");
         }
@@ -140,15 +252,15 @@ namespace MyPacket
             Status = GameStatus.VOTE_END;
             var result = from u in users.Values
                          orderby u.VoteCount descending
-                         select (u.Id, u.VoteCount);
+                         select Tuple.Create(u.Id, u.VoteCount);
             var elected = result.First();
             //최대 득표수가 1이거나 동수일 경우
-            if (elected.VoteCount < 2 ||
-                elected.VoteCount == result.ElementAt(1).VoteCount)
-                elected.Id = -1;
-            electedId = elected.Id;
+            if (elected.Item2 < 2 ||
+                elected.Item2 == result.ElementAt(1).Item2)
+                elected = Tuple.Create(-1, 0);
+            electedId = elected.Item1;
             var sendData = new VotingResultData(electedId, result.ToArray());
-            Broadcast(PacketType.VOTING_RESULT, sendData.ToBytes());
+            Broadcast(PacketType.VOTING_RESULT, sendData);
 
             server.Log($"voting result : elected - {elected}");
         }
@@ -165,7 +277,7 @@ namespace MyPacket
             if (Status != GameStatus.VOTE_END) return;
             currentTime = DEFENSE_TIME;
             Status = GameStatus.DEFENSE;
-            Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId).ToBytes());
+            Broadcast(PacketType.START_DEFENSE, new StartDefenseData((int)DEFENSE_TIME, electedId));
             server.Log($"defense start : {RoomId}, elected - {electedId}");
         }
         private void StartFinalVotinig()
@@ -174,7 +286,7 @@ namespace MyPacket
             currentTime = FINAL_VOTE_TIME;
             Status = GameStatus.FINAL_VOTE;
             InitVotingPhase();
-            Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME).ToBytes());
+            Broadcast(PacketType.START_FINAL_VOTING, new StartFinalVotingData((int)FINAL_VOTE_TIME));
             server.Log($"final voting start : {RoomId}");
         }
         private void EndFinalVoting()
@@ -187,10 +299,12 @@ namespace MyPacket
             {
                 users[electedId].Execute();
                 --live;
+                if (users[electedId].IsMafia)
+                    --liveMafia;
             }
             else
                 sendData.Kicking_id = -1;
-            Broadcast(PacketType.FINAL_VOTING_RESULT, sendData.ToBytes());
+            Broadcast(PacketType.FINAL_VOTING_RESULT, sendData);
 
             server.Log($"final voting result : elected - {electedId}, count - {sendData.voteCount}");
         }
@@ -221,110 +335,49 @@ namespace MyPacket
             prevTime = 0;
             timer.Restart();
         }
+        private void CheckGameEnd()
+        {
+            if (liveMafia == 0)
+            {
+                var citizen = (from u in users
+                               where !u.Value.IsMafia
+                               select u.Value.Id).ToArray();
+                Status = GameStatus.END;
+                Broadcast(PacketType.GAME_END, new GameEndData(false, citizen));
+                server.Log("시민 승");
+            }
+            else if (live <= liveMafia * 2)
+            {
+                var mafias = (from u in users
+                              where u.Value.IsMafia
+                              select u.Value.Id).ToArray();
+                Status = GameStatus.END;
+                Broadcast(PacketType.GAME_END, new GameEndData(true, mafias));
+                server.Log("마피아 승");
+            }
+        }
         //게임로직을 담당하는 루프
         private void GameLoof()
         {
             EnrollHanders();
+            WaitPlayerLoading();
+            Status = GameStatus.DAY;
             currentTime = DAY_TIME;
             timer.Start();
             while (Status != GameStatus.END && live > 0)
             {
-                if (eventQueue.Count == 0)
-                    Thread.Sleep(1);
                 EventHandling();
                 //TimeFlow();
                 if (currentTime < 0)
                     Timeout();
+                //CheckGameEnd();
             }
             timer.Stop();
+            server.Log($"Game End : {RoomId}");
+            server.RemoveRoom(RoomId);
         }
         #endregion
 
-        #region public method
-        //이벤트 큐에 패킷 추가
-        public void Enqueue(int id, Packet packet)
-        {
-            lock (eventQueue)
-                eventQueue.Enqueue((id, packet));
-        }
-        //유저 참가 처리
-        public bool Join(User user)
-        {
-            if (Participants == Maximum)
-                return false;
-            users[user.Id] = user;
-            userOrder.Add(user.Id);
-            var data = new JoinEventData(user.GetInfo());
-            Broadcast(PacketType.JOIN_EVENT, data.ToBytes(), user);
-            return true;
-        }
-        //유저 제거
-        public void RemoveUser(int userId)
-        {
-            if (users[userId].Alive)
-                --live;
-            users.Remove(userId);
-            userOrder.Remove(userId);
-        }
-        //유저 퇴장 처리
-        public bool Leave(User user)
-        {
-            if (Status != GameStatus.WAITTING)
-                return false;
-            user.LeaveRoom();
-            RemoveUser(user.Id);
-            // 방장이 퇴장한 경우
-            if (HostId == user.Id)
-            {
-                //모든 유저에게 ROOM_DESTROY_EVENT 발생 후 방 제거
-                Broadcast(PacketType.ROOM_DESTROY_EVENT);
-                //모든 유저 퇴장
-                foreach (var u in users.Values.ToArray())
-                {
-                    u.LeaveRoom();
-                    RemoveUser(u.Id);
-                }
-
-                server.Log($"room destroy : {RoomId}");
-                server.RemoveRoom(RoomId);
-            }
-            //그 외엔 남은 유저들에게 퇴장사실 전달
-            else
-                Broadcast(PacketType.LEAVE_EVENT, new LeaveEventData(user.Id).ToBytes());
-            return true;
-        }
-        //게임방의 정보를 반환
-        public GameRoomInfo GetInfo()
-        {
-            return new GameRoomInfo(RoomId, Participants, users[HostId].GetInfo(), Name);
-        }
-
-        //유저들의 정보를 반환
-        public List<UserInfo> GetUserInfos()
-        {
-            return (from id in userOrder select users[id].GetInfo()).ToList();
-        }
-        //게임 시작
-        public bool GameStart(User user)
-        {
-            //대기실이고, 방장일 경우에만 게임 시작 가능
-            if (user.Status != GameStatus.WAITTING || HostId != user.Id)
-                return false;
-            //if (users.Count < 4) return false;
-            Status = GameStatus.DAY;
-            live = users.Count;
-            var mafias = DesideMafia();
-            foreach (var u in users.Values)
-            {
-                u.GameStart(u.IsMafia, mafias);
-            }
-            var thread = new Thread(GameLoof);
-            thread.Start();
-
-            server.Log($"start : {user.Id}");
-            return true;
-        }
-        #endregion
 
         #region eventhandler
         //이벤트 핸들러 등록
@@ -333,13 +386,13 @@ namespace MyPacket
             handlerMap[type] += handler;
         }
         //모든 유저에게 송신
-        private void Broadcast(PacketType type, byte[] bytes = null, User sender = null)
+        private void Broadcast(PacketType type, IPacketData data = null, User sender = null)
         {
             foreach (var p in users.ToArray())
             {
                 if (sender?.Id == p.Value.Id)
                     continue;
-                p.Value.Emit(type, bytes);
+                p.Value.Emit(type, data);
             }
         }
         //모든 패킷 종류에 대한 핸들러를 공백 핸들러로 초기화
@@ -353,6 +406,7 @@ namespace MyPacket
         //핸들러 등록
         private void EnrollHanders()
         {
+            On(PacketType.PLAYER_LOAD, OnPlayerLoad);
             On(PacketType.MOVE_REQ, OnMoveReq);
             On(PacketType.VOTE_REQ, OnVoteReq);
             On(PacketType.FINAL_VOTE_REQ, OnFinalVoteReq);
@@ -360,21 +414,33 @@ namespace MyPacket
             On(PacketType.KILL_REQ, OnKillReq);
         }
         //공백 핸들러
-        private void EmptyHandler((int, Packet) data) { }
-        //move 이벤트 핸들러
-        private void OnMoveReq((int, Packet) eventdata)
+        private void EmptyHandler(Tuple<int, Packet> data) { }
+        private void OnPlayerLoad(Tuple<int, Packet> eventdata)
         {
-            (var id, var packet) = eventdata;
+            if (Status != GameStatus.INGAME)
+                return;
+            int id = eventdata.Item1;
+            var data = new PlayerLoadData(eventdata.Item2.Bytes);
+            users[id].Load(data.PhotonId);
+            ++loaded;
+            server.Log($"Player Load {id}, pid : {data.PhotonId}");
+        }
+        //move 이벤트 핸들러
+        private void OnMoveReq(Tuple<int, Packet> eventdata)
+        {
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             if (!users.ContainsKey(id))
                 return;
             var data = new MoveReqData(packet.Bytes);
             var sendData = new MoveEventData(id, data.location);
             users[id].MoveTo(data.location);
-            Broadcast(PacketType.MOVE_EVENT, sendData.ToBytes(), users[id]);
+            Broadcast(PacketType.MOVE_EVENT, sendData, users[id]);
         }
-        private void OnVoteReq((int, Packet) eventdata)
+        private void OnVoteReq(Tuple<int, Packet> eventdata)
         {
-            (int id, Packet packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             var data = new VoteReqData(packet.Bytes);
             var sendData = new VoteResData();
             if (Status == GameStatus.VOTE)
@@ -394,13 +460,14 @@ namespace MyPacket
             else
                 sendData.Result = false;
             server.Log($"vote : {id} -> {data.Target_id} {sendData.Result}");
-            users[id].Emit(PacketType.VOTE_RES, sendData.ToBytes());
+            users[id].Emit(PacketType.VOTE_RES, sendData);
             if (voters == 0)
                 EndVoting();
         }
-        private void OnFinalVoteReq((int, Packet) eventdata)
+        private void OnFinalVoteReq(Tuple<int, Packet> eventdata)
         {
-            (int id, Packet packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             var data = new FinalVoteReqData(packet.Bytes);
             var sendData = new FinalVoteResData();
             server.Log($"final vote : {id} -> {data.Agree}");
@@ -419,13 +486,13 @@ namespace MyPacket
             }
             else
                 sendData.Result = false;
-            users[id].Emit(PacketType.FINAL_VOTE_RES, sendData.ToBytes());
+            users[id].Emit(PacketType.FINAL_VOTE_RES, sendData);
             if (voters == 0)
                 EndFinalVoting();
         }
-        private void OnDeadReport((int, Packet) eventdata)
+        private void OnDeadReport(Tuple<int, Packet> eventdata)
         {
-            (_, Packet packet) = eventdata;
+            var packet = eventdata.Item2;
             var data = new DeadReportData(packet.Bytes);
 
             if (Status == GameStatus.DAY)
@@ -433,15 +500,16 @@ namespace MyPacket
                 if (users[data.Reporter_id].Alive && users[data.Dead_id].IsDeadBody)
                 {
                     users[data.Dead_id].Reported();
-                    Broadcast(PacketType.DEAD_REPORT, data.ToBytes());
+                    Broadcast(PacketType.DEAD_REPORT, data);
                     StartNight();
                     server.Log($"dead report : {data.Reporter_id} -> {data.Dead_id}");
                 }
             }
         }
-        private void OnKillReq((int, Packet) eventdata)
+        private void OnKillReq(Tuple<int, Packet> eventdata)
         {
-            (int id, Packet packet) = eventdata;
+            var id = eventdata.Item1;
+            var packet = eventdata.Item2;
             var data = new KillReqDada(packet.Bytes);
             var sendData = new KillResDada(false);
 
@@ -453,9 +521,9 @@ namespace MyPacket
                 sendData.Result = true;
             }
 
-            users[id].Emit(PacketType.KILL_RES, sendData.ToBytes());
+            users[id].Emit(PacketType.KILL_RES, sendData);
             if (sendData.Result)
-                Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id).ToBytes());
+                Broadcast(PacketType.DIE_EVENT, new DieEventData(data.Target_id));
         }
         #endregion
     }

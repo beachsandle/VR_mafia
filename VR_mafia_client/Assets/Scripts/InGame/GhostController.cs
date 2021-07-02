@@ -8,7 +8,7 @@ public class GhostController : MonoBehaviour
 
     void Start()
     {
-        currTargetNum = GetComponent<Player>().Number;
+        currTargetNum = GetComponent<PlayerCharacter>().Number;
     }
 
     void Update()

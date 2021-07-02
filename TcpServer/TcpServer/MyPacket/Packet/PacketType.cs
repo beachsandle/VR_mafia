@@ -33,6 +33,8 @@ namespace MyPacket
         GAME_START,
         //ingame
         INGAME_PACKET,
+        PLAYER_LOAD,
+        ALL_PLAYER_LOADED,
         DAY_START,
         NIGHT_START,
         MOVE_REQ,
@@ -52,6 +54,8 @@ namespace MyPacket
         FINAL_VOTE_RES,
         FINAL_VOTE_REQ,
         FINAL_VOTING_RESULT,
+        KILL_READY,
+        GAME_END,
         //
         END
     }

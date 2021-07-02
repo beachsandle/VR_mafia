@@ -995,6 +995,7 @@ MonoBehaviour:
   startButton: {fileID: 1758694173}
   leaveButton: {fileID: 1413976166}
   roomNameText: {fileID: 587248081}
+  nets: {fileID: 0}
 --- !u!1 &700733623
 GameObject:
   m_ObjectHideFlags: 0

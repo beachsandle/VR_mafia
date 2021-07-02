@@ -43,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyPacket\PacketData\InGame\AllPlayerLoadedData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\PlayerLoadData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\DeadReportData.cs" />
     <Compile Include="MyPacket\PacketData\InGame\DieEventData.cs" />
+    <Compile Include="MyPacket\PacketData\InGame\GameEndData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVoteReqData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\FinalVoteResData.cs" />
     <Compile Include="MyPacket\PacketData\Voting\VotingResultData.cs" />

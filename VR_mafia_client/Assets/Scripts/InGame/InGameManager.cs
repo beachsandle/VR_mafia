@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -49,9 +51,9 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private GameObject finalVotingPanel;
     private Text finalTimeText;
 
-    private List<Player> players;
-    private Dictionary<int, Player> playerDict; // id, object
-    private Player myInfo;
+    private List<PlayerCharacter> players;
+    private Dictionary<int, PlayerCharacter> playerDict; // id, object
+    private PlayerCharacter myInfo;
 
     private void Awake()
     {
@@ -78,9 +80,10 @@ public class InGameManager : MonoBehaviour
 
         UIManager.Instance.InitUI(isMafia);
 
-        HideCursor();
+        socket.Emit(PacketType.PLAYER_LOAD, new PlayerLoadData(PhotonManager.Instance.LocalPid));
 
-        FadeInOut.instance.FadeIn();
+        //HideCursor();
+
     }
     void Update()
     {
@@ -93,6 +96,7 @@ public class InGameManager : MonoBehaviour
 
     void InitInGameEvent()
     {
+        socket.On(PacketType.ALL_PLAYER_LOADED, OnAllPlayerLoaded);
         socket.On(PacketType.MOVE_EVENT, OnMoveEvent);
         socket.On(PacketType.DAY_START, OnDayStart);
         socket.On(PacketType.NIGHT_START, OnNightStart);
@@ -106,6 +110,7 @@ public class InGameManager : MonoBehaviour
         socket.On(PacketType.KILL_RES, OnKillRes);
         socket.On(PacketType.DIE_EVENT, OnDieEvent);
         socket.On(PacketType.DEAD_REPORT, OnDeadReport);
+        socket.On(PacketType.GAME_END, OnGameEnd);
     }
     void ClearInGameEvent()
     {
@@ -122,9 +127,32 @@ public class InGameManager : MonoBehaviour
         socket.Clear(PacketType.KILL_RES);
         socket.Clear(PacketType.DIE_EVENT);
         socket.Clear(PacketType.DEAD_REPORT);
+        socket.Clear(PacketType.GAME_END);
     }
 
     #region InGame Event
+    private void OnAllPlayerLoaded(Packet packet)
+    {
+        var pm = PhotonManager.Instance;
+        var data = new AllPlayerLoadedData(packet.Bytes);
+        foreach ((int id, string pid) in data.PhotonIdArr)
+        {
+            if (pid == pm.LocalPid)
+            {
+                pm.InitTrigger(myInfo.gameObject);
+            }
+            else
+            {
+                pm.InitPlayBack(id, pid, playerDict[id].gameObject);
+            }
+        }
+
+        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
+
+        HideCursor();
+
+        FadeInOut.instance.FadeIn();
+    }
     private void OnMoveEvent(Packet packet)
     {
         var data = new MoveEventData(packet.Bytes);
@@ -133,7 +161,7 @@ public class InGameManager : MonoBehaviour
     }
     public void EmitMoveReq(Vector3 pos, Quaternion rot)
     {
-        socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)).ToBytes());
+        socket.Emit(PacketType.MOVE_REQ, new MoveReqData(MakeLocation(pos, rot)));
     }
     private Location MakeLocation(Vector3 pos, Quaternion rot)
     {
@@ -160,7 +188,7 @@ public class InGameManager : MonoBehaviour
     }
     public void EmitVoteReq(int targetID)
     {
-        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID).ToBytes());
+        socket.Emit(PacketType.VOTE_REQ, new VoteReqData(targetID));
     }
     private void OnVoteRes(Packet packet)
     {
@@ -193,7 +221,7 @@ public class InGameManager : MonoBehaviour
     }
     public void EmitFinalVoteReq(bool agree)
     {
-        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree).ToBytes());
+        socket.Emit(PacketType.FINAL_VOTE_REQ, new FinalVoteReqData(agree));
     }
     private void OnFinalVoteRes(Packet packet)
     {
@@ -213,7 +241,7 @@ public class InGameManager : MonoBehaviour
 
     public void EmitKillReq(int targetID)
     {
-        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID).ToBytes());
+        socket.Emit(PacketType.KILL_REQ, new KillReqDada(targetID));
     }
     private void OnKillRes(Packet packet)
     {
@@ -232,21 +260,26 @@ public class InGameManager : MonoBehaviour
 
     public void EmitDeadReport(int deadID)
     {
-        socket.Emit(PacketType.DEAD_REPORT, new DeadReportData(deadID, 0).ToBytes());
+        socket.Emit(PacketType.DEAD_REPORT, new DeadReportData(deadID, 0));
     }
     private void OnDeadReport(Packet packet)
     {
         var data = new DeadReportData(packet.Bytes);
-        
+
         // 애니메이션 재생
 
-        foreach(Player p in players)
+        foreach (PlayerCharacter p in players)
         {
             if (!p.IsAlive)
             {
                 p.MakeEmpty();
             }
         }
+    }
+    private void OnGameEnd(Packet packet)
+    {
+        var data = new GameEndData(packet.Bytes);
+        Debug.Log("게임 종료" + (data.MafiaWin ? "마피아 승" : "시민 승"));
     }
     #endregion
 
@@ -262,7 +295,7 @@ public class InGameManager : MonoBehaviour
     }
     private void SpawnPlayer(int idx, UserInfo u)
     {
-        var p = Instantiate(playerObj).GetComponent<Player>();
+        var p = Instantiate(playerObj).GetComponent<PlayerCharacter>();
         p.InitPlayerInfo(idx, u);
         p.name = "Player_" + u.Id;
         p.transform.position = spawnPos.GetChild(idx).position;
@@ -292,14 +325,14 @@ public class InGameManager : MonoBehaviour
 
         int nextTargetIdx = targetNum % players.Count;
         SetCamera(players[nextTargetIdx].ID);
-        if(nextTargetIdx != (targetNum - 1))
+        if (nextTargetIdx != (targetNum - 1))
         {
             CharacterSetActive(players[targetNum - 1], true);
             CharacterSetActive(players[nextTargetIdx], false);
         }
         return (nextTargetIdx + 1);
     }
-    private void CharacterSetActive(Player p, bool b)
+    private void CharacterSetActive(PlayerCharacter p, bool b)
     {
         p.transform.Find("Head_1_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
         p.transform.Find("Helmet_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = b;
@@ -307,8 +340,8 @@ public class InGameManager : MonoBehaviour
     }
     private void SpawnPlayers()
     {
-        players = new List<Player>();
-        playerDict = new Dictionary<int, Player>();
+        players = new List<PlayerCharacter>();
+        playerDict = new Dictionary<int, PlayerCharacter>();
         spawnPos = GameObject.Find("SpawnPosition").transform;
         playerObjects = GameObject.Find("PlayerObjects");
 
@@ -327,7 +360,6 @@ public class InGameManager : MonoBehaviour
         }
 
         roleText.text = isMafia ? "마피아" : "시민";
-        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
     }
     private void UpdatePlayerTransform(MoveEventData data)
     {
@@ -336,7 +368,7 @@ public class InGameManager : MonoBehaviour
         V3 pos = data.Location.position;
         V3 rot = data.Location.rotation;
 
-        Player p = playerDict[data.Player_id];
+        PlayerCharacter p = playerDict[data.Player_id];
         Transform TR = playerDict[data.Player_id].transform;
         Vector3 currPos = TR.position;
         TR.position = new Vector3(pos.x, pos.y, pos.z);
@@ -344,7 +376,7 @@ public class InGameManager : MonoBehaviour
 
         UpdatePlayerAnimation(p, currPos, TR.position);
     }
-    private void UpdatePlayerAnimation(Player p, Vector3 currPos, Vector3 nextPos)
+    private void UpdatePlayerAnimation(PlayerCharacter p, Vector3 currPos, Vector3 nextPos)
     {
         Animator anim = p.transform.GetComponent<Animator>();
 
@@ -369,7 +401,7 @@ public class InGameManager : MonoBehaviour
     }
     private void KillPlayer(int deadID)
     {
-        playerDict[deadID].GetComponent<Player>().Dead(deadID == myInfo.ID);
+        playerDict[deadID].GetComponent<PlayerCharacter>().Dead(deadID == myInfo.ID);
     }
 
     #region Phase
@@ -538,8 +570,9 @@ public class InGameManager : MonoBehaviour
         votingPanel.SetActive(false);
     }
 
-    public void DisplayVotingResult(int electedId, (int pid, int count)[] result)
+    public void DisplayVotingResult(int electedId, Tuple<int, int>[] resultTuple)
     {
+        (int id, int count)[] result = (from t in resultTuple select t.ToValueTuple()).ToArray();
         timeText.enabled = false;
 
         var votingContent = votingPanel.transform.GetChild(0);
@@ -566,7 +599,7 @@ public class InGameManager : MonoBehaviour
         }
         else
         {
-            StartInformation($"{playerDict[electedId].GetComponent<Player>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
+            StartInformation($"{playerDict[electedId].GetComponent<PlayerCharacter>().Name}님이 {result[0].count}표를 받아 지목되었습니다.");
         }
     }
     #endregion
@@ -605,7 +638,7 @@ public class InGameManager : MonoBehaviour
         ShowCursor();
 
         Transform imageTR = finalVotingPanel.transform.GetChild(0).Find("Image");
-        imageTR.GetComponent<Image>().color = Global.colors[playerDict[id].Number-1];
+        imageTR.GetComponent<Image>().color = Global.colors[playerDict[id].Number - 1];
         imageTR.GetComponentInChildren<Text>().text = playerDict[id].Name;
 
         finalVotingPanel.SetActive(true);
@@ -663,7 +696,7 @@ public class InGameManager : MonoBehaviour
 
         if (id != -1)
         {
-            Player p = playerDict[id].GetComponent<Player>();
+            PlayerCharacter p = playerDict[id].GetComponent<PlayerCharacter>();
 
             StartInformation($"{p.Name}님이 {count}명의 동의로 추방되었습니다.");
             p.Dead(id == myInfo.ID);
