@@ -83,7 +83,6 @@ public class InGameManager : MonoBehaviour
         socket.Emit(PacketType.PLAYER_LOAD, new PlayerLoadData(PhotonManager.Instance.LocalPid));
 
         //HideCursor();
-
     }
     void Update()
     {
