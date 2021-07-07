@@ -26,6 +26,7 @@ public class SceneLoader : MonoBehaviour
     public bool IsMafia { get; private set; }
     public List<UserInfo> Users { get; private set; }
     public int[] Mafias { get; private set; }
+    public string NextScene { get; private set; }
 
     private void Awake()
     {
@@ -92,7 +93,9 @@ public class SceneLoader : MonoBehaviour
         IsMafia = isMafia;
         Users = users;
         Mafias = mafias;
-        SceneManager.LoadScene("InGame");
+
+        NextScene = "InGame";
+        SceneManager.LoadScene("Loading");
     }
     public (int, bool, int[], List<UserInfo>) GetInGameInfo()
     {

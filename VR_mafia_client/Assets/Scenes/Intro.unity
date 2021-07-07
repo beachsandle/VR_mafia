@@ -1508,11 +1508,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c1f4568e2926f47b5de12fe697cb27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoBegin: 1
+  autoBegin: 0
   hostIpInputField: {fileID: 1467204623}
   portInputField: {fileID: 597210670}
   connectButton: {fileID: 1429137317}
-  ip: 192.168.219.108
+  ip: 
   port: 
 --- !u!1 &1381308311
 GameObject:
