@@ -102,4 +102,8 @@ public class SceneLoader : MonoBehaviour
     {
         return (PlayerId, IsMafia, Mafias, Users);
     }
+    public void InGameToLobby()
+    {
+        SceneManager.LoadScene("Lobby");
+    }
 }
