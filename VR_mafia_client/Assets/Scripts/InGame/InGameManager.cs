@@ -51,6 +51,9 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private GameObject finalVotingPanel;
     private Text finalTimeText;
 
+    [Header("End Panel")]
+    [SerializeField] private GameObject endPanel;
+
     private List<PlayerCharacter> players;
     private Dictionary<int, PlayerCharacter> playerDict; // id, object
     private PlayerCharacter myInfo;
@@ -77,6 +80,7 @@ public class InGameManager : MonoBehaviour
         InitMenuPanel();
         InitVotingPanel();
         InitFinalVotingPanel();
+        InitEndPanel();
 
         UIManager.Instance.InitUI(isMafia);
 
@@ -275,10 +279,24 @@ public class InGameManager : MonoBehaviour
             }
         }
     }
+
     private void OnGameEnd(Packet packet)
     {
         var data = new GameEndData(packet.Bytes);
-        Debug.Log("게임 종료" + (data.MafiaWin ? "마피아 승" : "시민 승"));
+        endPanel.SetActive(true);
+
+        Text mainText = endPanel.transform.Find("MainText").GetComponent<Text>();
+        if (data.MafiaWin == isMafia)
+        {
+            mainText.text = "You Win!";
+        }
+        else
+        {
+            mainText.text = "You Lose!";
+            mainText.color = Color.red;
+        }
+
+        ClearInGameEvent();
     }
     #endregion
 
@@ -704,6 +722,17 @@ public class InGameManager : MonoBehaviour
         {
             StartInformation($"찬성 {count}표로 부결되었습니다.");
         }
+    }
+    #endregion
+
+    #region EndPanel
+    private void InitEndPanel()
+    {
+        endPanel.SetActive(true);
+
+        endPanel.transform.Find("Lobby Button").GetComponent<Button>().onClick.AddListener(() => { SceneLoader.Instance.InGameToLobby(); });
+
+        endPanel.SetActive(false);
     }
     #endregion
 }
