@@ -573,7 +573,7 @@ MonoBehaviour:
   menuState: 0
   votingPanel: {fileID: 851271952}
   finalVotingPanel: {fileID: 1913033438}
-  endPanel: {fileID: 0}
+  endPanel: {fileID: 3982674695788113168}
 --- !u!4 &415983047
 Transform:
   m_ObjectHideFlags: 0
@@ -21722,3 +21722,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6429e3be5b3c2fe4094385f63c1d0164, type: 3}
+--- !u!1 &3982674695788113168 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3982674694266170807, guid: 6429e3be5b3c2fe4094385f63c1d0164,
+    type: 3}
+  m_PrefabInstance: {fileID: 3982674695788113167}
+  m_PrefabAsset: {fileID: 0}
