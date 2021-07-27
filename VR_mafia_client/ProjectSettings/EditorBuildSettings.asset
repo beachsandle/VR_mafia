@@ -20,4 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InGame.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/IntroVR.unity
+    guid: 1a71679df13a57645bdd0f488684a961
+  - enabled: 1
+    path: Assets/Scenes/LobbyVR.unity
+    guid: de370e275bdfa9645a5c7cf1a28203dc
   m_configObjects: {}
