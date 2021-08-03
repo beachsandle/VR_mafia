@@ -59,7 +59,7 @@ public class SceneLoader : MonoBehaviour
         PhotonManager.Instance.OnJoined += () =>
         {
             NextScene = "WaitingRoom" + ends;
-            SceneManager.LoadScene("Loading");
+            SceneManager.LoadScene("Loading" + ends);
         };
         PhotonManager.Instance.OnLeft += () =>
         {
