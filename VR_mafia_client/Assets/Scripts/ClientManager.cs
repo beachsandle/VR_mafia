@@ -15,8 +15,6 @@ public class ClientManager : MonoBehaviour
     [HideInInspector] public string hostIp;
     [HideInInspector] public int port;
 
-    public bool isMafia;
-
     public static ClientManager Instance { get; private set; }
     void Awake()
     {

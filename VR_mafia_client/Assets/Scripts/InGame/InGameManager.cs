@@ -85,8 +85,6 @@ public class InGameManager : MonoBehaviour
         UIManager.Instance.InitUI(isMafia);
 
         socket.Emit(PacketType.PLAYER_LOAD, new PlayerLoadData(PhotonManager.Instance.LocalPid));
-
-        //HideCursor();
     }
     void Update()
     {
@@ -310,6 +308,7 @@ public class InGameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
     private void SpawnPlayer(int idx, UserInfo u)
     {
         var p = Instantiate(playerObj).GetComponent<PlayerCharacter>();
@@ -378,6 +377,7 @@ public class InGameManager : MonoBehaviour
 
         roleText.text = isMafia ? "마피아" : "시민";
     }
+
     private void UpdatePlayerTransform(MoveEventData data)
     {
         if (data.Player_id == myInfo.ID) return;
@@ -397,16 +397,6 @@ public class InGameManager : MonoBehaviour
     {
         Animator anim = p.transform.GetComponent<Animator>();
 
-        //CharacterController CC = p.transform.GetComponent<CharacterController>();
-        //if (!CC.isGrounded)
-        //{
-        //    anim.SetBool("jump", true);
-        //}
-        //else
-        //{
-        //    anim.SetBool("jump", false);
-        //}
-
         if ((currPos.x != nextPos.x) || (currPos.z != nextPos.z))
         {
             anim.SetBool("run", true);
@@ -416,6 +406,7 @@ public class InGameManager : MonoBehaviour
             anim.SetBool("run", false);
         }
     }
+
     private void KillPlayer(int deadID)
     {
         playerDict[deadID].GetComponent<PlayerCharacter>().Dead(deadID == myInfo.ID);
