@@ -89,6 +89,12 @@ public class PlayerController : MonoBehaviour
         transform.Find("Head_1_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
         HEAD.GetComponent<SkinnedMeshRenderer>().enabled = false;
         BODY.GetComponent<SkinnedMeshRenderer>().enabled = false;
+
+        if (SceneLoader.Instance.isVR)
+        {
+            transform.Find("Space Explorer_Forearm_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
+            transform.Find("Space Explorer_ShoulderPad_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
+        }
     }
 
     #region 상호작용

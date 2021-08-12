@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using MyPacket;
 
 public class InGameManager : MonoBehaviour
@@ -28,6 +29,9 @@ public class InGameManager : MonoBehaviour
     private GameObject playerObjects;
     private Transform spawnPos;
     private bool isMafia;
+
+    [Header("VR")]
+    [SerializeField] private GameObject cameraRig;
 
     [HideInInspector] public bool phaseChange;
     [HideInInspector] public bool isVoting;
@@ -324,8 +328,18 @@ public class InGameManager : MonoBehaviour
     {
         myInfo = playerDict[myId];
         myInfo.gameObject.AddComponent<PlayerController>().MoveTo(spawnPos.GetChild(myInfo.Number - 1).position);
+        
+        if (SceneLoader.Instance.isVR)
+        {
+            cameraRig.transform.SetParent(myInfo.gameObject.transform);
+            cameraRig.transform.localPosition = Vector3.zero;
 
-        SetCamera(myId);
+            myInfo.gameObject.AddComponent<OVRPlayerController>();
+        }
+        else
+        {
+            SetCamera(myId);
+        }
     }
     private void SetCamera(int id)
     {

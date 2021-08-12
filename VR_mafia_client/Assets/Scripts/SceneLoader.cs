@@ -99,8 +99,9 @@ public class SceneLoader : MonoBehaviour
         Users = users;
         Mafias = mafias;
 
-        NextScene = "InGame";
-        SceneManager.LoadScene("Loading");
+        string ends = isVR ? "VR" : "";
+        NextScene = "InGame" + ends;
+        SceneManager.LoadScene("Loading" + ends);
     }
     public (int, bool, int[], List<UserInfo>) GetInGameInfo()
     {
