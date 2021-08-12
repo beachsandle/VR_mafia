@@ -28,6 +28,8 @@ public class SceneLoader : MonoBehaviour
     public int[] Mafias { get; private set; }
     public string NextScene { get; private set; }
 
+    public bool isVR;
+
     private void Awake()
     {
         if (instance == null)
@@ -48,18 +50,20 @@ public class SceneLoader : MonoBehaviour
         UserName = "";
         RoomName = "";
         Users = new List<UserInfo>();
+
+        string ends = isVR ? "VR" : "";
         PhotonManager.Instance.OnConnect += () =>
         {
-            SceneManager.LoadScene("Lobby");
+            SceneManager.LoadScene("Lobby" + ends);
         };
         PhotonManager.Instance.OnJoined += () =>
         {
-            NextScene = "WaitingRoom";
-            SceneManager.LoadScene("Loading");
+            NextScene = "WaitingRoom" + ends;
+            SceneManager.LoadScene("Loading" + ends);
         };
         PhotonManager.Instance.OnLeft += () =>
         {
-            SceneManager.LoadScene("Lobby");
+            SceneManager.LoadScene("Lobby" + ends);
         };
     }
     public void IntroToLobby(int pid)
@@ -95,8 +99,9 @@ public class SceneLoader : MonoBehaviour
         Users = users;
         Mafias = mafias;
 
-        NextScene = "InGame";
-        SceneManager.LoadScene("Loading");
+        string ends = isVR ? "VR" : "";
+        NextScene = "InGame" + ends;
+        SceneManager.LoadScene("Loading" + ends);
     }
     public (int, bool, int[], List<UserInfo>) GetInGameInfo()
     {

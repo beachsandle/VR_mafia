@@ -20,4 +20,19 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InGame.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/VR/IntroVR.unity
+    guid: 1a71679df13a57645bdd0f488684a961
+  - enabled: 1
+    path: Assets/Scenes/VR/LobbyVR.unity
+    guid: de370e275bdfa9645a5c7cf1a28203dc
+  - enabled: 1
+    path: Assets/Scenes/VR/WaitingRoomVR.unity
+    guid: 90cdccc90839b224f863ab395e95e3f0
+  - enabled: 1
+    path: Assets/Scenes/VR/LoadingVR.unity
+    guid: 6e57d830958e9b24db0f433705e20d0f
+  - enabled: 1
+    path: Assets/Scenes/VR/InGameVR.unity
+    guid: be87f752f902afe4892c3e80c687cd5a
   m_configObjects: {}
