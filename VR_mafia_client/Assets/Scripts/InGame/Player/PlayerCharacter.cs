@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using MyPacket;
 
 public class PlayerCharacter : MonoBehaviour
@@ -18,6 +19,8 @@ public class PlayerCharacter : MonoBehaviour
         Name = info.Name;
         IsAlive = true;
         IsMafia = false;
+
+        transform.Find("NameTag").GetChild(0).GetComponentInChildren<Text>().text = Name;
 
         //transform.Find("Head").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
         //transform.Find("Body").GetComponent<MeshRenderer>().material.color = Global.colors[Number - 1];
