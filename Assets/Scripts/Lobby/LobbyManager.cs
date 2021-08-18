@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class LobbyManager : MonoBehaviour
 {
     #region field
+
+    #region reference
     private RoomList roomList;
     private Text playerName;
     //change name panel
@@ -16,10 +18,16 @@ public class LobbyManager : MonoBehaviour
     //create room panel
     private GameObject createRoomPanel;
     private InputField roomNameInputField;
+    #endregion
 
     private RoomInfo target = null;
     #endregion
+
+    #region property
     private PhotonManager pm => PhotonManager.Instance;
+    #endregion
+
+    #region unity message
     private void Awake()
     {
         if (pm == null)
@@ -33,6 +41,9 @@ public class LobbyManager : MonoBehaviour
         pm.RoomListChanged += OnRoomListChanged;
         pm.JoinLobby();
     }
+    #endregion
+
+    #region method
     private void FindReference()
     {
         roomList = transform.GetComponentInChildren<RoomList>();
@@ -50,20 +61,17 @@ public class LobbyManager : MonoBehaviour
         roomList.RoomDoubleClicked += OnJoinButton;
         playerName.text = PhotonNetwork.NickName;
     }
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    #endregion
 
     #region event handler
-
-    private void OnRoomClicked(RoomInfo roomInfo) => target = roomInfo;
     private void OnRoomListChanged(List<RoomInfo> roomInfos)
     {
         roomList.Clear();
         roomList.CreateRoom(roomInfos);
     }
+    private void OnRoomClicked(RoomInfo roomInfo) => target = roomInfo;
+
+    #region button event
     public void OnJoinButton()
     {
         Debug.Log($"lobby : {target}");
@@ -112,6 +120,8 @@ public class LobbyManager : MonoBehaviour
         createRoomPanel.SetActive(false);
     }
     #endregion
+
+    #endregion 
 
     #endregion
 }
