@@ -78,10 +78,7 @@ public class LobbyManager : MonoBehaviour
         if (target != null)
             pm.JoinRoom(target);
     }
-    public void OnRefreshButton()
-    {
-        //EmitRoomListReq();
-    }
+    public void OnRefreshButton() => pm.RefreshRoomList();
 
     #region ChangeNamePanel
     public void OnChangeNameButton()
@@ -112,7 +109,8 @@ public class LobbyManager : MonoBehaviour
     }
     public void OnCreateRoomOKButton()
     {
-        pm.CreateRoom(roomNameInputField.text);
+        if (roomNameInputField.text != "")
+            pm.CreateRoom(roomNameInputField.text);
         createRoomPanel.SetActive(false);
     }
     public void OnCreateRoomNOButton()

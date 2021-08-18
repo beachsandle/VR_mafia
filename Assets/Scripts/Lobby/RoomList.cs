@@ -33,7 +33,7 @@ public class RoomList : MonoBehaviour
     {
         var room = Instantiate(roomPrefab, content.transform);
         room.SetRoomInfo(roomInfo);
-        RoomClicked += OnRoomClicked;
+        room.Clicked += OnRoomClicked;
         room.DoubleClicked += OnRoomDoubleClicked;
         rooms.Add(room);
     }

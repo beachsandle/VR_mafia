@@ -47,7 +47,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #region method
     public void Connect(string nickname)
     {
-        //if (wait) return;
+        if (wait) return;
         wait = true;
         try
         {
@@ -63,7 +63,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public void JoinLobby()
     {
-        //if (wait) return;
+        if (wait) return;
         wait = true;
         try
         {
@@ -74,20 +74,39 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             wait = false;
         }
     }
-
     public void CreateRoom(string roomName)
     {
-
+        if (wait) return;
+        wait = true;
         var option = new RoomOptions();
         option.MaxPlayers = 10;
         option.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "HostName", PhotonNetwork.NickName } };
         option.CustomRoomPropertiesForLobby = new string[] { "HostName" };
-        PhotonNetwork.CreateRoom(roomName, option);
+        try
+        {
+            PhotonNetwork.CreateRoom(roomName, option);
+        }
+        catch
+        {
+            wait = false;
+        }
     }
-
+    public void RefreshRoomList()
+    {
+        PhotonNetwork.GetCustomRoomList(defaultLobby, "*");
+    }
     public void JoinRoom(RoomInfo roomInfo)
     {
-
+        if (wait) return;
+        wait = true;
+        try
+        {
+            PhotonNetwork.JoinRoom(roomInfo.Name);
+        }
+        catch
+        {
+            wait = false;
+        }
     }
     #endregion
 
@@ -107,6 +126,26 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("[Photon Manager] : room list changed");
         RoomListChanged?.Invoke(roomList);
+    }
+    public override void OnCreatedRoom()
+    {
+        wait = true;
+        Debug.Log("[Photon Manager] : room created");
+    }
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        wait = false;
+        Debug.Log("[Photon Manager] : create failed");
+    }
+    public override void OnJoinedRoom()
+    {
+        wait = false;
+        Debug.Log("[Photon Manager] : joined room");
+    }
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        wait = false;
+        Debug.Log("[Photon Manager] : join failed");
     }
     #endregion
 }
