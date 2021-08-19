@@ -37,9 +37,6 @@ public class LobbyManager : MonoBehaviour
         }
         FindReference();
         Init();
-        //enter lobby
-        pm.RoomListChanged += OnRoomListChanged;
-        pm.JoinLobby();
     }
     #endregion
 
@@ -60,10 +57,17 @@ public class LobbyManager : MonoBehaviour
         roomList.RoomClicked += OnRoomClicked;
         roomList.RoomDoubleClicked += OnJoinButton;
         playerName.text = PhotonNetwork.NickName;
+        pm.LeftLobby += OnLeftLobby;
+        pm.RoomListChanged += OnRoomListChanged;
     }
     #endregion
 
     #region event handler
+    private void OnLeftLobby()
+    {
+        pm.LeftLobby -= OnLeftLobby;
+        pm.RoomListChanged -= OnRoomListChanged;
+    }
     private void OnRoomListChanged(List<RoomInfo> roomInfos)
     {
         roomList.Clear();
