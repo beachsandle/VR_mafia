@@ -29,6 +29,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private bool wait = false;
     private Player host;
     private TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
+    public static Color[] colors = {
+        Color.red, Color.green,
+        Color.blue, Color.cyan,
+        Color.magenta, Color.yellow,
+        Color.gray, Color.black,
+        new Color(0.75f, 0.5f, 0.75f), new Color(0.5f, 0.75f, 0.5f)
+    };
     #endregion
 
     #region property
