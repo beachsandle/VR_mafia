@@ -22,11 +22,11 @@ public class SceneLoader : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
     }
-    public static void ReturnToIntroScene()
+    public static void ToIntroScene()
     {
         SceneManager.LoadScene("Intro");
     }
-    public void IntroToLobbyScene()
+    public void ToLobbyScene()
     {
         SceneManager.LoadScene("Lobby");
     }

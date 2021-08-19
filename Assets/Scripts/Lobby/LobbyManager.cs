@@ -32,7 +32,7 @@ public class LobbyManager : MonoBehaviour
     {
         if (pm == null)
         {
-            SceneLoader.ReturnToIntroScene();
+            SceneLoader.ToIntroScene();
             return;
         }
         FindReference();
@@ -59,6 +59,7 @@ public class LobbyManager : MonoBehaviour
         playerName.text = PhotonNetwork.NickName;
         pm.LeftLobby += OnLeftLobby;
         pm.RoomListChanged += OnRoomListChanged;
+        pm.JoinLobby();
     }
     #endregion
 

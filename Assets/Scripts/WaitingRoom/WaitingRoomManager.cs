@@ -22,7 +22,7 @@ public class WaitingRoomManager : MonoBehaviour
     {
         if (pm == null || PhotonNetwork.CurrentRoom == null)
         {
-            SceneLoader.ReturnToIntroScene();
+            SceneLoader.ToIntroScene();
             return;
         }
         FindReference();
@@ -44,9 +44,7 @@ public class WaitingRoomManager : MonoBehaviour
     #region event handler
 
     #region button event
-    public void OnLeaveButton()
-    {
-    }
+    public void OnLeaveButton() => pm.LeaveRoom();
     public void OnStartButton()
     {
 

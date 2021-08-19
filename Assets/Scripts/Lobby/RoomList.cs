@@ -40,6 +40,7 @@ public class RoomList : MonoBehaviour
     public void CreateRoom(List<RoomInfo> roomInfos)
     {
         foreach (var info in roomInfos)
-            CreateRoom(info);
+            if (info.PlayerCount != 0)
+                CreateRoom(info);
     }
 }

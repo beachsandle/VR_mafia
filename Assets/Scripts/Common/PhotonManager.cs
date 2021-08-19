@@ -67,6 +67,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region lobby
+    public void JoinLobby()
+    {
+        if (wait) return;
+        wait = true;
+        try
+        {
+            PhotonNetwork.JoinLobby(defaultLobby);
+        }
+        catch
+        {
+            wait = false;
+        }
+    }
     public void CreateRoom(string roomName)
     {
         if (wait) return;
@@ -103,6 +116,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
+    #region waiting room
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+    #endregion
+
     #endregion
 
     #region event handler
@@ -110,14 +130,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #region intro
     public override void OnConnectedToMaster()
     {
+        wait = false;
         Debug.Log("[Photon Manager] : connected");
-        PhotonNetwork.JoinLobby(defaultLobby);
+        sl.ToLobbyScene();
     }
     public override void OnJoinedLobby()
     {
         wait = false;
         Debug.Log("[Photon Manager] : joined lobby");
-        sl.IntroToLobbyScene();
     }
     #endregion
 
