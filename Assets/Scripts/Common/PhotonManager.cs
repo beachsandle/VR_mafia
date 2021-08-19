@@ -141,6 +141,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         wait = false;
         Debug.Log("[Photon Manager] : joined room");
         LeftLobby?.Invoke();
+        sl.LobbyToWaitingRoomScene();
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
@@ -150,6 +151,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region waitting room
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        Debug.Log($"[Photon Manager] : enter user {newPlayer}");
+    }
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        Debug.Log($"[Photon Manager] : left user {otherPlayer}");
+    }
     #endregion
 
     #endregion

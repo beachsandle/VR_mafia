@@ -18,6 +18,10 @@ public class SceneLoader : MonoBehaviour
             return instance;
         }
     }
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
     public static void ReturnToIntroScene()
     {
         SceneManager.LoadScene("Intro");
@@ -25,5 +29,10 @@ public class SceneLoader : MonoBehaviour
     public void IntroToLobbyScene()
     {
         SceneManager.LoadScene("Lobby");
+    }
+
+    public void LobbyToWaitingRoomScene()
+    {
+        SceneManager.LoadScene("WaitingRoom");
     }
 }
