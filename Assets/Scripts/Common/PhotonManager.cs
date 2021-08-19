@@ -33,11 +33,21 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     #region property
     private Photon.Realtime.Room cr => PhotonNetwork.CurrentRoom;
+    public Player[] PlayerList => PhotonNetwork.PlayerList;
     #endregion
 
     #region callback
-    [HideInInspector] public Action<List<RoomInfo>> RoomListChanged;
-    [HideInInspector] public Action LeftLobby;
+
+    #region lobby
+    public event Action<List<RoomInfo>> RoomListChanged;
+    public event Action LeftLobby;
+    #endregion
+
+    #region waiting room
+    public event Action PlayerListChanged;
+    public event Action LeftWaitingRoom;
+    #endregion
+
     #endregion
 
     #region unity message
@@ -101,7 +111,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public void RefreshRoomList()
     {
-        PhotonNetwork.GetCustomRoomList(defaultLobby, "*");
+        //PhotonNetwork.GetCustomRoomList(defaultLobby, "*");
     }
     public void JoinRoom(RoomInfo roomInfo)
     {
@@ -119,15 +129,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region waiting room
+
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
+        LeftWaitingRoom?.Invoke();
     }
     public void GameStart()
     {
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
             return;
         cr.IsOpen = false;
+        LeftWaitingRoom?.Invoke();
     }
     #endregion
 
@@ -142,15 +155,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("[Photon Manager] : connected");
         SceneManager.LoadScene("Lobby");
     }
+    #endregion
+
+    #region lobby
     public override void OnJoinedLobby()
     {
         wait = false;
         Debug.Log("[Photon Manager] : joined lobby");
-        RefreshRoomList();
     }
-    #endregion
-
-    #region lobby
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         Debug.Log("[Photon Manager] : room list changed");
@@ -185,12 +197,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($"[Photon Manager] : enter user {newPlayer}");
+        PlayerListChanged?.Invoke();
     }
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
         if (otherPlayer == host)
             LeaveRoom();
+        else
+            PlayerListChanged?.Invoke();
     }
     #endregion
 
