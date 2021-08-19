@@ -31,6 +31,8 @@ public class RoomList : MonoBehaviour
     }
     public void CreateRoom(RoomInfo roomInfo)
     {
+        if (roomInfo.PlayerCount == 0 || !roomInfo.IsOpen)
+            return;
         var room = Instantiate(roomPrefab, content.transform);
         room.SetRoomInfo(roomInfo);
         room.Clicked += OnRoomClicked;
@@ -40,7 +42,6 @@ public class RoomList : MonoBehaviour
     public void CreateRoom(List<RoomInfo> roomInfos)
     {
         foreach (var info in roomInfos)
-            if (info.PlayerCount != 0)
-                CreateRoom(info);
+            CreateRoom(info);
     }
 }

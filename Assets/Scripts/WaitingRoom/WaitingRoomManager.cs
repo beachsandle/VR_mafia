@@ -46,10 +46,7 @@ public class WaitingRoomManager : MonoBehaviour
 
     #region button event
     public void OnLeaveButton() => pm.LeaveRoom();
-    public void OnStartButton()
-    {
-
-    }
+    public void OnStartButton() => pm.GameStart();
 
     #endregion 
 
