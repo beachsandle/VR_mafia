@@ -8,6 +8,7 @@ using Photon.Realtime;
 using Dissonance;
 using Dissonance.Audio.Playback;
 using Dissonance.Integrations.PhotonUnityNetworking2;
+using UnityEngine.SceneManagement;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -27,10 +28,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #region field
     private bool wait = false;
     private TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
-    #endregion
-
-    #region property
-    private SceneLoader sl => SceneLoader.Instance;
     #endregion
 
     #region callback
@@ -132,7 +129,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         wait = false;
         Debug.Log("[Photon Manager] : connected");
-        sl.ToLobbyScene();
+        SceneManager.LoadScene("Lobby");
     }
     public override void OnJoinedLobby()
     {
@@ -161,7 +158,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         wait = false;
         Debug.Log("[Photon Manager] : joined room");
         LeftLobby?.Invoke();
-        sl.LobbyToWaitingRoomScene();
+        SceneManager.LoadScene("WaitingRoom");
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {

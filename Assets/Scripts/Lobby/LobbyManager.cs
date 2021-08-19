@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
@@ -32,7 +33,7 @@ public class LobbyManager : MonoBehaviour
     {
         if (pm == null)
         {
-            SceneLoader.ToIntroScene();
+            SceneManager.LoadScene("Intro");
             return;
         }
         FindReference();

@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class WaitingRoomManager : MonoBehaviour
@@ -22,7 +23,7 @@ public class WaitingRoomManager : MonoBehaviour
     {
         if (pm == null || PhotonNetwork.CurrentRoom == null)
         {
-            SceneLoader.ToIntroScene();
+            SceneManager.LoadScene("Intro");
             return;
         }
         FindReference();
