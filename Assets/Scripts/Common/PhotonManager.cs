@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,8 +10,9 @@ using Dissonance;
 using Dissonance.Audio.Playback;
 using Dissonance.Integrations.PhotonUnityNetworking2;
 using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
 
-public class PhotonManager : MonoBehaviourPunCallbacks
+public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     #region singleton
     private static PhotonManager instance;
@@ -77,6 +79,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         wait = false;
         Debug.Log("[Photon Manager] : connected");
+        if (PhotonNetwork.NickName.Trim() == "")
+            PhotonNetwork.NickName = PhotonNetwork.LocalPlayer.UserId.Substring(0, 6);
         SceneManager.LoadScene("Lobby");
     }
     #endregion
@@ -108,6 +112,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (wait) return;
         wait = true;
+        if (roomName == "")
+            roomName = PhotonNetwork.LocalPlayer.NickName + "'s room";
         var option = new RoomOptions();
         option.MaxPlayers = 10;
         option.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "HostName", PhotonNetwork.NickName } };

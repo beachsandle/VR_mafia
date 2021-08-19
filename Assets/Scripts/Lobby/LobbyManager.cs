@@ -115,8 +115,7 @@ public class LobbyManager : MonoBehaviour
     }
     public void OnCreateRoomOKButton()
     {
-        if (roomNameInputField.text != "")
-            pm.CreateRoom(roomNameInputField.text);
+        pm.CreateRoom(roomNameInputField.text);
         createRoomPanel.SetActive(false);
     }
     public void OnCreateRoomNOButton()

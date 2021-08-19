@@ -12,7 +12,6 @@ public class IntroManager : MonoBehaviour
     }
     public void OnConnectButton()
     {
-        if (nicknameInput.text != "")
-            PhotonManager.Instance.Connect(nicknameInput.text);
+        PhotonManager.Instance.Connect(nicknameInput.text);
     }
 }
