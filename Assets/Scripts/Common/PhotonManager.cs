@@ -27,6 +27,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     #region field
     private bool wait = false;
+    private Player host;
     private TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
     #endregion
 
@@ -147,15 +148,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnCreatedRoom()
     {
         Debug.Log("[Photon Manager] : room created");
+        PhotonNetwork.CurrentRoom.SetMasterClient(PhotonNetwork.LocalPlayer);
     }
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         wait = false;
         Debug.Log("[Photon Manager] : create failed");
     }
+    private Photon.Realtime.Room currentRoom => PhotonNetwork.CurrentRoom;
     public override void OnJoinedRoom()
     {
         wait = false;
+        host = currentRoom.Players[currentRoom.MasterClientId];
         Debug.Log("[Photon Manager] : joined room");
         LeftLobby?.Invoke();
         SceneManager.LoadScene("WaitingRoom");
@@ -175,6 +179,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
+        if (otherPlayer == host)
+            LeaveRoom();
     }
     #endregion
 
