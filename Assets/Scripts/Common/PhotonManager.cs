@@ -29,6 +29,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private bool wait = false;
     private Player host;
     private TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
+
     public static Color[] colors = {
         Color.red, Color.green,
         Color.blue, Color.cyan,
@@ -43,20 +44,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public Player[] PlayerList => PhotonNetwork.PlayerList;
     #endregion
 
-    #region callback
-
-    #region lobby
-    public event Action<List<RoomInfo>> RoomListChanged;
-    public event Action LeftLobby;
-    #endregion
-
-    #region waiting room
-    public event Action PlayerListChanged;
-    public event Action LeftWaitingRoom;
-    #endregion
-
-    #endregion
-
     #region unity message
     private void Awake()
     {
@@ -64,9 +51,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region method
-
     #region intro
+
+    #region method
     public void Connect(string nickname)
     {
         if (wait) return;
@@ -85,7 +72,25 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
+    #region event handler
+    public override void OnConnectedToMaster()
+    {
+        wait = false;
+        Debug.Log("[Photon Manager] : connected");
+        SceneManager.LoadScene("Lobby");
+    }
+    #endregion
+
+    #endregion
+
     #region lobby
+
+    #region callback
+    public event Action<List<RoomInfo>> RoomListChanged;
+    public event Action LeftLobby;
+    #endregion
+
+    #region method
     public void JoinLobby()
     {
         if (wait) return;
@@ -135,36 +140,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region waiting room
-
-    public void LeaveRoom()
-    {
-        PhotonNetwork.LeaveRoom();
-        LeftWaitingRoom?.Invoke();
-    }
-    public void GameStart()
-    {
-        if (!PhotonNetwork.LocalPlayer.IsMasterClient)
-            return;
-        cr.IsOpen = false;
-        LeftWaitingRoom?.Invoke();
-    }
-    #endregion
-
-    #endregion
-
     #region event handler
-
-    #region intro
-    public override void OnConnectedToMaster()
-    {
-        wait = false;
-        Debug.Log("[Photon Manager] : connected");
-        SceneManager.LoadScene("Lobby");
-    }
-    #endregion
-
-    #region lobby
     public override void OnJoinedLobby()
     {
         wait = false;
@@ -200,7 +176,33 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region waitting room
+    #endregion
+
+    #region waiting room
+
+    #region callback
+    public event Action PlayerListChanged;
+    public event Action LeftWaitingRoom;
+    #endregion
+
+    #region method
+
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+        LeftWaitingRoom?.Invoke();
+    }
+    public void GameStart()
+    {
+        if (!PhotonNetwork.LocalPlayer.IsMasterClient)
+            return;
+        cr.IsOpen = false;
+        LeftWaitingRoom?.Invoke();
+        SceneManager.LoadScene("Ingame(light)");
+    }
+    #endregion
+
+    #region event handler
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($"[Photon Manager] : enter user {newPlayer}");
