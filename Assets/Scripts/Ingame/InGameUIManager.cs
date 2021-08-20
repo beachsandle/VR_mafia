@@ -43,6 +43,10 @@ public class InGameUIManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
             OnMenuButton();
     }
+    private void OnDestroy()
+    {
+        SetActiveCursor(true);
+    }
     #endregion
 
     #region method
@@ -63,6 +67,20 @@ public class InGameUIManager : MonoBehaviour
     }
     private void Init()
     {
+        SetActiveCursor(false);
+    }
+    private void SetActiveCursor(bool active)
+    {
+        if (active)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
     #endregion
 
@@ -72,6 +90,7 @@ public class InGameUIManager : MonoBehaviour
     public void OnMenuButton()
     {
         menuPanel.SetActive(!menuPanel.activeSelf);
+        SetActiveCursor(menuPanel.activeSelf);
     }
     public void OnMenuBackButton()
     {

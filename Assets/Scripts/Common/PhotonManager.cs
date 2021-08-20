@@ -11,7 +11,7 @@ using Dissonance.Audio.Playback;
 using Dissonance.Integrations.PhotonUnityNetworking2;
 using ExitGames.Client.Photon;
 
-public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
+public class PhotonManager : MonoBehaviourPunCallbacks
 {
     #region singleton
     private static PhotonManager instance;
@@ -175,6 +175,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         wait = false;
         host = PhotonNetwork.MasterClient;
+        PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log("[Photon Manager] : joined room");
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -228,9 +229,5 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region ingame
-    public void OnEvent(EventData photonEvent)
-    {
-        Debug.Log($"[Photon Manager] event : {photonEvent.Code}");
-    }
     #endregion
 }
