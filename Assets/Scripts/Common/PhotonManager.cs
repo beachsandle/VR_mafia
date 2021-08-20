@@ -152,11 +152,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
         wait = false;
         Debug.Log("[Photon Manager] : joined lobby");
     }
-    public override void OnLeftLobby()
-    {
-        LeftLobby?.Invoke();
-        Debug.Log("[Photon Manager] : left lobby");
-    }
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         Debug.Log("[Photon Manager] : room list changed");
@@ -178,7 +173,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
         host = cr.Players[cr.MasterClientId];
         PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log("[Photon Manager] : joined room");
-        SceneManager.LoadScene("WaitingRoom");
+        LeftLobby?.Invoke();
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
@@ -198,22 +193,22 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region method
 
-    public void LeaveRoom() => PhotonNetwork.LeaveRoom();
+    public void LeaveRoom()
+    {
+        LeftWaitingRoom?.Invoke();
+        PhotonNetwork.LeaveRoom();
+    }
     public void GameStart()
     {
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
             return;
         cr.IsOpen = false;
+        cr.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { "GameStart", 1 } });
         PhotonNetwork.LoadLevel("InGame");
     }
     #endregion
 
     #region event handler
-    public override void OnLeftRoom()
-    {
-        LeftWaitingRoom?.Invoke();
-        Debug.Log("[Photon Manager] : left room");
-    }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($"[Photon Manager] : enter user {newPlayer}");
@@ -222,21 +217,25 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
-        if (otherPlayer == host)
+        if (cr.CustomProperties.ContainsKey("GameStart"))
+        {
+        }
+        else if (otherPlayer == host)
             LeaveRoom();
         else
             PlayerListChanged?.Invoke();
+
     }
     #endregion
 
     #endregion
 
     #region ingame
-    public void test()
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
-        //PhotonNetwork.RaiseEvent()
+        if (propertiesThatChanged.ContainsKey("GameStart"))
+            LeftWaitingRoom?.Invoke();
     }
-
     public void OnEvent(EventData photonEvent)
     {
         Debug.Log($"[Photon Manager] event : {photonEvent.Code}");
