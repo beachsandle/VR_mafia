@@ -63,10 +63,6 @@ public class InGameUIManager : MonoBehaviour
     }
     private void Init()
     {
-        var player = PhotonNetwork.Instantiate("Player_SE", Vector3.zero, Quaternion.identity);
-        player.AddComponent<PlayerController>();
-        Camera.main.transform.parent = player.transform;
-        Camera.main.transform.localPosition = new Vector3(0, 2);
     }
     #endregion
 

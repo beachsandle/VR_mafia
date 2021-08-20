@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour
     public void SetCamera(Camera cam)
     {
         cam.transform.parent = head.transform;
-        cam.transform.localPosition = new Vector3(0, 1.8f);
+        cam.transform.localPosition = Vector3.zero;
     }
     public void MoveTo(Vector3 pos)
     {
