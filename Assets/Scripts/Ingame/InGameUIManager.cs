@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class InGameManager : MonoBehaviour
+public class InGameUIManager : MonoBehaviour
 {
 
     #region field

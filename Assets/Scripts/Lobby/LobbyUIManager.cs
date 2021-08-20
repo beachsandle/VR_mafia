@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class LobbyManager : MonoBehaviour
+public class LobbyUIManager : MonoBehaviour
 {
     #region field
 

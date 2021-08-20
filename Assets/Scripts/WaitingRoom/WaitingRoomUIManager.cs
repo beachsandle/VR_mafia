@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class WaitingRoomManager : MonoBehaviour
+public class WaitingRoomUIManager : MonoBehaviour
 {
     #region field
 

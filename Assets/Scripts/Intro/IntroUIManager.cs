@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IntroManager : MonoBehaviour
+public class IntroUIManager : MonoBehaviour
 {
     private InputField nicknameInput;
     private void Awake()
