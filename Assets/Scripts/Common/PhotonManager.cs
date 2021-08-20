@@ -199,7 +199,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #region method
 
     public void LeaveRoom() => PhotonNetwork.LeaveRoom();
-
     public void GameStart()
     {
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
