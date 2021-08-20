@@ -152,6 +152,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
         wait = false;
         Debug.Log("[Photon Manager] : joined lobby");
     }
+    public override void OnLeftLobby()
+    {
+        LeftLobby?.Invoke();
+        Debug.Log("[Photon Manager] : left lobby");
+    }
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         Debug.Log("[Photon Manager] : room list changed");
@@ -171,8 +176,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         wait = false;
         host = cr.Players[cr.MasterClientId];
+        PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log("[Photon Manager] : joined room");
-        LeftLobby?.Invoke();
         SceneManager.LoadScene("WaitingRoom");
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -193,22 +198,23 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region method
 
-    public void LeaveRoom()
-    {
-        PhotonNetwork.LeaveRoom();
-        LeftWaitingRoom?.Invoke();
-    }
+    public void LeaveRoom() => PhotonNetwork.LeaveRoom();
+
     public void GameStart()
     {
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
             return;
         cr.IsOpen = false;
-        LeftWaitingRoom?.Invoke();
-        SceneManager.LoadScene("Ingame(light)");
+        PhotonNetwork.LoadLevel("InGame");
     }
     #endregion
 
     #region event handler
+    public override void OnLeftRoom()
+    {
+        LeftWaitingRoom?.Invoke();
+        Debug.Log("[Photon Manager] : left room");
+    }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         Debug.Log($"[Photon Manager] : enter user {newPlayer}");
@@ -224,5 +230,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     #endregion
 
+    #endregion
+
+    #region ingame
+    public void test()
+    {
+        //PhotonNetwork.RaiseEvent()
+    }
+
+    public void OnEvent(EventData photonEvent)
+    {
+        Debug.Log($"[Photon Manager] event : {photonEvent.Code}");
+    }
     #endregion
 }
