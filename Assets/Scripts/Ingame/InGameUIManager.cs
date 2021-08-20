@@ -9,21 +9,18 @@ public class InGameUIManager : MonoBehaviour
 {
 
     #region field
-
-    #region reference
     //text
     private Text roleText;
     private Text informationText;
     //ui
     private GameObject killUI;
     private GameObject deadReportUI;
+    private FadeInOut fadeInOut;
     //panel
     private GameObject menuPanel;
     private GameObject votingPanel;
     private GameObject finalVotingPanel;
     private GameObject endPanel;
-    #endregion
-
     #endregion
 
     #region property
@@ -57,6 +54,7 @@ public class InGameUIManager : MonoBehaviour
         //ui
         killUI = transform.Find("Kill UI").gameObject;
         deadReportUI = transform.Find("DeadReport UI").gameObject;
+        fadeInOut = transform.GetComponentInChildren<FadeInOut>();
         //panel
         menuPanel = transform.Find("Menu Panel").gameObject;
         votingPanel = transform.Find("Voting Panel").gameObject;
