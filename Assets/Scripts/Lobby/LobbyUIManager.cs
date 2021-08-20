@@ -31,13 +31,18 @@ public class LobbyUIManager : MonoBehaviour
     #region unity message
     private void Awake()
     {
-        if (pm == null)
+        if (!pm)
         {
             SceneManager.LoadScene("Intro");
             return;
         }
         FindReference();
         Init();
+    }
+    private void OnDestroy()
+    {
+        if (pm)
+            pm.RoomListChanged -= OnRoomListChanged;
     }
     #endregion
 
@@ -58,18 +63,12 @@ public class LobbyUIManager : MonoBehaviour
         roomList.RoomClicked += OnRoomClicked;
         roomList.RoomDoubleClicked += OnJoinButton;
         playerName.text = PhotonNetwork.NickName;
-        pm.LeftLobby += OnLeftLobby;
         pm.RoomListChanged += OnRoomListChanged;
         pm.JoinLobby();
     }
     #endregion
 
     #region event handler
-    private void OnLeftLobby()
-    {
-        pm.LeftLobby -= OnLeftLobby;
-        pm.RoomListChanged -= OnRoomListChanged;
-    }
     private void OnRoomListChanged(List<RoomInfo> roomInfos)
     {
         roomList.Clear();

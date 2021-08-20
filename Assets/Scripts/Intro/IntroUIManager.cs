@@ -10,6 +10,10 @@ public class IntroUIManager : MonoBehaviour
     {
         nicknameInput = transform.Find("IntroPanel").Find("Nickname").GetComponentInChildren<InputField>();
     }
+    private void Start()
+    {
+        OnConnectButton();
+    }
     public void OnConnectButton()
     {
         PhotonManager.Instance.Connect(nicknameInput.text);

@@ -9,7 +9,6 @@ using Photon.Realtime;
 using Dissonance;
 using Dissonance.Audio.Playback;
 using Dissonance.Integrations.PhotonUnityNetworking2;
-using UnityEngine.SceneManagement;
 using ExitGames.Client.Photon;
 
 public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
@@ -81,7 +80,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log("[Photon Manager] : connected");
         if (PhotonNetwork.NickName.Trim() == "")
             PhotonNetwork.NickName = PhotonNetwork.LocalPlayer.UserId.Substring(0, 6);
-        SceneManager.LoadScene("Lobby");
+        PhotonNetwork.LoadLevel("Lobby");
+    }
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        Connect(PhotonNetwork.NickName);
     }
     #endregion
 
@@ -91,7 +94,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region callback
     public event Action<List<RoomInfo>> RoomListChanged;
-    public event Action LeftLobby;
     #endregion
 
     #region method
@@ -161,6 +163,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         Debug.Log("[Photon Manager] : room created");
         PhotonNetwork.CurrentRoom.SetMasterClient(PhotonNetwork.LocalPlayer);
+        PhotonNetwork.AutomaticallySyncScene = true;
+        PhotonNetwork.LoadLevel("WaitingRoom");
     }
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
@@ -170,10 +174,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnJoinedRoom()
     {
         wait = false;
-        host = cr.Players[cr.MasterClientId];
-        PhotonNetwork.AutomaticallySyncScene = true;
+        host = PhotonNetwork.MasterClient;
         Debug.Log("[Photon Manager] : joined room");
-        LeftLobby?.Invoke();
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
@@ -188,22 +190,16 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region callback
     public event Action PlayerListChanged;
-    public event Action LeftWaitingRoom;
     #endregion
 
     #region method
 
-    public void LeaveRoom()
-    {
-        LeftWaitingRoom?.Invoke();
-        PhotonNetwork.LeaveRoom();
-    }
+    public void LeaveRoom() => PhotonNetwork.LeaveRoom();
     public void GameStart()
     {
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
             return;
         cr.IsOpen = false;
-        cr.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { "GameStart", 1 } });
         PhotonNetwork.LoadLevel("InGame");
     }
     #endregion
@@ -217,11 +213,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
-        if (cr.CustomProperties.ContainsKey("GameStart"))
-        {
-        }
-        else if (otherPlayer == host)
+        if (otherPlayer == host)
             LeaveRoom();
+        else if (!cr.IsOpen)
+        {
+            //게임중 퇴장
+        }
         else
             PlayerListChanged?.Invoke();
 
@@ -231,11 +228,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region ingame
-    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
-    {
-        if (propertiesThatChanged.ContainsKey("GameStart"))
-            LeftWaitingRoom?.Invoke();
-    }
     public void OnEvent(EventData photonEvent)
     {
         Debug.Log($"[Photon Manager] event : {photonEvent.Code}");

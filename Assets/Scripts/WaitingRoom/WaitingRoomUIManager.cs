@@ -22,13 +22,18 @@ public class WaitingRoomUIManager : MonoBehaviour
     #region unity message
     private void Awake()
     {
-        if (pm == null || PhotonNetwork.CurrentRoom == null)
+        if (!pm || PhotonNetwork.CurrentRoom == null)
         {
             SceneManager.LoadScene("Intro");
             return;
         }
         FindReference();
         Init();
+    }
+    private void OnDestroy()
+    {
+        if (pm)
+            pm.PlayerListChanged -= SetPlayers;
     }
     #endregion
 
@@ -43,7 +48,6 @@ public class WaitingRoomUIManager : MonoBehaviour
         roomName.text = PhotonNetwork.CurrentRoom.Name;
         SetPlayers();
         pm.PlayerListChanged += SetPlayers;
-        pm.LeftWaitingRoom += OnLeftWaitingRoom;
     }
     private void SetPlayers()
     {
@@ -67,12 +71,6 @@ public class WaitingRoomUIManager : MonoBehaviour
     #endregion
 
     #region event handler
-    private void OnLeftWaitingRoom()
-    {
-        pm.PlayerListChanged -= SetPlayers;
-        pm.LeftWaitingRoom -= OnLeftWaitingRoom;
-    }
-
     #region button event
     public void OnLeaveButton() => pm.LeaveRoom();
     public void OnStartButton() => pm.GameStart();
