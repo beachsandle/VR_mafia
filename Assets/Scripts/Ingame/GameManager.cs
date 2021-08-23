@@ -8,6 +8,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     private Transform[] spawnPositions;
+    private Vector3 spawnPosition;
+    private PlayerController localPlayerController;
     private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
     private void Awake()
     {
@@ -16,27 +18,29 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     void Start()
     {
         SpawnPlayer();
-        if (PhotonNetwork.IsMasterClient)
-            StartCoroutine(GameLogic());
     }
     private void SpawnPlayer()
     {
-        var player = PhotonNetwork.Instantiate("Player_SE", spawnPositions[PhotonNetwork.LocalPlayer.ActorNumber].position, Quaternion.identity);
-        var controller = player.AddComponent<PlayerController>();
-        controller.SetCamera(Camera.main);
+        spawnPosition = spawnPositions[PhotonNetwork.LocalPlayer.ActorNumber].position;
+        var player = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity);
+        localPlayerController = player.AddComponent<PlayerController>();
+        localPlayerController.SetCamera(Camera.main);
     }
-    private IEnumerator GameLogic()
-    {
-        while (true)
-        {
-            PhotonNetwork.RaiseEvent(1, null, eventOption, SendOptions.SendReliable);
-            yield return new WaitForSeconds(3f);
-        }
-    }
-
     public void OnEvent(EventData photonEvent)
     {
-        if (photonEvent.Code == 1)
-            Debug.Log(photonEvent.Code);
+        switch ((VrMafiaEventCode)photonEvent.Code)
+        {
+            case VrMafiaEventCode.DayStart:
+                Debug.Log($"[GameManager] Day Start");
+                break;
+            case VrMafiaEventCode.NightStart:
+                Debug.Log($"[GameManager] Night Start");
+                localPlayerController.MoveTo(spawnPosition);
+                break;
+            case VrMafiaEventCode.VotingStart:
+                Debug.Log($"[GameManager] Voting Start");
+                break;
+            default: break;
+        }
     }
 }
