@@ -7,6 +7,19 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
+    #region singleton
+    private static GameManager instance;
+    public static GameManager Instance
+    {
+        get
+        {
+            if (instance == null)
+                instance = FindObjectOfType<GameManager>();
+            return instance;
+        }
+    }
+    #endregion
+
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
@@ -26,21 +39,50 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         localPlayerController = player.AddComponent<PlayerController>();
         localPlayerController.SetCamera(Camera.main);
     }
+    private void SetMafia(EventData data)
+    {
+        Debug.Log($"[GameManager] Set Mafia : {(int[])data.CustomData}");
+    }
+    private void DayStart()
+    {
+        Debug.Log($"[GameManager] Day Start");
+    }
+    private void NightStart()
+    {
+        Debug.Log($"[GameManager] Night Start");
+        localPlayerController.MoveTo(spawnPosition);
+    }
+    private void VotingStart(EventData data)
+    {
+        Debug.Log($"[GameManager] Voting Start : {data.CustomData}");
+    }
     public void OnEvent(EventData photonEvent)
     {
         switch ((VrMafiaEventCode)photonEvent.Code)
         {
+            case VrMafiaEventCode.SetMafia:
+                SetMafia(photonEvent);
+                break;
             case VrMafiaEventCode.DayStart:
-                Debug.Log($"[GameManager] Day Start");
+                DayStart();
                 break;
             case VrMafiaEventCode.NightStart:
-                Debug.Log($"[GameManager] Night Start");
-                localPlayerController.MoveTo(spawnPosition);
+                NightStart();
                 break;
             case VrMafiaEventCode.VotingStart:
-                Debug.Log($"[GameManager] Voting Start");
+                VotingStart(photonEvent);
                 break;
             default: break;
         }
+    }
+    public void OnVoteButton(int id)
+    {
+
+    }
+    public void OnKillButton(int id) { }
+    public void OnDeadReportButton(int id) { }
+    public void OnFinalVoteButton(bool pros)
+    {
+
     }
 }

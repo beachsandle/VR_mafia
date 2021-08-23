@@ -1,9 +1,12 @@
 ﻿using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -17,6 +20,13 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private GamePhase phase = GamePhase.None;
     private RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
     private RaiseEventOptions unicastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.Others };
+
+    private int[] mafiaIds;
+
+    private int electedId;
+    private int[] voteCounts = new int[10];
+
+    private Player[] players => PhotonNetwork.PlayerList;
     #endregion
 
     #region unity message
@@ -33,11 +43,26 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private void GameStart()
     {
         Debug.Log($"[GameServer] Game Start");
+        SelectMafia();
+        SendUnicastEvent(VrMafiaEventCode.SetMafia, mafiaIds, mafiaIds);
         DayStart();
     }
     private void SendBroadcastEvent(VrMafiaEventCode code, object content = null)
     {
         PhotonNetwork.RaiseEvent((byte)code, content, broadcastOption, SendOptions.SendReliable);
+    }
+    private void SendUnicastEvent(VrMafiaEventCode code, int[] targets, object content = null)
+    {
+        unicastOption.TargetActors = targets;
+        PhotonNetwork.RaiseEvent((byte)code, content, unicastOption, SendOptions.SendReliable);
+    }
+
+    private void SelectMafia()
+    {
+        mafiaIds = (from p in players
+                    select p.ActorNumber).OrderBy(a => Guid.NewGuid())
+                   .Take(players.Length > 6 ? 2 : 1)
+                   .ToArray();
     }
 
     #region phase change
@@ -47,7 +72,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameServer] Day Start");
         phase = GamePhase.Day;
         SendBroadcastEvent(VrMafiaEventCode.DayStart);
-        Invoke("NightStart", dayTime);
+        //Invoke("NightStart", dayTime);
     }
     private void NightStart()
     {
@@ -62,7 +87,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase == GamePhase.Voting) return;
         Debug.Log($"[GameServer] Voting Start");
         phase = GamePhase.Voting;
-        SendBroadcastEvent(VrMafiaEventCode.VotingStart);
+        electedId = -1;
+        SendBroadcastEvent(VrMafiaEventCode.VotingStart, votingTime);
         Invoke("VotingEnd", votingTime);
     }
     private void VotingEnd()
@@ -83,8 +109,26 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     #region event handler
     public void OnEvent(EventData photonEvent)
     {
+        switch ((VrMafiaEventCode)photonEvent.Code)
+        {
+            case VrMafiaEventCode.KillReq:
+                OnKillReq(photonEvent);
+                break;
+            default: break;
+        }
     }
 
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        base.OnPlayerLeftRoom(otherPlayer);
+    }
+    private void OnKillReq(EventData data)
+    {
+        int targetId = (int)data.CustomData;
+        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId]}");
+        SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, true);
+        SendBroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
+    }
     private void OnReceiveDeadReport()
     {
 
