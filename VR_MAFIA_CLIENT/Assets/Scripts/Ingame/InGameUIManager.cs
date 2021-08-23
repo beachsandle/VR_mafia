@@ -21,10 +21,13 @@ public class InGameUIManager : MonoBehaviour
     private GameObject votingPanel;
     private GameObject finalVotingPanel;
     private GameObject endPanel;
+
+    private float fadeTime = 3f;
     #endregion
 
     #region property
     private PhotonManager pm => PhotonManager.Instance;
+    private GameManager gm => GameManager.Instance;
     #endregion
 
     #region unity message
@@ -46,6 +49,8 @@ public class InGameUIManager : MonoBehaviour
     private void OnDestroy()
     {
         SetActiveCursor(true);
+        gm.DayStarted -= OnDayStarted;
+        gm.NightStarted -= OnNightStarted;
     }
     #endregion
 
@@ -68,6 +73,36 @@ public class InGameUIManager : MonoBehaviour
     private void Init()
     {
         SetActiveCursor(false);
+        gm.DayStarted += OnDayStarted;
+        gm.NightStarted += OnNightStarted;
+    }
+
+    private void OnNightStarted()
+    {
+        StartInformation("밤이 되었습니다.");
+        fadeInOut.FadeAll(
+            () =>
+            {
+                gm.ReturnSpawnPosition();
+            },
+            () => { });
+    }
+
+    private void OnDayStarted()
+    {
+        if (votingPanel.activeSelf)
+            OffVotingPanel();
+        StartInformation("낮이 되었습니다.");
+        fadeInOut.FadeAll();
+    }
+
+    private void OffVotingPanel()
+    {
+        //suffrage = false;
+        //isVoting = false;
+        SetActiveCursor(false);
+
+        votingPanel.SetActive(false);
     }
     private void SetActiveCursor(bool active)
     {
@@ -82,6 +117,37 @@ public class InGameUIManager : MonoBehaviour
             Cursor.visible = false;
         }
     }
+
+
+    #region Information
+    public void StartInformation(string s)
+    {
+        informationText.gameObject.SetActive(true);
+        informationText.text = s;
+
+        StopCoroutine("FadeOutInformationText");
+        StartCoroutine("FadeOutInformationText");
+    }
+    private IEnumerator FadeOutInformationText()
+    {
+        Color orginColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 1);
+        Color clearColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 0);
+        float time = 0f;
+
+        while (informationText.color.a > 0.0f)
+        {
+            informationText.color = Color.Lerp(orginColor, clearColor, time / fadeTime);
+            time += Time.deltaTime;
+
+            yield return null;
+        }
+
+        informationText.text = "";
+        informationText.color = orginColor;
+        informationText.gameObject.SetActive(false);
+    }
+    #endregion
+
     #endregion
 
     #region event handler

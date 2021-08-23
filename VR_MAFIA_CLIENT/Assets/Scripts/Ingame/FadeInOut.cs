@@ -5,38 +5,12 @@ using UnityEngine.UI;
 
 public class FadeInOut : MonoBehaviour
 {
-    private static FadeInOut _instance;
-    public static FadeInOut instance
-    {
-        get
-        {
-            if (!_instance)
-            {
-                _instance = FindObjectOfType(typeof(FadeInOut)) as FadeInOut;
-            }
-
-            return _instance;
-        }
-    }
-
     private Image image;
 
     private Color orginColor;
     private Color srcColor;
     private Color destColor;
     private float fadeTime = 0.75f;
-
-    private void Awake()
-    {
-        if (_instance == null)
-        {
-            _instance = this;
-        }
-        else if (_instance != this)
-        {
-            Destroy(gameObject);
-        }
-    }
 
     void Start()
     {

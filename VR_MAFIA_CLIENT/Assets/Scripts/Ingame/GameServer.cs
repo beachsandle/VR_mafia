@@ -72,7 +72,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameServer] Day Start");
         phase = GamePhase.Day;
         SendBroadcastEvent(VrMafiaEventCode.DayStart);
-        //Invoke("NightStart", dayTime);
+        Invoke("NightStart", dayTime);
     }
     private void NightStart()
     {

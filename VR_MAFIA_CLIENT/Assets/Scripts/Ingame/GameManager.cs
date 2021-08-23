@@ -1,6 +1,7 @@
 ﻿using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,6 +25,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
     private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
+
+    public event Action DayStarted;
+    public event Action NightStarted;
     private void Awake()
     {
         spawnPositions = transform.Find("SpawnPosition").GetComponentsInChildren<Transform>();
@@ -46,11 +50,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void DayStart()
     {
         Debug.Log($"[GameManager] Day Start");
+        DayStarted?.Invoke();
     }
     private void NightStart()
     {
         Debug.Log($"[GameManager] Night Start");
-        localPlayerController.MoveTo(spawnPosition);
+        NightStarted?.Invoke();
     }
     private void VotingStart(EventData data)
     {
@@ -75,6 +80,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             default: break;
         }
     }
+    public void ReturnSpawnPosition() => localPlayerController.MoveTo(spawnPosition);
     public void OnVoteButton(int id)
     {
 
