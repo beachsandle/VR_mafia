@@ -100,6 +100,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void DayStart()
     {
+        CancelInvoke("DayStart");
         if (phase != GamePhase.Voting_End && phase != GamePhase.FinalVoting_End) return;
         Debug.Log($"[GameServer] Day Start");
         phase = GamePhase.Day;
@@ -108,6 +109,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void NightStart()
     {
+        CancelInvoke("NightStart");
         if (phase != GamePhase.Day) return;
         Debug.Log($"[GameServer] Night Start");
         phase = GamePhase.Night;
@@ -116,6 +118,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void VotingStart()
     {
+        CancelInvoke("VotingStart");
         if (phase != GamePhase.Night) return;
         Debug.Log($"[GameServer] Voting Start");
         phase = GamePhase.Voting;
@@ -125,6 +128,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void VotingEnd()
     {
+        CancelInvoke("VotingEnd");
         if (phase != GamePhase.Voting) return;
         Debug.Log($"[GameServer] Voting End");
         phase = GamePhase.Voting_End;
@@ -137,15 +141,16 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void DefenseStart()
     {
+        CancelInvoke("DefenseStart");
         if (phase != GamePhase.Voting_End) return;
         Debug.Log($"[GameServer] Defense Start");
         phase = GamePhase.Defense;
-        SendBroadcastEvent(VrMafiaEventCode.DefenseStart);
+        SendBroadcastEvent(VrMafiaEventCode.DefenseStart, defenseTime);
         Invoke("FinalVotingStart", defenseTime);
     }
     private void FinalVotingStart()
     {
-
+        CancelInvoke("FinalVotingStart");
         if (phase != GamePhase.Defense) return;
         Debug.Log($"[GameServer] Final Voting Start");
         phase = GamePhase.FinalVoting;
@@ -155,6 +160,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void FinalVotingEnd()
     {
+        CancelInvoke("FinalVotingEnd");
         if (phase != GamePhase.FinalVoting) return;
         Debug.Log($"[GameServer] Final Voting End");
         phase = GamePhase.FinalVoting_End;
