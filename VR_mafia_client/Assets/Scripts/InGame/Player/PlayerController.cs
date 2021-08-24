@@ -60,8 +60,11 @@ public class PlayerController : MonoBehaviour
     {
         if (InGameManager.Instance.phaseChange || InGameManager.Instance.isVoting) return;
 
-        Move();
-        Rotate();
+        if (!SceneLoader.Instance.isVR)
+        {
+            Move();
+            Rotate();
+        }
         InGameManager.Instance.EmitMoveReq(transform.position, transform.rotation);
 
         if (InGameManager.Instance.menuState) return;
