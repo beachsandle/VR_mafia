@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action DayStarted;
     public event Action NightStarted;
     public event Action<float> VotingStarted;
+    public event Action VoteFailed;
     public event Action<int[]> VotingEnded;
     public event Action DefenseStarted;
     public event Action FinalVotingStarted;
@@ -66,6 +67,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         localPlayerController = player.AddComponent<PlayerController>();
         localPlayerController.SetCamera(Camera.main);
     }
+    #endregion
+
+    #region public
     public void ReturnSpawnPosition() => localPlayerController.MoveTo(spawnPosition);
     #endregion
 
@@ -89,6 +93,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 break;
             case VrMafiaEventCode.VotingStart:
                 OnVotingStarted(photonEvent);
+                break;
+            case VrMafiaEventCode.VoteRes:
+                OnVoteResponse(photonEvent);
                 break;
             case VrMafiaEventCode.VotingEnd:
                 OnVotingEnded(photonEvent);
@@ -120,6 +127,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         VotingStarted?.Invoke(votingTime);
     }
+    private void OnVoteResponse(EventData data)
+    {
+        var result = (bool)data.CustomData;
+        Debug.Log($"[GameManager] Vote Response : {result}");
+        if (!result)
+            VoteFailed?.Invoke();
+    }
     private void OnVotingEnded(EventData data)
     {
         var result = (int[])data.CustomData;
@@ -131,6 +145,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #region button handler
     public void OnVoteButton(int id)
     {
+        Debug.Log($"[GameManager] Vote Request : {id}");
+        PhotonNetwork.RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }
     public void OnKillButton(int id) { }
     public void OnDeadReportButton(int id) { }

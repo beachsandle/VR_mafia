@@ -57,6 +57,7 @@ public class InGameUIManager : MonoBehaviour
             gm.DayStarted -= OnDayStarted;
             gm.NightStarted -= OnNightStarted;
             gm.VotingStarted -= OnVotingStarted;
+            gm.VoteFailed -= votingPanel.VoteFail;
             gm.VotingEnded -= OnVotingEnded;
             gm.DefenseStarted -= OnDefenseStarted;
             gm.FinalVotingStarted -= OnFinalVotingStarted;
@@ -89,6 +90,7 @@ public class InGameUIManager : MonoBehaviour
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
         gm.VotingStarted += OnVotingStarted;
+        gm.VoteFailed += votingPanel.VoteFail;
         gm.VotingEnded += OnVotingEnded;
         gm.DefenseStarted += OnDefenseStarted;
         gm.FinalVotingStarted += OnFinalVotingStarted;

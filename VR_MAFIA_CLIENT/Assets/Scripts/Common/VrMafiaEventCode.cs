@@ -45,7 +45,7 @@ public enum VrMafiaEventCode
     VotingStart,
 
     /// <summary>
-    /// 
+    /// int targetId
     /// </summary>
     VoteReq,
 

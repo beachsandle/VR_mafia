@@ -123,8 +123,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         switch ((VrMafiaEventCode)photonEvent.Code)
         {
-            case VrMafiaEventCode.KillReq:
-                OnKillReq(photonEvent);
+            case VrMafiaEventCode.VoteReq:
+                OnVoteRequest(photonEvent);
                 break;
             default: break;
         }
@@ -134,12 +134,18 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         base.OnPlayerLeftRoom(otherPlayer);
     }
-    private void OnKillReq(EventData data)
+    private void OnKillRequest(EventData data)
     {
         int targetId = (int)data.CustomData;
         Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId]}");
         SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, true);
         SendBroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
+    }
+    private void OnVoteRequest(EventData data)
+    {
+        int targetId = (int)data.CustomData;
+        Debug.Log($"[GameServer] On Vote Request : {players[data.Sender].NickName} -> {players[targetId]}");
+        SendUnicastEvent(VrMafiaEventCode.VoteRes, new int[] { data.Sender }, true);
     }
     private void OnReceiveDeadReport()
     {

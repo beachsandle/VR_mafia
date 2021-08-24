@@ -88,7 +88,6 @@ public class VotingPanel : MonoBehaviour
     }
     public void VoteFail()
     {
-        //ToDo: 투표 실패하면 true로 바꿔줘야함
         Suffrage = true;
     }
     public void VotingEnd(int[] result)
