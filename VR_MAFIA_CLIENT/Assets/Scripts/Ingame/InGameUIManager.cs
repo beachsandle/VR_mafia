@@ -52,6 +52,7 @@ public class InGameUIManager : MonoBehaviour
         SetActiveCursor(true);
         if (pm != null)
         {
+            votingPanel.VoteButtonClicked -= gm.OnVoteButton;
             gm.GameStarted -= OnGameStarted;
             gm.DayStarted -= OnDayStarted;
             gm.NightStarted -= OnNightStarted;
@@ -83,6 +84,7 @@ public class InGameUIManager : MonoBehaviour
     private void Init()
     {
         SetActiveCursor(false);
+        votingPanel.VoteButtonClicked += gm.OnVoteButton;
         gm.GameStarted += OnGameStarted;
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
@@ -132,8 +134,9 @@ public class InGameUIManager : MonoBehaviour
         SetActiveCursor(true);
         votingPanel.VotingStart(votingTime);
     }
-    private void OnVotingEnded()
+    private void OnVotingEnded(int[] result)
     {
+        votingPanel.VotingEnd(result);
     }
     private void OnDefenseStarted()
     {

@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action DayStarted;
     public event Action NightStarted;
     public event Action<float> VotingStarted;
-    public event Action VotingEnded;
+    public event Action<int[]> VotingEnded;
     public event Action DefenseStarted;
     public event Action FinalVotingStarted;
     public event Action FinalVotingEnded;
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         localPlayerController = player.AddComponent<PlayerController>();
         localPlayerController.SetCamera(Camera.main);
     }
-    private void GameStart(EventData e)
+    private void OnGameStarted(EventData e)
     {
         var content = (Hashtable)e.CustomData;
         var isMafia = (bool)content["isMafia"];
@@ -58,37 +58,46 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Set Mafia : {isMafia}");
         GameStarted?.Invoke(isMafia, mafiaIds);
     }
-    private void DayStart()
+    private void OnDayStarted()
     {
         Debug.Log($"[GameManager] Day Start");
         DayStarted?.Invoke();
     }
-    private void NightStart()
+    private void OnNightStarted()
     {
         Debug.Log($"[GameManager] Night Start");
         NightStarted?.Invoke();
     }
-    private void VotingStart(EventData data)
+    private void OnVotingStarted(EventData data)
     {
         var votingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         VotingStarted?.Invoke(votingTime);
+    }
+    private void OnVotingEnded(EventData data)
+    {
+        var result = (int[])data.CustomData;
+        Debug.Log($"[GameManager] Voting Result : {string.Join(" ", result)}");
+        VotingEnded?.Invoke(result);
     }
     public void OnEvent(EventData photonEvent)
     {
         switch ((VrMafiaEventCode)photonEvent.Code)
         {
             case VrMafiaEventCode.GameStart:
-                GameStart(photonEvent);
+                OnGameStarted(photonEvent);
                 break;
             case VrMafiaEventCode.DayStart:
-                DayStart();
+                OnDayStarted();
                 break;
             case VrMafiaEventCode.NightStart:
-                NightStart();
+                OnNightStarted();
                 break;
             case VrMafiaEventCode.VotingStart:
-                VotingStart(photonEvent);
+                OnVotingStarted(photonEvent);
+                break;
+            case VrMafiaEventCode.VotingEnd:
+                OnVotingEnded(photonEvent);
                 break;
             default: break;
         }
