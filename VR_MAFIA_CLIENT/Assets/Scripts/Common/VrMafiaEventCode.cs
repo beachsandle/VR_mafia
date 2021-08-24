@@ -60,7 +60,7 @@ public enum VrMafiaEventCode
     VoteEvent,
 
     /// <summary>
-    /// 
+    /// {int electedId, int[] result}
     /// </summary>
     VotingEnd,
 

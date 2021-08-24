@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action NightStarted;
     public event Action<float> VotingStarted;
     public event Action VoteFailed;
-    public event Action<int[]> VotingEnded;
+    public event Action<int, int[]> VotingEnded;
     public event Action DefenseStarted;
     public event Action FinalVotingStarted;
     public event Action FinalVotingEnded;
@@ -58,7 +58,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void Init()
     {
-        SpawnPlayer();
+        if (PhotonManager.Instance != null)
+            SpawnPlayer();
     }
     private void SpawnPlayer()
     {
@@ -136,15 +137,18 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnVotingEnded(EventData data)
     {
-        var result = (int[])data.CustomData;
+        var content = (Hashtable)data.CustomData;
+        var electedId = (int)content["electedId"];
+        var result = (int[])content["result"];
         Debug.Log($"[GameManager] Voting Result : {string.Join(" ", result)}");
-        VotingEnded?.Invoke(result);
+        VotingEnded?.Invoke(electedId, result);
     }
     #endregion
 
     #region button handler
-    public void OnVoteButton(int id)
+    public void OnVoteButton(int num)
     {
+        var id = PhotonNetwork.PlayerList[num].ActorNumber;
         Debug.Log($"[GameManager] Vote Request : {id}");
         PhotonNetwork.RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }

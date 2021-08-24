@@ -26,7 +26,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private int electedId;
     private int[] voteCounts = new int[10];
 
-    private Player[] players => PhotonNetwork.PlayerList;
+    private Dictionary<int, Player> players => PhotonNetwork.CurrentRoom.Players;
     #endregion
 
     #region unity message
@@ -58,14 +58,14 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void SelectMafia()
     {
-        mafiaIds = (from p in players
+        mafiaIds = (from p in players.Values
                     select p.ActorNumber).OrderBy(a => Guid.NewGuid())
-                   .Take(players.Length > 6 ? 2 : 1)
+                   .Take(players.Count > 6 ? 2 : 1)
                    .ToArray();
     }
     private void SetRole()
     {
-        var citizen = from p in players where !mafiaIds.Contains(p.ActorNumber) select p.ActorNumber;
+        var citizen = from p in players.Values where !mafiaIds.Contains(p.ActorNumber) select p.ActorNumber;
         SendUnicastEvent(VrMafiaEventCode.GameStart, mafiaIds, new Hashtable() { { "isMafia", true }, { "mafiaIds", mafiaIds } });
         SendUnicastEvent(VrMafiaEventCode.GameStart, citizen.ToArray(), new Hashtable() { { "isMafia", false } });
     }
@@ -137,14 +137,14 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnKillRequest(EventData data)
     {
         int targetId = (int)data.CustomData;
-        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId]}");
+        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}");
         SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, true);
         SendBroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
     }
     private void OnVoteRequest(EventData data)
     {
         int targetId = (int)data.CustomData;
-        Debug.Log($"[GameServer] On Vote Request : {players[data.Sender].NickName} -> {players[targetId]}");
+        Debug.Log($"[GameServer] On Vote Request : {players[data.Sender].NickName} -> {players[targetId].NickName}");
         SendUnicastEvent(VrMafiaEventCode.VoteRes, new int[] { data.Sender }, true);
     }
     private void OnReceiveDeadReport()

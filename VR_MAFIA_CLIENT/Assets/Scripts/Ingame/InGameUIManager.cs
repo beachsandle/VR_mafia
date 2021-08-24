@@ -95,6 +95,7 @@ public class InGameUIManager : MonoBehaviour
         gm.DefenseStarted += OnDefenseStarted;
         gm.FinalVotingStarted += OnFinalVotingStarted;
         gm.FinalVotingEnded += OnFinalVotingEnded;
+        votingPanel.gameObject.SetActive(true);
     }
     private void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
@@ -136,7 +137,7 @@ public class InGameUIManager : MonoBehaviour
         SetActiveCursor(true);
         votingPanel.VotingStart(votingTime);
     }
-    private void OnVotingEnded(int[] result)
+    private void OnVotingEnded(int electedId, int[] result)
     {
         votingPanel.VotingEnd(result);
     }

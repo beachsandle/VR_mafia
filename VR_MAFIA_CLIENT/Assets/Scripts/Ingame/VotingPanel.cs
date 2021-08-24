@@ -45,7 +45,14 @@ public class VotingPanel : MonoBehaviour
     private void Init()
     {
         for (int i = 0; i < 10; ++i)
-            btns[i].onClick.AddListener(() => { OnVoteButton(i); });
+        {
+            int n = i;
+            btns[i].onClick.AddListener(() =>
+            {
+                OnVoteButton(n);
+            });
+        }
+        gameObject.SetActive(false);
     }
     private void InitCandidates()
     {
@@ -82,6 +89,7 @@ public class VotingPanel : MonoBehaviour
     public void VotingStart(float votingTime)
     {
         Suffrage = true;
+        timeText.enabled = true;
         gameObject.SetActive(true);
         InitCandidates();
         StartCoroutine(UpdateVotingTime(votingTime));
@@ -92,6 +100,7 @@ public class VotingPanel : MonoBehaviour
     }
     public void VotingEnd(int[] result)
     {
+        timeText.enabled = false;
         //ToDo: 투표 결과
     }
     public void PanelOff()
