@@ -151,13 +151,13 @@ public class InGameUIManager : MonoBehaviour
         }
         votingPanel.VotingEnd(electedId, result);
     }
-    private void OnDefenseStarted()
+    private void OnDefenseStarted(float defenseTime)
     {
     }
-    private void OnFinalVotingStarted()
+    private void OnFinalVotingStarted(float finalVotingTime)
     {
     }
-    private void OnFinalVotingEnded()
+    private void OnFinalVotingEnded(bool result, int pros)
     {
     }
     private void SetActiveCursor(bool active)

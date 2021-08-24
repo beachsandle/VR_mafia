@@ -36,9 +36,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action<float> VotingStarted;
     public event Action VoteFailed;
     public event Action<int, int[]> VotingEnded;
-    public event Action DefenseStarted;
-    public event Action FinalVotingStarted;
-    public event Action FinalVotingEnded;
+    public event Action<float> DefenseStarted;
+    public event Action<float> FinalVotingStarted;
+    public event Action FinalVoteFailed;
+    public event Action<bool, int> FinalVotingEnded;
     #endregion
 
     #region unity message
@@ -102,6 +103,18 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.VotingEnd:
                 OnVotingEnded(photonEvent);
                 break;
+            case VrMafiaEventCode.DefenseStart:
+                OnDefenseStarted(photonEvent);
+                break;
+            case VrMafiaEventCode.FinalVotingStart:
+                OnFinalVotingStarted(photonEvent);
+                break;
+            case VrMafiaEventCode.FinalVoteRes:
+                OnFinalVoteResponse(photonEvent);
+                break;
+            case VrMafiaEventCode.FinalVotingEnd:
+                OnFinalVotingEnded(photonEvent);
+                break;
             default: break;
         }
     }
@@ -144,20 +157,48 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] elected : {electedId}, result : {string.Join(" ", result)}");
         VotingEnded?.Invoke(electedId, result);
     }
+    private void OnFinalVotingStarted(EventData data)
+    {
+        var finalVotingTime = (float)data.CustomData;
+        Debug.Log($"[GameManager] Final Voting Start : {finalVotingTime}");
+        FinalVotingStarted?.Invoke(finalVotingTime);
+    }
+    private void OnDefenseStarted(EventData data)
+    {
+        var defenseTime = (float)data.CustomData;
+        Debug.Log($"[GameManager] Defense Start : {defenseTime}");
+        DefenseStarted?.Invoke(defenseTime);
+    }
+    private void OnFinalVoteResponse(EventData data)
+    {
+        var result = (bool)data.CustomData;
+        Debug.Log($"[GameManager] Final Vote Response : {result}");
+        if (!result)
+            FinalVoteFailed?.Invoke();
+    }
+    private void OnFinalVotingEnded(EventData data)
+    {
+        var content = (Hashtable)data.CustomData;
+        var result = (bool)content["result"];
+        var pros = (int)content["pros"];
+        Debug.Log($"[GameManager] result : {result}, pros : {pros}");
+        FinalVotingEnded?.Invoke(result, pros);
+    }
     #endregion
 
     #region button handler
+    public void OnKillButton(int id) { }
+    public void OnDeadReportButton(int id) { }
     public void OnVoteButton(int num)
     {
         var id = PhotonNetwork.PlayerList[num].ActorNumber;
         Debug.Log($"[GameManager] Vote Request : {id}");
         PhotonNetwork.RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }
-    public void OnKillButton(int id) { }
-    public void OnDeadReportButton(int id) { }
     public void OnFinalVoteButton(bool pros)
     {
-
+        Debug.Log($"[GameManager] Final Vote Request : {pros}");
+        PhotonNetwork.RaiseEvent((byte)VrMafiaEventCode.FinalVoteReq, pros, eventOption, SendOptions.SendReliable);
     }
     #endregion
 

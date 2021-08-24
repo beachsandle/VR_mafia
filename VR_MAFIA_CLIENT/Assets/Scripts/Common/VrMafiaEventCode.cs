@@ -50,14 +50,9 @@ public enum VrMafiaEventCode
     VoteReq,
 
     /// <summary>
-    /// 
+    /// bool result
     /// </summary>
     VoteRes,
-
-    /// <summary>
-    /// 
-    /// </summary>
-    VoteEvent,
 
     /// <summary>
     /// {int electedId, int[] result}
@@ -65,27 +60,27 @@ public enum VrMafiaEventCode
     VotingEnd,
 
     /// <summary>
-    /// 
+    /// float defenseTime
     /// </summary>
     DefenseStart,
 
     /// <summary>
-    /// 
+    /// float finalVotingTime
     /// </summary>
     FinalVotingStart,
 
     /// <summary>
-    /// 
+    /// bool pros
     /// </summary>
     FinalVoteReq,
 
     /// <summary>
-    /// 
+    /// bool result
     /// </summary>
     FinalVoteRes,
 
     /// <summary>
-    /// 
+    /// {bool result, int pros}
     /// </summary>
     FinalVotingEnd,
 

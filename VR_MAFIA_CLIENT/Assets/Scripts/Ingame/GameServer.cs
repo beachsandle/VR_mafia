@@ -70,7 +70,17 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         voters.Clear();
         foreach (var id in players.Where(p => p.Value.Alive()).Select(p => p.Key))
             voters.Add(id);
-        Debug.Log(string.Join(" ", voters));
+    }
+    private void GetElectedPlayer()
+    {
+        var result = from i in Enumerable.Range(0, PhotonNetwork.PlayerList.Length)
+                     orderby voteCounts[i] descending
+                     select (i, voteCounts[i]);
+        electedId = PhotonNetwork.PlayerList[result.First().i].ActorNumber;
+        //최대 득표수가 1이거나 동수일 경우
+        if (result.First().Item2 < 2 ||
+            result.First().Item2 == result.ElementAt(1).Item2)
+            electedId = -1;
     }
 
     #region phase change
@@ -118,22 +128,40 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase != GamePhase.Voting) return;
         Debug.Log($"[GameServer] Voting End");
         phase = GamePhase.Voting_End;
-
-        var result = from i in Enumerable.Range(0, PhotonNetwork.PlayerList.Length)
-                     orderby voteCounts[i] descending
-                     select (i, voteCounts[i]);
-        electedId = PhotonNetwork.PlayerList[result.First().i].ActorNumber;
-        //최대 득표수가 1이거나 동수일 경우
-        if (result.First().Item2 < 2 ||
-            result.First().Item2 == result.ElementAt(1).Item2)
-            electedId = -1;
-
+        GetElectedPlayer();
         SendBroadcastEvent(VrMafiaEventCode.VotingEnd, new Hashtable() { { "electedId", electedId }, { "result", voteCounts } });
+        if (electedId != -1)
+            Invoke("DefenseStart", votingResultTime);
+        else
+            Invoke("DayStart", votingResultTime);
+    }
+    private void DefenseStart()
+    {
+        if (phase != GamePhase.Voting_End) return;
+        Debug.Log($"[GameServer] Defense Start");
+        phase = GamePhase.Defense;
+        SendBroadcastEvent(VrMafiaEventCode.DefenseStart);
+        Invoke("FinalVotingStart", defenseTime);
+    }
+    private void FinalVotingStart()
+    {
+
+        if (phase != GamePhase.Defense) return;
+        Debug.Log($"[GameServer] Final Voting Start");
+        phase = GamePhase.FinalVoting;
+        //InitVotingPhase();
+        SendBroadcastEvent(VrMafiaEventCode.FinalVotingStart, finalVotingTime);
+        Invoke("FinalVotingEnd", finalVotingTime);
+    }
+    private void FinalVotingEnd()
+    {
+        if (phase != GamePhase.FinalVoting) return;
+        Debug.Log($"[GameServer] Final Voting End");
+        phase = GamePhase.FinalVoting_End;
+        //GetElectedPlayer();
+        SendBroadcastEvent(VrMafiaEventCode.FinalVotingEnd, new Hashtable() { { "result", true }, { "pros", 1 } });
         Invoke("DayStart", votingResultTime);
     }
-    private void DefenseStart() { }
-    private void FinalVotingStart() { }
-    private void FinalVotingEnd() { }
     #endregion
 
     #endregion
