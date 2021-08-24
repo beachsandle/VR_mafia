@@ -156,7 +156,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("[Photon Manager] : room created");
         PhotonNetwork.CurrentRoom.SetMasterClient(PhotonNetwork.LocalPlayer);
-        PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.LoadLevel("WaitingRoom");
     }
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -166,10 +165,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-        wait = false;
         host = PhotonNetwork.MasterClient;
         PhotonNetwork.AutomaticallySyncScene = true;
         Debug.Log("[Photon Manager] : joined room");
+        wait = false;
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
     {

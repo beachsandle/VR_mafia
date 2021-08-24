@@ -18,10 +18,11 @@ public class InGameUIManager : MonoBehaviour
     private FadeInOut fadeInOut;
     //panel
     private GameObject menuPanel;
-    private GameObject votingPanel;
+    private VotingPanel votingPanel;
     private GameObject finalVotingPanel;
     private GameObject endPanel;
 
+    private bool isVoting = false;
     private float fadeTime = 3f;
     #endregion
 
@@ -54,6 +55,11 @@ public class InGameUIManager : MonoBehaviour
             gm.GameStarted -= OnGameStarted;
             gm.DayStarted -= OnDayStarted;
             gm.NightStarted -= OnNightStarted;
+            gm.VotingStarted -= OnVotingStarted;
+            gm.VotingEnded -= OnVotingEnded;
+            gm.DefenseStarted -= OnDefenseStarted;
+            gm.FinalVotingStarted -= OnFinalVotingStarted;
+            gm.FinalVotingEnded -= OnFinalVotingEnded;
         }
     }
     #endregion
@@ -70,7 +76,7 @@ public class InGameUIManager : MonoBehaviour
         fadeInOut = transform.GetComponentInChildren<FadeInOut>();
         //panel
         menuPanel = transform.Find("Menu Panel").gameObject;
-        votingPanel = transform.Find("Voting Panel").gameObject;
+        votingPanel = transform.Find("Voting Panel").GetComponent<VotingPanel>();
         finalVotingPanel = transform.Find("Final Voting Panel").gameObject;
         endPanel = transform.Find("End Panel").gameObject;
     }
@@ -80,8 +86,12 @@ public class InGameUIManager : MonoBehaviour
         gm.GameStarted += OnGameStarted;
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
+        gm.VotingStarted += OnVotingStarted;
+        gm.VotingEnded += OnVotingEnded;
+        gm.DefenseStarted += OnDefenseStarted;
+        gm.FinalVotingStarted += OnFinalVotingStarted;
+        gm.FinalVotingEnded += OnFinalVotingEnded;
     }
-
     private void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
         roleText.text = isMafia ? "마피아" : "시민";
@@ -94,7 +104,6 @@ public class InGameUIManager : MonoBehaviour
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
         fadeInOut.FadeIn();
     }
-
     private void OnNightStarted()
     {
         StartInformation("밤이 되었습니다.");
@@ -105,22 +114,35 @@ public class InGameUIManager : MonoBehaviour
             },
             () => { });
     }
-
     private void OnDayStarted()
     {
-        if (votingPanel.activeSelf)
-            OffVotingPanel();
+        if (votingPanel.gameObject.activeSelf)
+        {
+            isVoting = false;
+            SetActiveCursor(false);
+            votingPanel.PanelOff();
+
+        }
         StartInformation("낮이 되었습니다.");
         fadeInOut.FadeAll();
     }
-
-    private void OffVotingPanel()
+    private void OnVotingStarted(float votingTime)
     {
-        //suffrage = false;
-        //isVoting = false;
-        SetActiveCursor(false);
-
-        votingPanel.SetActive(false);
+        isVoting = true;
+        SetActiveCursor(true);
+        votingPanel.VotingStart(votingTime);
+    }
+    private void OnVotingEnded()
+    {
+    }
+    private void OnDefenseStarted()
+    {
+    }
+    private void OnFinalVotingStarted()
+    {
+    }
+    private void OnFinalVotingEnded()
+    {
     }
     private void SetActiveCursor(bool active)
     {
@@ -129,7 +151,7 @@ public class InGameUIManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else
+        else if (!isVoting)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
