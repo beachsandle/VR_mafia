@@ -29,10 +29,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
-    private readonly RaiseEventOptions eventOption = new() { Receivers = ReceiverGroup.MasterClient };
+    private readonly RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
     #endregion
 
     #region property
+    public bool IsMafia { get; private set; }
+    public bool MenuOpened { get; set; } = false;
+    public bool PhaseChanging { get; set; } = false;
+    public bool IsVoting { get; private set; } = false;
     #endregion
 
     #region callback
@@ -127,14 +131,15 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnGameStarted(EventData e)
     {
         var content = (Hashtable)e.CustomData;
-        var isMafia = (bool)content["isMafia"];
-        var mafiaIds = isMafia ? (int[])content["mafiaIds"] : null;
-        Debug.Log($"[GameManager] Set Mafia : {isMafia}");
-        GameStarted?.Invoke(isMafia, mafiaIds);
+        IsMafia = (bool)content["isMafia"];
+        var mafiaIds = IsMafia ? (int[])content["mafiaIds"] : null;
+        Debug.Log($"[GameManager] Game Start, Is Mafia : {IsMafia}");
+        GameStarted?.Invoke(IsMafia, mafiaIds);
     }
     private void OnDayStarted()
     {
         Debug.Log($"[GameManager] Day Start");
+        IsVoting = false;
         DayStarted?.Invoke();
     }
     private void OnNightStarted()
@@ -146,6 +151,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         var votingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
+        IsVoting = true;
         VotingStarted?.Invoke(votingTime);
     }
     private void OnVoteResponse(EventData data)
@@ -192,7 +198,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     #endregion
 
-    #region button handler
+    #region ui handler
+    public void OnFindTarget(Player p)
+    {
+
+    }
     public void OnKillButton(int id) { }
     public void OnDeadReportButton(int id) { }
     public void OnVoteButton(int num)

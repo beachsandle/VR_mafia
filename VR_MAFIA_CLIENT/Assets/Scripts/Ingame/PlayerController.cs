@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Photon.Pun;
+using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Animator))]
@@ -13,6 +14,8 @@ public class PlayerController : MonoBehaviour
     //variable
     private Vector3 moveDirection = Vector3.zero;
     private float rotX, rotY;
+    private RaycastHit hit;
+    private int layermask;
     //inspector
     [Header("Status")]
     public float moveSpeed = 5.0F;
@@ -20,6 +23,10 @@ public class PlayerController : MonoBehaviour
     public float rotateSpeed = 100.0F;
     public float gravity = 20.0F;
     public float range = 5.0F;
+    #endregion
+
+    #region property
+    private GameManager gm => GameManager.Instance;
     #endregion
 
     #region unity message
@@ -31,12 +38,32 @@ public class PlayerController : MonoBehaviour
     }
     private void Start()
     {
+        layermask = (1 << (int)Global.Layers.Player);
         HideMyCharacter();
     }
     private void Update()
     {
+        if (gm.PhaseChanging || gm.IsVoting)
+            return;
+
         Move();
+
+        if (gm.MenuOpened)
+            return;
+
         Rotate();
+
+        FindTarget();
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Kill();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            DeadReport();
+        }
     }
     #endregion
 
@@ -86,6 +113,14 @@ public class PlayerController : MonoBehaviour
         foreach (var render in GetComponentsInChildren<Renderer>(false))
             render.enabled = false;
     }
+    private void FindTarget()
+    {
+        Physics.Raycast(head.transform.position, head.transform.forward, out hit, range, layermask);
+        Debug.DrawRay(head.transform.position, head.transform.forward * range, Color.red);
+        gm.OnFindTarget(hit.transform.GetComponent<PhotonView>()?.Owner);
+    }
+    private void Kill() { }
+    private void DeadReport() { }
     #endregion
 
     #region public

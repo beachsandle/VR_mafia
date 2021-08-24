@@ -23,7 +23,6 @@ public class InGameUIManager : MonoBehaviour
     private FinalVotingPanel finalVotingPanel;
     private GameObject endPanel;
 
-    private bool isVoting = false;
     private int electedId;
     private bool canKill = false;
     private readonly float fadeTime = 3f;
@@ -115,7 +114,7 @@ public class InGameUIManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else if (!isVoting)
+        else if (!gm.IsVoting)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -134,8 +133,8 @@ public class InGameUIManager : MonoBehaviour
     }
     private IEnumerator FadeOutInformationText()
     {
-        Color orginColor = new(informationText.color.r, informationText.color.g, informationText.color.b, 1);
-        Color clearColor = new(informationText.color.r, informationText.color.g, informationText.color.b, 0);
+        Color orginColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 1);
+        Color clearColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 0);
         float time = 0f;
 
         while (informationText.color.a > 0.0f)
@@ -174,7 +173,6 @@ public class InGameUIManager : MonoBehaviour
     }
     private void OnDayStarted()
     {
-        isVoting = false;
         SetActiveCursor(false);
         votingPanel.PanelOff();
         finalVotingPanel.PanelOff();
@@ -184,16 +182,19 @@ public class InGameUIManager : MonoBehaviour
     private void OnNightStarted()
     {
         StartInformation("밤이 되었습니다.");
+        gm.PhaseChanging = true;
         fadeInOut.FadeAll(
             () =>
             {
                 gm.ReturnSpawnPosition();
             },
-            () => { });
+            () =>
+            {
+                gm.PhaseChanging = false;
+            });
     }
     private void OnVotingStarted(float votingTime)
     {
-        isVoting = true;
         SetActiveCursor(true);
         votingPanel.VotingStart(votingTime);
     }
@@ -234,10 +235,12 @@ public class InGameUIManager : MonoBehaviour
     {
         menuPanel.SetActive(!menuPanel.activeSelf);
         SetActiveCursor(menuPanel.activeSelf);
+        gm.MenuOpened = menuPanel.activeSelf;
     }
     public void OnMenuBackButton()
     {
         menuPanel.SetActive(false);
+        gm.MenuOpened = false;
     }
     #endregion
 

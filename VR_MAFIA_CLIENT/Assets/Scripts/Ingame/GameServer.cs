@@ -20,8 +20,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     public float defenseTime = 15f;
     public float finalVotingTime = 15f;
     private GamePhase phase = GamePhase.None;
-    private readonly RaiseEventOptions broadcastOption = new() { Receivers = ReceiverGroup.All };
-    private readonly RaiseEventOptions unicastOption = new() { Receivers = ReceiverGroup.Others };
+    private readonly RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
+    private readonly RaiseEventOptions unicastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.Others };
 
     private int[] mafiaIds;
 
@@ -29,7 +29,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private int[] voteCounts;
     private int pros;
     private int maxVoters;
-    private readonly HashSet<int> voters = new();
+    private readonly HashSet<int> voters = new HashSet<int>();
 
     private Dictionary<int, Player> players => CurrentRoom.Players;
     #endregion

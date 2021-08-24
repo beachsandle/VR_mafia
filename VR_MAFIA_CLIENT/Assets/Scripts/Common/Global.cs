@@ -15,6 +15,6 @@ public static class Global
     {
         Default,
         IgnoreRaycast = 2,
-        Player = 10
+        Player = 8
     }
 }
