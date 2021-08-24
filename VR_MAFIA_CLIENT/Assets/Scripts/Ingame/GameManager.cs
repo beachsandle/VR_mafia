@@ -22,11 +22,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     #endregion
 
+    #region field
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
     private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
+    #endregion
 
+    #region callback
     public event Action<bool, int[]> GameStarted;
     public event Action DayStarted;
     public event Action NightStarted;
@@ -35,11 +38,24 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action DefenseStarted;
     public event Action FinalVotingStarted;
     public event Action FinalVotingEnded;
+    #endregion
+
+    #region unity message
     private void Awake()
+    {
+        FindReference();
+        Init();
+    }
+    #endregion
+
+    #region method
+
+    #region private
+    private void FindReference()
     {
         spawnPositions = transform.Find("SpawnPosition").GetComponentsInChildren<Transform>();
     }
-    void Start()
+    private void Init()
     {
         SpawnPlayer();
     }
@@ -49,6 +65,36 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var player = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity);
         localPlayerController = player.AddComponent<PlayerController>();
         localPlayerController.SetCamera(Camera.main);
+    }
+    public void ReturnSpawnPosition() => localPlayerController.MoveTo(spawnPosition);
+    #endregion
+
+    #endregion
+
+    #region event handler
+
+    #region message handler
+    public void OnEvent(EventData photonEvent)
+    {
+        switch ((VrMafiaEventCode)photonEvent.Code)
+        {
+            case VrMafiaEventCode.GameStart:
+                OnGameStarted(photonEvent);
+                break;
+            case VrMafiaEventCode.DayStart:
+                OnDayStarted();
+                break;
+            case VrMafiaEventCode.NightStart:
+                OnNightStarted();
+                break;
+            case VrMafiaEventCode.VotingStart:
+                OnVotingStarted(photonEvent);
+                break;
+            case VrMafiaEventCode.VotingEnd:
+                OnVotingEnded(photonEvent);
+                break;
+            default: break;
+        }
     }
     private void OnGameStarted(EventData e)
     {
@@ -80,32 +126,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Voting Result : {string.Join(" ", result)}");
         VotingEnded?.Invoke(result);
     }
-    public void OnEvent(EventData photonEvent)
-    {
-        switch ((VrMafiaEventCode)photonEvent.Code)
-        {
-            case VrMafiaEventCode.GameStart:
-                OnGameStarted(photonEvent);
-                break;
-            case VrMafiaEventCode.DayStart:
-                OnDayStarted();
-                break;
-            case VrMafiaEventCode.NightStart:
-                OnNightStarted();
-                break;
-            case VrMafiaEventCode.VotingStart:
-                OnVotingStarted(photonEvent);
-                break;
-            case VrMafiaEventCode.VotingEnd:
-                OnVotingEnded(photonEvent);
-                break;
-            default: break;
-        }
-    }
-    public void ReturnSpawnPosition() => localPlayerController.MoveTo(spawnPosition);
+    #endregion
+
+    #region button handler
     public void OnVoteButton(int id)
     {
-
     }
     public void OnKillButton(int id) { }
     public void OnDeadReportButton(int id) { }
@@ -113,4 +138,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
 
     }
+    #endregion
+
+    #endregion
 }
