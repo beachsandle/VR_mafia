@@ -25,6 +25,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private int electedId;
     private int[] voteCounts;
+    private int pros;
+    private int maxVoters;
     private HashSet<int> voters = new HashSet<int>();
 
     private Dictionary<int, Player> players => PhotonNetwork.CurrentRoom.Players;
@@ -66,7 +68,13 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private void InitVotingPhase()
     {
         electedId = -1;
+        pros = 0;
         voteCounts = new int[10];
+        ResetVoters();
+        maxVoters = voters.Count;
+    }
+    private void ResetVoters()
+    {
         voters.Clear();
         foreach (var id in players.Where(p => p.Value.Alive()).Select(p => p.Key))
             voters.Add(id);
@@ -81,6 +89,10 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (result.First().Item2 < 2 ||
             result.First().Item2 == result.ElementAt(1).Item2)
             electedId = -1;
+    }
+    private bool JudgeFinalVoting()
+    {
+        return pros * 2 >= maxVoters;
     }
 
     #region phase change
@@ -154,7 +166,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase != GamePhase.Defense) return;
         Debug.Log($"[GameServer] Final Voting Start");
         phase = GamePhase.FinalVoting;
-        //InitVotingPhase();
+        ResetVoters();
         SendBroadcastEvent(VrMafiaEventCode.FinalVotingStart, finalVotingTime);
         Invoke("FinalVotingEnd", finalVotingTime);
     }
@@ -164,8 +176,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase != GamePhase.FinalVoting) return;
         Debug.Log($"[GameServer] Final Voting End");
         phase = GamePhase.FinalVoting_End;
-        //GetElectedPlayer();
-        SendBroadcastEvent(VrMafiaEventCode.FinalVotingEnd, new Hashtable() { { "result", true }, { "pros", 1 } });
+        var result = JudgeFinalVoting();
+        SendBroadcastEvent(VrMafiaEventCode.FinalVotingEnd, new Hashtable() { { "result", result }, { "pros", pros } });
+        //Todo: 가결될 경우 추방
         Invoke("DayStart", votingResultTime);
     }
     #endregion
@@ -180,6 +193,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.VoteReq:
                 OnVoteRequest(photonEvent);
                 break;
+            case VrMafiaEventCode.FinalVoteReq:
+                OnFinalVoteRequest(photonEvent);
+                break;
             default: break;
         }
     }
@@ -190,27 +206,50 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnKillRequest(EventData data)
     {
-        int targetId = (int)data.CustomData;
-        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}");
-        SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, true);
-        SendBroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
+        bool result = true;
+        var targetId = (int)data.CustomData;
+        if (phase != GamePhase.Day || !players[data.Sender].Alive() || !players.ContainsKey(targetId) || !players[targetId].Alive())
+            result = false;
+        else
+        {
+            players[targetId].Die();
+            SendBroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
+        }
+        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, Result : {result}");
+        SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, result);
     }
     private void OnVoteRequest(EventData data)
     {
         bool result = true;
         int targetId = (int)data.CustomData;
-        var target = players[(int)data.CustomData];
-        if (target.Alive() && voters.Contains(data.Sender))
+        if (phase != GamePhase.Voting || !voters.Contains(data.Sender) || !players.ContainsKey(targetId) || !players[targetId].Alive())
+            result = false;
+        else
         {
             voters.Remove(data.Sender);
-            ++voteCounts[Array.IndexOf(PhotonNetwork.PlayerList, target)];
+            ++voteCounts[Array.IndexOf(PhotonNetwork.PlayerList, players[targetId])];
         }
-        else
-            result = false;
         Debug.Log($"[GameServer] On Vote Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, result : {result}");
         SendUnicastEvent(VrMafiaEventCode.VoteRes, new int[] { data.Sender }, result);
         if (voters.Count == 0)
             VotingEnd();
+    }
+    private void OnFinalVoteRequest(EventData data)
+    {
+        bool result = true;
+        bool pros = (bool)data.CustomData;
+        if (phase != GamePhase.FinalVoting || !voters.Contains(data.Sender))
+            result = false;
+        else
+        {
+            voters.Remove(data.Sender);
+            if (pros)
+                ++this.pros;
+        }
+        Debug.Log($"[GameServer] On Final Vote Request : {players[data.Sender].NickName} -> {pros}, result : {result}");
+        SendUnicastEvent(VrMafiaEventCode.FinalVoteRes, new int[] { data.Sender }, result);
+        if (voters.Count == 0)
+            FinalVotingEnd();
     }
     #endregion
 }

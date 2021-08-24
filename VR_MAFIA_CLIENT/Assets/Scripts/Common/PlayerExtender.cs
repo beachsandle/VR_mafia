@@ -11,4 +11,8 @@ public static class PlayerExtender
     {
         return p.CustomProperties.ContainsKey("Alive") && (bool)p.CustomProperties["Alive"];
     }
+    public static void Die(this Player p)
+    {
+        p.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { "Alive", false } });
+    }
 }
