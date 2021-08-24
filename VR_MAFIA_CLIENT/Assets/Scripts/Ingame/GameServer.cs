@@ -6,7 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using static Photon.Pun.PhotonNetwork;
 
 public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -18,8 +20,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     public float defenseTime = 15f;
     public float finalVotingTime = 15f;
     private GamePhase phase = GamePhase.None;
-    private RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
-    private RaiseEventOptions unicastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.Others };
+    private readonly RaiseEventOptions broadcastOption = new() { Receivers = ReceiverGroup.All };
+    private readonly RaiseEventOptions unicastOption = new() { Receivers = ReceiverGroup.Others };
 
     private int[] mafiaIds;
 
@@ -27,9 +29,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private int[] voteCounts;
     private int pros;
     private int maxVoters;
-    private HashSet<int> voters = new HashSet<int>();
+    private readonly HashSet<int> voters = new();
 
-    private Dictionary<int, Player> players => PhotonNetwork.CurrentRoom.Players;
+    private Dictionary<int, Player> players => CurrentRoom.Players;
     #endregion
 
     #region unity message
@@ -108,48 +110,48 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase == GamePhase.Day) return;
         Debug.Log($"[GameServer] First Day Start");
         phase = GamePhase.Day;
-        Invoke("NightStart", dayTime);
+        Invoke(nameof(NightStart), dayTime);
     }
     private void DayStart()
     {
-        CancelInvoke("DayStart");
+        CancelInvoke(nameof(DayStart));
         if (phase != GamePhase.Voting_End && phase != GamePhase.FinalVoting_End) return;
         Debug.Log($"[GameServer] Day Start");
         phase = GamePhase.Day;
         SendBroadcastEvent(VrMafiaEventCode.DayStart);
-        Invoke("NightStart", dayTime);
+        Invoke(nameof(NightStart), dayTime);
     }
     private void NightStart()
     {
-        CancelInvoke("NightStart");
+        CancelInvoke(nameof(NightStart));
         if (phase != GamePhase.Day) return;
         Debug.Log($"[GameServer] Night Start");
         phase = GamePhase.Night;
         SendBroadcastEvent(VrMafiaEventCode.NightStart);
-        Invoke("VotingStart", nightTime);
+        Invoke(nameof(VotingStart), nightTime);
     }
     private void VotingStart()
     {
-        CancelInvoke("VotingStart");
+        CancelInvoke(nameof(VotingStart));
         if (phase != GamePhase.Night) return;
         Debug.Log($"[GameServer] Voting Start");
         phase = GamePhase.Voting;
         InitVotingPhase();
         SendBroadcastEvent(VrMafiaEventCode.VotingStart, votingTime);
-        Invoke("VotingEnd", votingTime);
+        Invoke(nameof(VotingEnd), votingTime);
     }
     private void VotingEnd()
     {
-        CancelInvoke("VotingEnd");
+        CancelInvoke(nameof(VotingEnd));
         if (phase != GamePhase.Voting) return;
         Debug.Log($"[GameServer] Voting End");
         phase = GamePhase.Voting_End;
         GetElectedPlayer();
         SendBroadcastEvent(VrMafiaEventCode.VotingEnd, new Hashtable() { { "electedId", electedId }, { "result", voteCounts } });
         if (electedId != -1)
-            Invoke("DefenseStart", votingResultTime);
+            Invoke(nameof(DefenseStart), votingResultTime);
         else
-            Invoke("DayStart", votingResultTime);
+            Invoke(nameof(DayStart), votingResultTime);
     }
     private void DefenseStart()
     {
@@ -158,28 +160,28 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameServer] Defense Start");
         phase = GamePhase.Defense;
         SendBroadcastEvent(VrMafiaEventCode.DefenseStart, defenseTime);
-        Invoke("FinalVotingStart", defenseTime);
+        Invoke(nameof(FinalVotingStart), defenseTime);
     }
     private void FinalVotingStart()
     {
-        CancelInvoke("FinalVotingStart");
+        CancelInvoke(nameof(FinalVotingStart));
         if (phase != GamePhase.Defense) return;
         Debug.Log($"[GameServer] Final Voting Start");
         phase = GamePhase.FinalVoting;
         ResetVoters();
         SendBroadcastEvent(VrMafiaEventCode.FinalVotingStart, finalVotingTime);
-        Invoke("FinalVotingEnd", finalVotingTime);
+        Invoke(nameof(FinalVotingEnd), finalVotingTime);
     }
     private void FinalVotingEnd()
     {
-        CancelInvoke("FinalVotingEnd");
+        CancelInvoke(nameof(FinalVotingEnd));
         if (phase != GamePhase.FinalVoting) return;
         Debug.Log($"[GameServer] Final Voting End");
         phase = GamePhase.FinalVoting_End;
         var result = JudgeFinalVoting();
         SendBroadcastEvent(VrMafiaEventCode.FinalVotingEnd, new Hashtable() { { "result", result }, { "pros", pros } });
         //Todo: 가결될 경우 추방
-        Invoke("DayStart", votingResultTime);
+        Invoke(nameof(DayStart), votingResultTime);
     }
     #endregion
 
@@ -190,6 +192,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         switch ((VrMafiaEventCode)photonEvent.Code)
         {
+            case VrMafiaEventCode.KillReq:
+                OnKillRequest(photonEvent);
+                break;
             case VrMafiaEventCode.VoteReq:
                 OnVoteRequest(photonEvent);
                 break;

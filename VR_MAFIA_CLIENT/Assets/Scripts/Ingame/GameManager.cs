@@ -5,7 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+using PhotonRoom = Photon.Realtime.Room;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using static Photon.Pun.PhotonNetwork;
 
 public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -26,7 +29,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
-    private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
+    private readonly RaiseEventOptions eventOption = new() { Receivers = ReceiverGroup.MasterClient };
+    #endregion
+
+    #region property
     #endregion
 
     #region callback
@@ -64,7 +70,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void SpawnPlayer()
     {
-        int idx = Array.IndexOf(PhotonNetwork.PlayerList, PhotonNetwork.LocalPlayer);
+        int idx = Array.IndexOf(PlayerList, LocalPlayer);
         spawnPosition = spawnPositions[idx + 1].position;
         var player = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity);
         localPlayerController = player.AddComponent<PlayerController>();
@@ -191,14 +197,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnDeadReportButton(int id) { }
     public void OnVoteButton(int num)
     {
-        var id = PhotonNetwork.PlayerList[num].ActorNumber;
+        var id = PlayerList[num].ActorNumber;
         Debug.Log($"[GameManager] Vote Request : {id}");
-        PhotonNetwork.RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
+        RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }
     public void OnFinalVoteButton(bool pros)
     {
         Debug.Log($"[GameManager] Final Vote Request : {pros}");
-        PhotonNetwork.RaiseEvent((byte)VrMafiaEventCode.FinalVoteReq, pros, eventOption, SendOptions.SendReliable);
+        RaiseEvent((byte)VrMafiaEventCode.FinalVoteReq, pros, eventOption, SendOptions.SendReliable);
     }
     #endregion
 

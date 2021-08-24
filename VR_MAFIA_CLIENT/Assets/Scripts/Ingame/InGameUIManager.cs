@@ -25,7 +25,8 @@ public class InGameUIManager : MonoBehaviour
 
     private bool isVoting = false;
     private int electedId;
-    private float fadeTime = 3f;
+    private bool canKill = false;
+    private readonly float fadeTime = 3f;
     #endregion
 
     #region property
@@ -87,6 +88,12 @@ public class InGameUIManager : MonoBehaviour
     private void Init()
     {
         SetActiveCursor(false);
+        EnrollHandler();
+        votingPanel.gameObject.SetActive(true);
+        finalVotingPanel.gameObject.SetActive(true);
+    }
+    private void EnrollHandler()
+    {
         gm.GameStarted += OnGameStarted;
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
@@ -99,8 +106,7 @@ public class InGameUIManager : MonoBehaviour
         gm.FinalVotingEnded += OnFinalVotingEnded;
         votingPanel.VoteButtonClicked += gm.OnVoteButton;
         finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
-        votingPanel.gameObject.SetActive(true);
-        finalVotingPanel.gameObject.SetActive(true);
+
     }
     private void SetActiveCursor(bool active)
     {
@@ -123,13 +129,13 @@ public class InGameUIManager : MonoBehaviour
         informationText.gameObject.SetActive(true);
         informationText.text = s;
 
-        StopCoroutine("FadeOutInformationText");
-        StartCoroutine("FadeOutInformationText");
+        StopCoroutine(nameof(FadeOutInformationText));
+        StartCoroutine(nameof(FadeOutInformationText));
     }
     private IEnumerator FadeOutInformationText()
     {
-        Color orginColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 1);
-        Color clearColor = new Color(informationText.color.r, informationText.color.g, informationText.color.b, 0);
+        Color orginColor = new(informationText.color.r, informationText.color.g, informationText.color.b, 1);
+        Color clearColor = new(informationText.color.r, informationText.color.g, informationText.color.b, 0);
         float time = 0f;
 
         while (informationText.color.a > 0.0f)
@@ -154,7 +160,10 @@ public class InGameUIManager : MonoBehaviour
     private void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
         roleText.text = isMafia ? "마피아" : "시민";
-        if (isMafia) { }
+        if (isMafia)
+        {
+            canKill = true;
+        }
         else
         {
             killUI.SetActive(false);

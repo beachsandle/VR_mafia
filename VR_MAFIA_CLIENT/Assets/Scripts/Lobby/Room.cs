@@ -13,7 +13,7 @@ public class Room : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Text headCount;
 
     private float last = 0f;
-    private float interval = 0.4f;
+    private readonly float interval = 0.4f;
     private RoomInfo roomInfo;
 
     public Action<RoomInfo> Clicked;
@@ -32,7 +32,7 @@ public class Room : MonoBehaviour, IPointerClickHandler
     {
         this.roomInfo = roomInfo;
         roomName.text = roomInfo.Name;
-        hostName.text = roomInfo.CustomProperties["HostName"].ToString();
+        hostName.text = roomInfo.HostName();
         headCount.text = $"{roomInfo.PlayerCount}/{roomInfo.MaxPlayers}";
     }
 }
