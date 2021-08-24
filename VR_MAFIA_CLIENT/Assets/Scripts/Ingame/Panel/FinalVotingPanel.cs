@@ -12,9 +12,12 @@ public class FinalVotingPanel : MonoBehaviour
 {
     #region field
     private Transform content;
+    private Text subjectText;
     private Text timeText;
     private Image electedImage;
     private Text electedName;
+    private Transform prosButton;
+    private Transform consButton;
     #endregion
 
     #region property
@@ -41,9 +44,12 @@ public class FinalVotingPanel : MonoBehaviour
     private void FindReference()
     {
         content = transform.Find("Final Voting Image");
+        subjectText = content.Find("Subject Text").GetComponent<Text>();
         timeText = content.Find("Time Text").GetComponent<Text>();
         electedImage = content.Find("Image").GetComponent<Image>();
         electedName = electedImage.GetComponentInChildren<Text>();
+        prosButton = content.Find("Pros Button");
+        consButton = content.Find("Cons Button");
     }
     private void Init()
     {
@@ -62,21 +68,32 @@ public class FinalVotingPanel : MonoBehaviour
     #endregion
 
     #region public
-    public void FinalVotingStart(float finalVotingTime, Player elected)
+    public void DefenseStart(float defenseTime, int electedId)
     {
-        Suffrage = true;
+        subjectText.text = "Defense";
         timeText.enabled = true;
+        var elected = players[electedId];
         electedImage.color = Global.colors[Array.IndexOf(playerList, elected)];
         electedName.text = elected.NickName;
         electedName.color = Color.white;
+        prosButton.gameObject.SetActive(false);
+        consButton.gameObject.SetActive(false);
         gameObject.SetActive(true);
+        StartCoroutine(UpdateVotingTime(defenseTime));
+    }
+    public void FinalVotingStart(float finalVotingTime)
+    {
+        Suffrage = true;
+        subjectText.text = "FinalVote";
+        prosButton.gameObject.SetActive(true);
+        consButton.gameObject.SetActive(true);
         StartCoroutine(UpdateVotingTime(finalVotingTime));
     }
-    public void VoteFail()
+    public void FinalVoteFail()
     {
         Suffrage = true;
     }
-    public void VotingEnd(bool result)
+    public void FinalVotingEnd(bool result)
     {
         timeText.enabled = false;
         if (result)

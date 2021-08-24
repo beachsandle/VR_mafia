@@ -20,10 +20,11 @@ public class InGameUIManager : MonoBehaviour
     //panel
     private GameObject menuPanel;
     private VotingPanel votingPanel;
-    private GameObject finalVotingPanel;
+    private FinalVotingPanel finalVotingPanel;
     private GameObject endPanel;
 
     private bool isVoting = false;
+    private int electedId;
     private float fadeTime = 3f;
     #endregion
 
@@ -80,23 +81,26 @@ public class InGameUIManager : MonoBehaviour
         //panel
         menuPanel = transform.Find("Menu Panel").gameObject;
         votingPanel = transform.Find("Voting Panel").GetComponent<VotingPanel>();
-        finalVotingPanel = transform.Find("Final Voting Panel").gameObject;
+        finalVotingPanel = transform.Find("Final Voting Panel").GetComponent<FinalVotingPanel>();
         endPanel = transform.Find("End Panel").gameObject;
     }
     private void Init()
     {
         SetActiveCursor(false);
-        votingPanel.VoteButtonClicked += gm.OnVoteButton;
         gm.GameStarted += OnGameStarted;
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
         gm.VotingStarted += OnVotingStarted;
         gm.VoteFailed += votingPanel.VoteFail;
+        gm.FinalVoteFailed += finalVotingPanel.FinalVoteFail;
         gm.VotingEnded += OnVotingEnded;
         gm.DefenseStarted += OnDefenseStarted;
         gm.FinalVotingStarted += OnFinalVotingStarted;
         gm.FinalVotingEnded += OnFinalVotingEnded;
+        votingPanel.VoteButtonClicked += gm.OnVoteButton;
+        finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
         votingPanel.gameObject.SetActive(true);
+        finalVotingPanel.gameObject.SetActive(true);
     }
     private void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
@@ -122,13 +126,10 @@ public class InGameUIManager : MonoBehaviour
     }
     private void OnDayStarted()
     {
-        if (votingPanel.gameObject.activeSelf)
-        {
-            isVoting = false;
-            SetActiveCursor(false);
-            votingPanel.PanelOff();
-
-        }
+        isVoting = false;
+        SetActiveCursor(false);
+        votingPanel.PanelOff();
+        finalVotingPanel.PanelOff();
         StartInformation("낮이 되었습니다.");
         fadeInOut.FadeAll();
     }
@@ -140,6 +141,7 @@ public class InGameUIManager : MonoBehaviour
     }
     private void OnVotingEnded(int electedId, int[] result)
     {
+        this.electedId = electedId;
         if (electedId == -1)
         {
             StartInformation("투표가 부결되었습니다.");
@@ -153,12 +155,19 @@ public class InGameUIManager : MonoBehaviour
     }
     private void OnDefenseStarted(float defenseTime)
     {
+        finalVotingPanel.DefenseStart(defenseTime, electedId);
     }
     private void OnFinalVotingStarted(float finalVotingTime)
     {
+        finalVotingPanel.FinalVotingStart(finalVotingTime);
     }
     private void OnFinalVotingEnded(bool result, int pros)
     {
+        finalVotingPanel.FinalVotingEnd(result);
+        if (result)
+            StartInformation($"{PhotonNetwork.CurrentRoom.Players[electedId].NickName}님이 {pros}명의 동의로 추방되었습니다.");
+        else
+            StartInformation($"찬성 {pros}표로 부결되었습니다.");
     }
     private void SetActiveCursor(bool active)
     {
