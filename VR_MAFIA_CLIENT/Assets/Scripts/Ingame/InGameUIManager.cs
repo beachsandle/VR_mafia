@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -139,7 +140,16 @@ public class InGameUIManager : MonoBehaviour
     }
     private void OnVotingEnded(int electedId, int[] result)
     {
-        votingPanel.VotingEnd(result);
+        if (electedId == -1)
+        {
+            StartInformation("투표가 부결되었습니다.");
+        }
+        else
+        {
+            var elected = PhotonNetwork.CurrentRoom.Players[electedId];
+            StartInformation($"{elected.NickName}님이 {result[Array.IndexOf(PhotonNetwork.PlayerList, elected)]}표를 받아 지목되었습니다.");
+        }
+        votingPanel.VotingEnd(electedId, result);
     }
     private void OnDefenseStarted()
     {

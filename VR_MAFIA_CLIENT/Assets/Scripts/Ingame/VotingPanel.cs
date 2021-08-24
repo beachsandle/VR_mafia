@@ -17,7 +17,8 @@ public class VotingPanel : MonoBehaviour
     #endregion
 
     #region property
-    private Player[] players => PhotonNetwork.PlayerList;
+    private Player[] playerList => PhotonNetwork.PlayerList;
+    private Dictionary<int, Player> players => PhotonNetwork.CurrentRoom.Players;
     public bool Suffrage { get; private set; } = false;
     #endregion
 
@@ -58,15 +59,17 @@ public class VotingPanel : MonoBehaviour
     {
         for (int i = 0; i < 10; ++i)
         {
-            if (i < players.Length)
+            if (i < playerList.Length)
             {
                 btns[i].gameObject.SetActive(true);
                 btns[i].transform.GetComponent<Image>().color = Global.colors[i];
-                btns[i].transform.Find("Text").GetComponent<Text>().text = players[i].NickName;
+                var nameText = btns[i].transform.Find("Text").GetComponent<Text>();
+                nameText.text = playerList[i].NickName;
+                nameText.color = Color.white;
                 btns[i].transform.Find("Count Text").GetComponent<Text>().text = "0";
                 btns[i].transform.Find("Selected UI").gameObject.SetActive(false);
 
-                if (!players[i].Alive())
+                if (!playerList[i].Alive())
                     btns[i].interactable = false;
             }
             else
@@ -98,10 +101,19 @@ public class VotingPanel : MonoBehaviour
     {
         Suffrage = true;
     }
-    public void VotingEnd(int[] result)
+    public void VotingEnd(int electedId, int[] result)
     {
         timeText.enabled = false;
-        //ToDo: 투표 결과
+        for (int i = 0; i < result.Length; ++i)
+        {
+            btns[i].transform.Find("Count Text").GetComponent<Text>().text = result[i].ToString();
+        }
+        if (electedId != -1)
+        {
+            int idx = Array.IndexOf(playerList, players[electedId]);
+            btns[idx].transform.Find("Text").GetComponent<Text>().color = Color.red;
+            btns[idx].transform.Find("Selected UI").gameObject.SetActive(true);
+        }
     }
     public void PanelOff()
     {

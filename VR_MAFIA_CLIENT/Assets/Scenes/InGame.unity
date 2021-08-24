@@ -2841,9 +2841,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 489d9dd28729c234db474795ca0759e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dayTime: 5
-  nightTime: 5
-  votingTime: 5
+  dayTime: 1
+  nightTime: 3
+  votingTime: 10
+  votingResultTime: 3
   defenseTime: 5
   finalVotingTime: 5
 --- !u!1 &1861971120

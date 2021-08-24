@@ -63,7 +63,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void SpawnPlayer()
     {
-        spawnPosition = spawnPositions[PhotonNetwork.LocalPlayer.ActorNumber].position;
+        int idx = Array.IndexOf(PhotonNetwork.PlayerList, PhotonNetwork.LocalPlayer);
+        spawnPosition = spawnPositions[idx + 1].position;
         var player = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity);
         localPlayerController = player.AddComponent<PlayerController>();
         localPlayerController.SetCamera(Camera.main);
@@ -140,7 +141,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var content = (Hashtable)data.CustomData;
         var electedId = (int)content["electedId"];
         var result = (int[])content["result"];
-        Debug.Log($"[GameManager] Voting Result : {string.Join(" ", result)}");
+        Debug.Log($"[GameManager] elected : {electedId}, result : {string.Join(" ", result)}");
         VotingEnded?.Invoke(electedId, result);
     }
     #endregion
