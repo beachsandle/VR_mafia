@@ -39,31 +39,22 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         layermask = (1 << (int)Global.Layers.Player);
+        InactiveMyRay();
         HideMyCharacter();
     }
     private void Update()
     {
-        if (gm.PhaseChanging || gm.IsVoting)
+        if (gm.PhaseChanging || gm.IsVoting || animator.GetBool("death2"))
             return;
-
         Move();
-
         if (gm.MenuOpened)
             return;
-
         Rotate();
-
         FindTarget();
-
         if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Kill();
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            DeadReport();
-        }
+            gm.OnKillButton();
+        else if (Input.GetKeyDown(KeyCode.E))
+            gm.OnDeadReportButton();
     }
     #endregion
 
@@ -108,6 +99,11 @@ public class PlayerController : MonoBehaviour
         transform.eulerAngles = new Vector3(0f, rotY, 0);
         head.transform.eulerAngles = new Vector3(-rotX, rotY, 0f);
     }
+    private void InactiveMyRay()
+    {
+        gameObject.layer = (int)Global.Layers.IgnoreRaycast;
+        head.gameObject.layer = (int)Global.Layers.IgnoreRaycast;
+    }
     private void HideMyCharacter()
     {
         foreach (var render in GetComponentsInChildren<Renderer>(false))
@@ -117,10 +113,8 @@ public class PlayerController : MonoBehaviour
     {
         Physics.Raycast(head.transform.position, head.transform.forward, out hit, range, layermask);
         Debug.DrawRay(head.transform.position, head.transform.forward * range, Color.red);
-        gm.OnFindTarget(hit.transform.GetComponent<PhotonView>()?.Owner);
+        gm.OnFoundTarget(hit.transform?.GetComponent<PhotonView>().Owner);
     }
-    private void Kill() { }
-    private void DeadReport() { }
     #endregion
 
     #region public
@@ -135,6 +129,11 @@ public class PlayerController : MonoBehaviour
         moveDirection = Vector3.zero;
         transform.position = pos;
         cc.enabled = true;
+    }
+    public void Die()
+    {
+        animator.SetBool("death2", true);
+        //Destroy(GetComponent<PlayerController>());
     }
     #endregion
 

@@ -15,6 +15,7 @@ public class InGameUIManager : MonoBehaviour
     private Text informationText;
     //ui
     private GameObject killUI;
+    private Image killCheckUI;
     private GameObject deadReportUI;
     private FadeInOut fadeInOut;
     //panel
@@ -76,6 +77,7 @@ public class InGameUIManager : MonoBehaviour
         informationText = transform.Find("Information Text").GetComponent<Text>();
         //ui
         killUI = transform.Find("Kill UI").gameObject;
+        killCheckUI = killUI.transform.Find("Kill Check UI").GetComponent<Image>();
         deadReportUI = transform.Find("DeadReport UI").gameObject;
         fadeInOut = transform.GetComponentInChildren<FadeInOut>();
         //panel
@@ -93,6 +95,7 @@ public class InGameUIManager : MonoBehaviour
     }
     private void EnrollHandler()
     {
+        gm.FoundTarget += OnFoundTarget;
         gm.GameStarted += OnGameStarted;
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
@@ -107,6 +110,15 @@ public class InGameUIManager : MonoBehaviour
         finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
 
     }
+
+    private void OnFoundTarget(bool found)
+    {
+        if (found)
+            killCheckUI.color = Color.red;
+        else
+            killCheckUI.color = Color.white;
+    }
+
     private void SetActiveCursor(bool active)
     {
         if (active)

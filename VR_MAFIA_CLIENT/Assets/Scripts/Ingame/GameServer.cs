@@ -213,7 +213,11 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         bool result = true;
         var targetId = (int)data.CustomData;
-        if (phase != GamePhase.Day || !players[data.Sender].Alive() || !players.ContainsKey(targetId) || !players[targetId].Alive())
+        if (phase != GamePhase.Day ||
+            !players[data.Sender].Alive() ||
+            !players.ContainsKey(targetId) ||
+            !players[targetId].Alive() ||
+            mafiaIds.Contains(targetId))
             result = false;
         else
         {

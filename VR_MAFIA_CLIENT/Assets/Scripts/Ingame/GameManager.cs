@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region field
+    private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
@@ -40,6 +41,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region callback
+
+    #region ui callback
+    public event Action<bool> FoundTarget;
+    #endregion
+
+    #region server callback
     public event Action<bool, int[]> GameStarted;
     public event Action DayStarted;
     public event Action NightStarted;
@@ -50,6 +57,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action<float> FinalVotingStarted;
     public event Action FinalVoteFailed;
     public event Action<bool, int> FinalVotingEnded;
+    #endregion
+
     #endregion
 
     #region unity message
@@ -83,7 +92,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region public
-    public void ReturnSpawnPosition() => localPlayerController.MoveTo(spawnPosition);
+    public void ReturnSpawnPosition()
+    {
+        if (LocalPlayer.Alive())
+            localPlayerController.MoveTo(spawnPosition);
+    }
     #endregion
 
     #endregion
@@ -100,6 +113,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 break;
             case VrMafiaEventCode.DayStart:
                 OnDayStarted();
+                break;
+            case VrMafiaEventCode.DieEvent:
+                OnDieEvent(photonEvent);
                 break;
             case VrMafiaEventCode.NightStart:
                 OnNightStarted();
@@ -128,9 +144,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             default: break;
         }
     }
-    private void OnGameStarted(EventData e)
+    private void OnGameStarted(EventData data)
     {
-        var content = (Hashtable)e.CustomData;
+        var content = (Hashtable)data.CustomData;
         IsMafia = (bool)content["isMafia"];
         var mafiaIds = IsMafia ? (int[])content["mafiaIds"] : null;
         Debug.Log($"[GameManager] Game Start, Is Mafia : {IsMafia}");
@@ -141,6 +157,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Day Start");
         IsVoting = false;
         DayStarted?.Invoke();
+    }
+    private void OnDieEvent(EventData data)
+    {
+        if ((int)data.CustomData == LocalPlayer.ActorNumber)
+        {
+            localPlayerController.Die();
+        }
+        Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
     }
     private void OnNightStarted()
     {
@@ -199,16 +223,29 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region ui handler
-    public void OnFindTarget(Player p)
+    public void OnFoundTarget(Player p)
     {
-
+        if (p != null && p.Alive())
+            target = p;
+        else
+            target = null;
+        FoundTarget?.Invoke(target != null);
     }
-    public void OnKillButton(int id) { }
-    public void OnDeadReportButton(int id) { }
+    public void OnKillButton()
+    {
+        if (target == null ||
+            !target.Alive() ||
+            !LocalPlayer.Alive() ||
+            !IsMafia)
+            return;
+        Debug.Log($"[GameManager] Kill Request : {target.NickName}");
+        RaiseEvent((byte)VrMafiaEventCode.KillReq, target.ActorNumber, eventOption, SendOptions.SendReliable);
+    }
+    public void OnDeadReportButton() { }
     public void OnVoteButton(int num)
     {
         var id = PlayerList[num].ActorNumber;
-        Debug.Log($"[GameManager] Vote Request : {id}");
+        Debug.Log($"[GameManager] Vote Request : {PlayerList[num].NickName}");
         RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }
     public void OnFinalVoteButton(bool pros)
