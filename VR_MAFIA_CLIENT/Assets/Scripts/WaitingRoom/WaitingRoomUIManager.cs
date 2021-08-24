@@ -58,7 +58,7 @@ public class WaitingRoomUIManager : MonoBehaviour
             var name = p.GetComponentInChildren<Text>();
             if (pm.PlayerList.Length > i)
             {
-                img.color = PhotonManager.colors[i];
+                img.color = Global.colors[i];
                 name.text = pm.PlayerList[i].NickName;
             }
             else

@@ -10,12 +10,12 @@ public enum VrMafiaEventCode
     GameStart,
 
     /// <summary>
-    /// header only
+    /// none
     /// </summary>
     DayStart,
 
     /// <summary>
-    /// header only
+    /// none
     /// </summary>
     NightStart,
 
@@ -40,7 +40,7 @@ public enum VrMafiaEventCode
     DeadReport,
 
     /// <summary>
-    /// int VotingTime
+    /// float votingTime
     /// </summary>
     VotingStart,
 

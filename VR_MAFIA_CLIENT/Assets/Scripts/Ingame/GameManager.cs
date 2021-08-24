@@ -25,12 +25,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
-    private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
+    private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
 
     public event Action<bool, int[]> GameStarted;
     public event Action DayStarted;
     public event Action NightStarted;
-    public event Action VotingStarted;
+    public event Action<float> VotingStarted;
     public event Action VotingEnded;
     public event Action DefenseStarted;
     public event Action FinalVotingStarted;
@@ -70,7 +70,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void VotingStart(EventData data)
     {
-        Debug.Log($"[GameManager] Voting Start : {data.CustomData}");
+        var votingTime = (float)data.CustomData;
+        Debug.Log($"[GameManager] Voting Start : {votingTime}");
+        VotingStarted?.Invoke(votingTime);
     }
     public void OnEvent(EventData photonEvent)
     {

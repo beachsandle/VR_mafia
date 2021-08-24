@@ -9,7 +9,8 @@ using Photon.Realtime;
 using Dissonance;
 using Dissonance.Audio.Playback;
 using Dissonance.Integrations.PhotonUnityNetworking2;
-using ExitGames.Client.Photon;
+
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -30,14 +31,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private bool wait = false;
     private Player host;
     private TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
-
-    public static Color[] colors = {
-        Color.red, Color.green,
-        Color.blue, Color.cyan,
-        Color.magenta, Color.yellow,
-        Color.gray, Color.black,
-        new Color(0.75f, 0.5f, 0.75f), new Color(0.5f, 0.75f, 0.5f)
-    };
     #endregion
 
     #region property
@@ -201,6 +194,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
             return;
         cr.IsOpen = false;
+        foreach (var p in PhotonNetwork.PlayerList)
+            p.SetCustomProperties(new Hashtable() { { "Alive", true } });
         PhotonNetwork.LoadLevel("InGame");
     }
     #endregion
@@ -226,8 +221,5 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #endregion
-
-    #region ingame
     #endregion
 }
