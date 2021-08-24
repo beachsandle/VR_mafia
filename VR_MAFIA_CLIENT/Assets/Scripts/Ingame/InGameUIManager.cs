@@ -102,73 +102,6 @@ public class InGameUIManager : MonoBehaviour
         votingPanel.gameObject.SetActive(true);
         finalVotingPanel.gameObject.SetActive(true);
     }
-    private void OnGameStarted(bool isMafia, int[] mafiaIds)
-    {
-        roleText.text = isMafia ? "마피아" : "시민";
-        if (isMafia) { }
-        else
-        {
-            killUI.SetActive(false);
-        }
-
-        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
-        fadeInOut.FadeIn();
-    }
-    private void OnNightStarted()
-    {
-        StartInformation("밤이 되었습니다.");
-        fadeInOut.FadeAll(
-            () =>
-            {
-                gm.ReturnSpawnPosition();
-            },
-            () => { });
-    }
-    private void OnDayStarted()
-    {
-        isVoting = false;
-        SetActiveCursor(false);
-        votingPanel.PanelOff();
-        finalVotingPanel.PanelOff();
-        StartInformation("낮이 되었습니다.");
-        fadeInOut.FadeAll();
-    }
-    private void OnVotingStarted(float votingTime)
-    {
-        isVoting = true;
-        SetActiveCursor(true);
-        votingPanel.VotingStart(votingTime);
-    }
-    private void OnVotingEnded(int electedId, int[] result)
-    {
-        this.electedId = electedId;
-        if (electedId == -1)
-        {
-            StartInformation("투표가 부결되었습니다.");
-        }
-        else
-        {
-            var elected = PhotonNetwork.CurrentRoom.Players[electedId];
-            StartInformation($"{elected.NickName}님이 {result[Array.IndexOf(PhotonNetwork.PlayerList, elected)]}표를 받아 지목되었습니다.");
-        }
-        votingPanel.VotingEnd(electedId, result);
-    }
-    private void OnDefenseStarted(float defenseTime)
-    {
-        finalVotingPanel.DefenseStart(defenseTime, electedId);
-    }
-    private void OnFinalVotingStarted(float finalVotingTime)
-    {
-        finalVotingPanel.FinalVotingStart(finalVotingTime);
-    }
-    private void OnFinalVotingEnded(bool result, int pros)
-    {
-        finalVotingPanel.FinalVotingEnd(result);
-        if (result)
-            StartInformation($"{PhotonNetwork.CurrentRoom.Players[electedId].NickName}님이 {pros}명의 동의로 추방되었습니다.");
-        else
-            StartInformation($"찬성 {pros}표로 부결되었습니다.");
-    }
     private void SetActiveCursor(bool active)
     {
         if (active)
@@ -216,6 +149,76 @@ public class InGameUIManager : MonoBehaviour
     #endregion
 
     #region event handler
+
+    #region game event
+    private void OnGameStarted(bool isMafia, int[] mafiaIds)
+    {
+        roleText.text = isMafia ? "마피아" : "시민";
+        if (isMafia) { }
+        else
+        {
+            killUI.SetActive(false);
+        }
+
+        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
+        fadeInOut.FadeIn();
+    }
+    private void OnDayStarted()
+    {
+        isVoting = false;
+        SetActiveCursor(false);
+        votingPanel.PanelOff();
+        finalVotingPanel.PanelOff();
+        StartInformation("낮이 되었습니다.");
+        fadeInOut.FadeAll();
+    }
+    private void OnNightStarted()
+    {
+        StartInformation("밤이 되었습니다.");
+        fadeInOut.FadeAll(
+            () =>
+            {
+                gm.ReturnSpawnPosition();
+            },
+            () => { });
+    }
+    private void OnVotingStarted(float votingTime)
+    {
+        isVoting = true;
+        SetActiveCursor(true);
+        votingPanel.VotingStart(votingTime);
+    }
+    private void OnVotingEnded(int electedId, int[] result)
+    {
+        this.electedId = electedId;
+        if (electedId == -1)
+        {
+            StartInformation("투표가 부결되었습니다.");
+        }
+        else
+        {
+            var elected = PhotonNetwork.CurrentRoom.Players[electedId];
+            StartInformation($"{elected.NickName}님이 {result[Array.IndexOf(PhotonNetwork.PlayerList, elected)]}표를 받아 지목되었습니다.");
+        }
+        votingPanel.VotingEnd(electedId, result);
+    }
+    private void OnDefenseStarted(float defenseTime)
+    {
+        finalVotingPanel.DefenseStart(defenseTime, electedId);
+    }
+    private void OnFinalVotingStarted(float finalVotingTime)
+    {
+        finalVotingPanel.FinalVotingStart(finalVotingTime);
+    }
+    private void OnFinalVotingEnded(bool result, int pros)
+    {
+        finalVotingPanel.FinalVotingEnd(result);
+        if (result)
+            StartInformation($"{PhotonNetwork.CurrentRoom.Players[electedId].NickName}님이 {pros}명의 동의로 추방되었습니다.");
+        else
+            StartInformation($"찬성 {pros}표로 부결되었습니다.");
+    }
+    #endregion
 
     #region button event
     public void OnMenuButton()
