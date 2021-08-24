@@ -44,8 +44,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         Debug.Log($"[GameServer] Game Start");
         SelectMafia();
-        SendUnicastEvent(VrMafiaEventCode.SetMafia, mafiaIds, mafiaIds);
-        DayStart();
+        SetRole();
+        FirstDayStart();
     }
     private void SendBroadcastEvent(VrMafiaEventCode code, object content = null)
     {
@@ -56,7 +56,6 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         unicastOption.TargetActors = targets;
         PhotonNetwork.RaiseEvent((byte)code, content, unicastOption, SendOptions.SendReliable);
     }
-
     private void SelectMafia()
     {
         mafiaIds = (from p in players
@@ -64,8 +63,21 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
                    .Take(players.Length > 6 ? 2 : 1)
                    .ToArray();
     }
+    private void SetRole()
+    {
+        var citizen = from p in players where !mafiaIds.Contains(p.ActorNumber) select p.ActorNumber;
+        SendUnicastEvent(VrMafiaEventCode.GameStart, mafiaIds, new Hashtable() { { "isMafia", true }, { "mafiaIds", mafiaIds } });
+        SendUnicastEvent(VrMafiaEventCode.GameStart, citizen.ToArray(), new Hashtable() { { "isMafia", false } });
+    }
 
     #region phase change
+    private void FirstDayStart()
+    {
+        if (phase == GamePhase.Day) return;
+        Debug.Log($"[GameServer] First Day Start");
+        phase = GamePhase.Day;
+        Invoke("NightStart", dayTime);
+    }
     private void DayStart()
     {
         if (phase == GamePhase.Day) return;

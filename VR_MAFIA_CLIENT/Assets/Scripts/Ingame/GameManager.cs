@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -26,8 +27,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private PlayerController localPlayerController;
     private RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
 
+    public event Action<bool, int[]> GameStarted;
     public event Action DayStarted;
     public event Action NightStarted;
+    public event Action VotingStarted;
+    public event Action VotingEnded;
+    public event Action DefenseStarted;
+    public event Action FinalVotingStarted;
+    public event Action FinalVotingEnded;
     private void Awake()
     {
         spawnPositions = transform.Find("SpawnPosition").GetComponentsInChildren<Transform>();
@@ -43,9 +50,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         localPlayerController = player.AddComponent<PlayerController>();
         localPlayerController.SetCamera(Camera.main);
     }
-    private void SetMafia(EventData data)
+    private void GameStart(EventData e)
     {
-        Debug.Log($"[GameManager] Set Mafia : {(int[])data.CustomData}");
+        var content = (Hashtable)e.CustomData;
+        var isMafia = (bool)content["isMafia"];
+        var mafiaIds = isMafia ? (int[])content["mafiaIds"] : null;
+        Debug.Log($"[GameManager] Set Mafia : {isMafia}");
+        GameStarted?.Invoke(isMafia, mafiaIds);
     }
     private void DayStart()
     {
@@ -65,8 +76,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         switch ((VrMafiaEventCode)photonEvent.Code)
         {
-            case VrMafiaEventCode.SetMafia:
-                SetMafia(photonEvent);
+            case VrMafiaEventCode.GameStart:
+                GameStart(photonEvent);
                 break;
             case VrMafiaEventCode.DayStart:
                 DayStart();

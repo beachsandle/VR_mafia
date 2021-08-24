@@ -5,9 +5,9 @@ using UnityEngine;
 public enum VrMafiaEventCode
 {
     /// <summary>
-    /// int[] mafiaIds
+    /// {bool isMafia, int[] mafiaIds}
     /// </summary>
-    SetMafia,
+    GameStart,
 
     /// <summary>
     /// header only

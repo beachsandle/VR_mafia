@@ -49,8 +49,12 @@ public class InGameUIManager : MonoBehaviour
     private void OnDestroy()
     {
         SetActiveCursor(true);
-        gm.DayStarted -= OnDayStarted;
-        gm.NightStarted -= OnNightStarted;
+        if (pm != null)
+        {
+            gm.GameStarted -= OnGameStarted;
+            gm.DayStarted -= OnDayStarted;
+            gm.NightStarted -= OnNightStarted;
+        }
     }
     #endregion
 
@@ -73,8 +77,22 @@ public class InGameUIManager : MonoBehaviour
     private void Init()
     {
         SetActiveCursor(false);
+        gm.GameStarted += OnGameStarted;
         gm.DayStarted += OnDayStarted;
         gm.NightStarted += OnNightStarted;
+    }
+
+    private void OnGameStarted(bool isMafia, int[] mafiaIds)
+    {
+        roleText.text = isMafia ? "마피아" : "시민";
+        if (isMafia) { }
+        else
+        {
+            killUI.SetActive(false);
+        }
+
+        StartInformation(string.Format("당신은 {0}입니다", roleText.text));
+        fadeInOut.FadeIn();
     }
 
     private void OnNightStarted()
@@ -162,10 +180,6 @@ public class InGameUIManager : MonoBehaviour
     {
         menuPanel.SetActive(false);
     }
-    public void OnVoteButton(int actNum) { }
-    public void OnFinalVoteButton(bool pros) { }
-    public void OnLobbyButton() { }
-
     #endregion
 
     #endregion
