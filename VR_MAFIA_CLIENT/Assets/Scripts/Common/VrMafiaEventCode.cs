@@ -25,9 +25,14 @@ public enum VrMafiaEventCode
     KillReq,
 
     /// <summary>
-    /// bool result
+    /// float coolTime (fail : -1)
     /// </summary>
     KillRes,
+
+    /// <summary>
+    /// none
+    /// </summary>
+    KillReady,
 
     /// <summary>
     /// int deadId
@@ -83,11 +88,6 @@ public enum VrMafiaEventCode
     /// {bool result, int pros}
     /// </summary>
     FinalVotingEnd,
-
-    /// <summary>
-    /// 
-    /// </summary>
-    KillReady,
 
     /// <summary>
     /// {bool mafiaWin, int[] mafiaIds}

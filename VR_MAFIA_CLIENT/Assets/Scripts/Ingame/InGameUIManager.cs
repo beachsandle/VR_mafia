@@ -17,6 +17,7 @@ public class InGameUIManager : MonoBehaviour
     //ui
     private GameObject killUI;
     private Image killCheckUI;
+    private Image killFillImage;
     private Image deadReportUI;
     private FadeInOut fadeInOut;
     //panel
@@ -26,7 +27,6 @@ public class InGameUIManager : MonoBehaviour
     private GameObject endPanel;
 
     private int electedId;
-    private bool canKill = false;
     private readonly float fadeTime = 3f;
     #endregion
 
@@ -66,6 +66,7 @@ public class InGameUIManager : MonoBehaviour
         //ui
         killUI = transform.Find("Kill UI").gameObject;
         killCheckUI = killUI.transform.Find("Kill Check UI").GetComponent<Image>();
+        killFillImage = killUI.transform.Find("Fill Image").GetComponent<Image>();
         deadReportUI = transform.Find("DeadReport UI").GetComponent<Image>();
         fadeInOut = transform.GetComponentInChildren<FadeInOut>();
         //panel
@@ -134,15 +135,8 @@ public class InGameUIManager : MonoBehaviour
     public void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
         roleText.text = isMafia ? "마피아" : "시민";
-        if (isMafia)
-        {
-            canKill = true;
-        }
-        else
-        {
+        if (!isMafia)
             killUI.SetActive(false);
-        }
-
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
         fadeInOut.FadeIn();
     }
@@ -211,9 +205,25 @@ public class InGameUIManager : MonoBehaviour
     {
         finalVotingPanel.FinalVoteFail();
     }
-    public void OnKillFailed()
+    public void OnKillResponse(float coolTime)
     {
-        //Todo: kill 실패
+        if (coolTime > 0)
+            StartCoroutine(UpdateCoolTime(coolTime));
+    }
+    IEnumerator UpdateCoolTime(float coolTime)
+    {
+        float ct = coolTime;
+
+        killFillImage.fillAmount = 1f;
+        while (0 < ct)
+        {
+            ct -= 0.5f;
+            killFillImage.fillAmount = ct / coolTime;
+
+            yield return new WaitForSeconds(0.5f);
+        }
+        killFillImage.fillAmount = 0f;
+
     }
     public void OnGameEnded(bool mafiaWin, int[] mafiaIds)
     {

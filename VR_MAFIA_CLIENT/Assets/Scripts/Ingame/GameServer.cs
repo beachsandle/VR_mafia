@@ -19,6 +19,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     public float votingResultTime = 3f;
     public float defenseTime = 15f;
     public float finalVotingTime = 15f;
+    public float killCoolTime = 5f;
     public bool checkGameEnd = true;
     private GamePhase phase = GamePhase.None;
     private readonly RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
@@ -102,6 +103,13 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
             result.First().Item2 == result.ElementAt(1).Item2)
             electedId = -1;
     }
+    private IEnumerator KillReady(int id)
+    {
+        yield return new WaitForSeconds(killCoolTime);
+        Debug.Log($"[GameServer] Kill Ready : {players[id].NickName}");
+        SendUnicastEvent(VrMafiaEventCode.KillReady, new int[] { id });
+    }
+
     #region phase change
     private void GameStart()
     {
@@ -243,21 +251,22 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnKillRequest(EventData data)
     {
-        bool result = true;
+        var cool = killCoolTime;
         var targetId = (int)data.CustomData;
         if (phase != GamePhase.Day ||
             !players[data.Sender].Alive() ||
             !players.ContainsKey(targetId) ||
             !players[targetId].Alive() ||
             mafiaIds.Contains(targetId))
-            result = false;
+            cool = -1;
         else
         {
             PlayerDead(targetId);
             SendBroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
+            StartCoroutine(KillReady(data.Sender));
         }
-        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, Result : {result}");
-        SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, result);
+        Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, Result : {cool}");
+        SendUnicastEvent(VrMafiaEventCode.KillRes, new int[] { data.Sender }, cool);
     }
     private void OnVoteRequest(EventData data)
     {
