@@ -54,21 +54,6 @@ public class InGameUIManager : MonoBehaviour
     private void OnDestroy()
     {
         SetActiveCursor(true);
-        if (pm != null)
-        {
-            gm.GameStarted -= OnGameStarted;
-            gm.DayStarted -= OnDayStarted;
-            gm.NightStarted -= OnNightStarted;
-            gm.VotingStarted -= OnVotingStarted;
-            gm.VoteFailed -= votingPanel.VoteFail;
-            gm.FinalVoteFailed -= finalVotingPanel.FinalVoteFail;
-            gm.KillFailed -= OnKillFailed;
-            gm.VotingEnded -= OnVotingEnded;
-            gm.DefenseStarted -= OnDefenseStarted;
-            gm.FinalVotingStarted -= OnFinalVotingStarted;
-            gm.FinalVotingEnded -= OnFinalVotingEnded;
-            gm.GameEnded -= OnGameEnded;
-        }
     }
     #endregion
 
@@ -92,44 +77,11 @@ public class InGameUIManager : MonoBehaviour
     private void Init()
     {
         SetActiveCursor(false);
-        EnrollHandler();
         votingPanel.gameObject.SetActive(true);
         finalVotingPanel.gameObject.SetActive(true);
-    }
-    private void EnrollHandler()
-    {
-        gm.FoundTarget += OnFoundTarget;
-        gm.GameStarted += OnGameStarted;
-        gm.DayStarted += OnDayStarted;
-        gm.NightStarted += OnNightStarted;
-        gm.VotingStarted += OnVotingStarted;
-        gm.VoteFailed += votingPanel.VoteFail;
-        gm.FinalVoteFailed += finalVotingPanel.FinalVoteFail;
-        gm.KillFailed += OnKillFailed;
-        gm.VotingEnded += OnVotingEnded;
-        gm.DefenseStarted += OnDefenseStarted;
-        gm.FinalVotingStarted += OnFinalVotingStarted;
-        gm.FinalVotingEnded += OnFinalVotingEnded;
-        gm.GameEnded += OnGameEnded;
         votingPanel.VoteButtonClicked += gm.OnVoteButton;
         finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
-
     }
-
-
-    private void OnFoundTarget(Player target)
-    {
-        killCheckUI.color = Color.white;
-        deadReportUI.color = Color.white;
-        if (target != null)
-        {
-            if (target.Alive())
-                killCheckUI.color = Color.red;
-            else
-                deadReportUI.color = Color.red;
-        }
-    }
-
     private void SetActiveCursor(bool active)
     {
         if (active)
@@ -179,7 +131,7 @@ public class InGameUIManager : MonoBehaviour
     #region event handler
 
     #region game event
-    private void OnGameStarted(bool isMafia, int[] mafiaIds)
+    public void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
         roleText.text = isMafia ? "마피아" : "시민";
         if (isMafia)
@@ -194,7 +146,7 @@ public class InGameUIManager : MonoBehaviour
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
         fadeInOut.FadeIn();
     }
-    private void OnDayStarted()
+    public void OnDayStarted()
     {
         SetActiveCursor(false);
         votingPanel.PanelOff();
@@ -202,7 +154,7 @@ public class InGameUIManager : MonoBehaviour
         StartInformation("낮이 되었습니다.");
         fadeInOut.FadeAll();
     }
-    private void OnNightStarted()
+    public void OnNightStarted()
     {
         StartInformation("밤이 되었습니다.");
         gm.PhaseChanging = true;
@@ -216,12 +168,12 @@ public class InGameUIManager : MonoBehaviour
                 gm.PhaseChanging = false;
             });
     }
-    private void OnVotingStarted(float votingTime)
+    public void OnVotingStarted(float votingTime)
     {
         SetActiveCursor(true);
         votingPanel.VotingStart(votingTime);
     }
-    private void OnVotingEnded(int electedId, int[] result)
+    public void OnVotingEnded(int electedId, int[] result)
     {
         this.electedId = electedId;
         if (electedId == -1)
@@ -235,15 +187,15 @@ public class InGameUIManager : MonoBehaviour
         }
         votingPanel.VotingEnd(electedId, result);
     }
-    private void OnDefenseStarted(float defenseTime)
+    public void OnDefenseStarted(float defenseTime)
     {
         finalVotingPanel.DefenseStart(defenseTime, electedId);
     }
-    private void OnFinalVotingStarted(float finalVotingTime)
+    public void OnFinalVotingStarted(float finalVotingTime)
     {
         finalVotingPanel.FinalVotingStart(finalVotingTime);
     }
-    private void OnFinalVotingEnded(bool result, int pros)
+    public void OnFinalVotingEnded(bool result, int pros)
     {
         finalVotingPanel.FinalVotingEnd(result);
         if (result)
@@ -251,14 +203,34 @@ public class InGameUIManager : MonoBehaviour
         else
             StartInformation($"찬성 {pros}표로 부결되었습니다.");
     }
-    private void OnKillFailed()
+    public void OnVoteFailed()
+    {
+        votingPanel.VoteFail();
+    }
+    public void OnFinalVoteFailed()
+    {
+        finalVotingPanel.FinalVoteFail();
+    }
+    public void OnKillFailed()
     {
         //Todo: kill 실패
     }
-    private void OnGameEnded(bool mafiaWin, int[] mafiaIds)
+    public void OnGameEnded(bool mafiaWin, int[] mafiaIds)
     {
         //Todo: 게임 종료 패널
         endPanel.gameObject.SetActive(true);
+    }
+    public void OnFoundTarget(Player target)
+    {
+        killCheckUI.color = Color.white;
+        deadReportUI.color = Color.white;
+        if (target != null)
+        {
+            if (target.Alive())
+                killCheckUI.color = Color.red;
+            else
+                deadReportUI.color = Color.red;
+        }
     }
     #endregion
 

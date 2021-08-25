@@ -2286,6 +2286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30ee8002702a9b546a3480b234924364, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiManager: {fileID: 1275793200}
 --- !u!114 &1819207291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2304,6 +2305,7 @@ MonoBehaviour:
   votingResultTime: 3
   defenseTime: 5
   finalVotingTime: 5
+  checkGameEnd: 1
 --- !u!1 &1861971120
 GameObject:
   m_ObjectHideFlags: 0

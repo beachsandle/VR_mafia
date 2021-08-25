@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region field
+    [SerializeField] private InGameUIManager uiManager;
     private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
@@ -39,29 +40,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public bool MenuOpened { get; set; } = false;
     public bool PhaseChanging { get; set; } = false;
     public bool IsVoting { get; private set; } = false;
-    #endregion
-
-    #region callback
-
-    #region ui callback
-    public event Action<Player> FoundTarget;
-    #endregion
-
-    #region server callback
-    public event Action<bool, int[]> GameStarted;
-    public event Action DayStarted;
-    public event Action KillFailed;
-    public event Action NightStarted;
-    public event Action<float> VotingStarted;
-    public event Action VoteFailed;
-    public event Action<int, int[]> VotingEnded;
-    public event Action<float> DefenseStarted;
-    public event Action<float> FinalVotingStarted;
-    public event Action FinalVoteFailed;
-    public event Action<bool, int> FinalVotingEnded;
-    public event Action<bool, int[]> GameEnded;
-    #endregion
-
     #endregion
 
     #region unity message
@@ -160,13 +138,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         IsMafia = (bool)content["isMafia"];
         var mafiaIds = IsMafia ? (int[])content["mafiaIds"] : null;
         Debug.Log($"[GameManager] Game Start, Is Mafia : {IsMafia}");
-        GameStarted?.Invoke(IsMafia, mafiaIds);
+        uiManager.OnGameStarted(IsMafia, mafiaIds);
     }
     private void OnDayStarted()
     {
         Debug.Log($"[GameManager] Day Start");
         IsVoting = false;
-        DayStarted?.Invoke();
+        uiManager.OnDayStarted();
     }
     private void OnKillResponse(EventData photonEvent)
     {
@@ -174,7 +152,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Kill Response : {result}");
         if (!result)
             //Todo: 킬 실패 만들어야함
-            KillFailed?.Invoke();
+            uiManager.OnKillFailed();
     }
 
     private void OnDieEvent(EventData data)
@@ -185,21 +163,21 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnNightStarted()
     {
         Debug.Log($"[GameManager] Night Start");
-        NightStarted?.Invoke();
+        uiManager.OnNightStarted();
     }
     private void OnVotingStarted(EventData data)
     {
         var votingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         IsVoting = true;
-        VotingStarted?.Invoke(votingTime);
+        uiManager.OnVotingStarted(votingTime);
     }
     private void OnVoteResponse(EventData data)
     {
         var result = (bool)data.CustomData;
         Debug.Log($"[GameManager] Vote Response : {result}");
         if (!result)
-            VoteFailed?.Invoke();
+            uiManager.OnVoteFailed();
     }
     private void OnVotingEnded(EventData data)
     {
@@ -207,26 +185,26 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var electedId = (int)content["electedId"];
         var result = (int[])content["result"];
         Debug.Log($"[GameManager] elected : {electedId}, result : {string.Join(" ", result)}");
-        VotingEnded?.Invoke(electedId, result);
+        uiManager.OnVotingEnded(electedId, result);
     }
     private void OnFinalVotingStarted(EventData data)
     {
         var finalVotingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Final Voting Start : {finalVotingTime}");
-        FinalVotingStarted?.Invoke(finalVotingTime);
+        uiManager.OnFinalVotingStarted(finalVotingTime);
     }
     private void OnDefenseStarted(EventData data)
     {
         var defenseTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Defense Start : {defenseTime}");
-        DefenseStarted?.Invoke(defenseTime);
+        uiManager.OnDefenseStarted(defenseTime);
     }
     private void OnFinalVoteResponse(EventData data)
     {
         var result = (bool)data.CustomData;
         Debug.Log($"[GameManager] Final Vote Response : {result}");
         if (!result)
-            FinalVoteFailed?.Invoke();
+            uiManager.OnFinalVoteFailed();
     }
     private void OnFinalVotingEnded(EventData data)
     {
@@ -234,7 +212,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var result = (bool)content["result"];
         var pros = (int)content["pros"];
         Debug.Log($"[GameManager] result : {result}, pros : {pros}");
-        FinalVotingEnded?.Invoke(result, pros);
+        uiManager.OnFinalVotingEnded(result, pros);
     }
     private void OnGameEnded(EventData data)
     {
@@ -242,7 +220,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var mafiaWin = (bool)content["mafiaWin"];
         var mafiaIds = (int[])content["mafiaIds"];
         Debug.Log($"[GameManager] Game End, Mafia Win : {mafiaWin}");
-        GameEnded?.Invoke(mafiaWin, mafiaIds);
+        uiManager.OnGameEnded(mafiaWin, mafiaIds);
     }
     #endregion
 
@@ -258,7 +236,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnFoundTarget(Player p)
     {
         target = p;
-        FoundTarget?.Invoke(p);
+        uiManager.OnFoundTarget(p);
     }
     public void OnKillButton()
     {
