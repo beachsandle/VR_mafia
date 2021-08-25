@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
     private PlayerController localPlayerController;
+    private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
     private readonly RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
     #endregion
 
@@ -160,10 +161,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnDieEvent(EventData data)
     {
-        if ((int)data.CustomData == LocalPlayer.ActorNumber)
-        {
-            localPlayerController.Die();
-        }
+        playerObjs[(int)data.CustomData].Die();
         Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
     }
     private void OnNightStarted()
@@ -223,6 +221,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region ui handler
+    public void OnSpwanPlayer(PlayerCharacter obj)
+    {
+        playerObjs[obj.Owner.ActorNumber] = obj;
+    }
     public void OnFoundTarget(Player p)
     {
         if (p != null && p.Alive())

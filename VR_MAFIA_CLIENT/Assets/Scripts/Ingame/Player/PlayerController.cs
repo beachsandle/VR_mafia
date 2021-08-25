@@ -130,11 +130,6 @@ public class PlayerController : MonoBehaviour
         transform.position = pos;
         cc.enabled = true;
     }
-    public void Die()
-    {
-        animator.SetBool("death2", true);
-        //Destroy(GetComponent<PlayerController>());
-    }
     #endregion
 
     #endregion
