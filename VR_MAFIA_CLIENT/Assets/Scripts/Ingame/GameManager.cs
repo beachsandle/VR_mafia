@@ -44,12 +44,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #region callback
 
     #region ui callback
-    public event Action<bool> FoundTarget;
+    public event Action<Player> FoundTarget;
     #endregion
 
     #region server callback
     public event Action<bool, int[]> GameStarted;
     public event Action DayStarted;
+    public event Action KillFailed;
     public event Action NightStarted;
     public event Action<float> VotingStarted;
     public event Action VoteFailed;
@@ -115,6 +116,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.DayStart:
                 OnDayStarted();
                 break;
+            case VrMafiaEventCode.KillRes:
+                OnKillResponse(photonEvent);
+                break;
             case VrMafiaEventCode.DieEvent:
                 OnDieEvent(photonEvent);
                 break;
@@ -145,6 +149,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             default: break;
         }
     }
+
     private void OnGameStarted(EventData data)
     {
         var content = (Hashtable)data.CustomData;
@@ -159,6 +164,15 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         IsVoting = false;
         DayStarted?.Invoke();
     }
+    private void OnKillResponse(EventData photonEvent)
+    {
+        var result = (bool)photonEvent.CustomData;
+        Debug.Log($"[GameManager] Kill Response : {result}");
+        if (!result)
+            //Todo: 킬 실패 만들어야함
+            KillFailed?.Invoke();
+    }
+
     private void OnDieEvent(EventData data)
     {
         playerObjs[(int)data.CustomData].Die();
@@ -227,11 +241,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     public void OnFoundTarget(Player p)
     {
-        if (p != null && p.Alive())
-            target = p;
-        else
-            target = null;
-        FoundTarget?.Invoke(target != null);
+        target = p;
+        FoundTarget?.Invoke(p);
     }
     public void OnKillButton()
     {

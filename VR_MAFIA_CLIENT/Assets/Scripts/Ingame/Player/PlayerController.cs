@@ -44,7 +44,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Update()
     {
-        if (gm.PhaseChanging || gm.IsVoting || animator.GetBool("death2"))
+        if (gm.PhaseChanging || gm.IsVoting)
             return;
         Move();
         if (gm.MenuOpened)
@@ -55,6 +55,10 @@ public class PlayerController : MonoBehaviour
             gm.OnKillButton();
         else if (Input.GetKeyDown(KeyCode.E))
             gm.OnDeadReportButton();
+    }
+    private void OnDestroy()
+    {
+        Destroy(cc);
     }
     #endregion
 

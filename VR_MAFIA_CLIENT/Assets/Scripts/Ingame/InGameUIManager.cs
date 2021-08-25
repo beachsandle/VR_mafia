@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ public class InGameUIManager : MonoBehaviour
     //ui
     private GameObject killUI;
     private Image killCheckUI;
-    private GameObject deadReportUI;
+    private Image deadReportUI;
     private FadeInOut fadeInOut;
     //panel
     private GameObject menuPanel;
@@ -55,12 +56,12 @@ public class InGameUIManager : MonoBehaviour
         SetActiveCursor(true);
         if (pm != null)
         {
-            votingPanel.VoteButtonClicked -= gm.OnVoteButton;
             gm.GameStarted -= OnGameStarted;
             gm.DayStarted -= OnDayStarted;
             gm.NightStarted -= OnNightStarted;
             gm.VotingStarted -= OnVotingStarted;
             gm.VoteFailed -= votingPanel.VoteFail;
+            gm.FinalVoteFailed -= finalVotingPanel.FinalVoteFail;
             gm.VotingEnded -= OnVotingEnded;
             gm.DefenseStarted -= OnDefenseStarted;
             gm.FinalVotingStarted -= OnFinalVotingStarted;
@@ -78,7 +79,7 @@ public class InGameUIManager : MonoBehaviour
         //ui
         killUI = transform.Find("Kill UI").gameObject;
         killCheckUI = killUI.transform.Find("Kill Check UI").GetComponent<Image>();
-        deadReportUI = transform.Find("DeadReport UI").gameObject;
+        deadReportUI = transform.Find("DeadReport UI").GetComponent<Image>();
         fadeInOut = transform.GetComponentInChildren<FadeInOut>();
         //panel
         menuPanel = transform.Find("Menu Panel").gameObject;
@@ -111,12 +112,17 @@ public class InGameUIManager : MonoBehaviour
 
     }
 
-    private void OnFoundTarget(bool found)
+    private void OnFoundTarget(Player target)
     {
-        if (found)
-            killCheckUI.color = Color.red;
-        else
-            killCheckUI.color = Color.white;
+        killCheckUI.color = Color.white;
+        deadReportUI.color = Color.white;
+        if (target != null)
+        {
+            if (target.Alive())
+                killCheckUI.color = Color.red;
+            else
+                deadReportUI.color = Color.red;
+        }
     }
 
     private void SetActiveCursor(bool active)

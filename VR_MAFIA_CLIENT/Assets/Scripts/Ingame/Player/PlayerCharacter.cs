@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class PlayerCharacter : MonoBehaviour
+public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
 {
     public Player Owner { get; private set; }
     private Animator animator;

@@ -2298,7 +2298,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 489d9dd28729c234db474795ca0759e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dayTime: 15
+  dayTime: 9999
   nightTime: 3
   votingTime: 10
   votingResultTime: 3
