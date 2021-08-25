@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
-    private PlayerController localPlayerController;
+    private PlayerCharacter localCharacter;
     private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
     private readonly RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
     #endregion
@@ -66,9 +66,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         int idx = Array.IndexOf(PlayerList, LocalPlayer);
         spawnPosition = spawnPositions[idx + 1].position;
-        var player = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity);
-        localPlayerController = player.AddComponent<PlayerController>();
-        localPlayerController.SetCamera(Camera.main);
+        localCharacter = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity).GetComponent<PlayerCharacter>();
     }
     #endregion
 
@@ -76,7 +74,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void ReturnSpawnPosition()
     {
         if (LocalPlayer.Alive())
-            localPlayerController.MoveTo(spawnPosition);
+            localCharacter.Controller.MoveTo(spawnPosition);
     }
     #endregion
 

@@ -8,6 +8,7 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
 {
     public Player Owner { get; private set; }
     private Animator animator;
+    public PlayerController Controller { get; private set; } = null;
     private void OnEnable()
     {
         animator = GetComponent<Animator>();
@@ -23,5 +24,10 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
     {
         Owner = info.Sender;
         GameManager.Instance.OnSpwanPlayer(this);
+        if (Owner.IsLocal)
+        {
+            Controller = gameObject.AddComponent<PlayerController>();
+            Controller.SetCamera(Camera.main);
+        }
     }
 }
