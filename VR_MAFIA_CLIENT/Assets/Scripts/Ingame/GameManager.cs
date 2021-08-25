@@ -255,10 +255,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         RaiseEvent((byte)VrMafiaEventCode.KillReq, target.ActorNumber, eventOption, SendOptions.SendReliable);
     }
     public void OnDeadReportButton() { }
-    public void OnVoteButton(int num)
+    public void OnVoteButton(int id)
     {
-        var id = PlayerList[num].ActorNumber;
-        Debug.Log($"[GameManager] Vote Request : {PlayerList[num].NickName}");
+        Debug.Log($"[GameManager] Vote Request : {PlayerList[id].NickName}");
         RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }
     public void OnFinalVoteButton(bool pros)

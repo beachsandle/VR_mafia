@@ -14,6 +14,7 @@ public class VotingPanel : MonoBehaviour
     private Transform content;
     private Button[] btns;
     private Text timeText;
+    private int[] playerIds;
     #endregion
 
     #region property
@@ -57,6 +58,7 @@ public class VotingPanel : MonoBehaviour
     }
     private void InitCandidates()
     {
+        playerIds = playerList.Select(p => p.ActorNumber).ToArray();
         for (int i = 0; i < 10; ++i)
         {
             if (i < playerList.Length)
@@ -129,7 +131,7 @@ public class VotingPanel : MonoBehaviour
         if (!Suffrage)
             return;
         Suffrage = false;
-        VoteButtonClicked?.Invoke(number);
+        VoteButtonClicked?.Invoke(playerIds[number]);
     }
     #endregion
 }
