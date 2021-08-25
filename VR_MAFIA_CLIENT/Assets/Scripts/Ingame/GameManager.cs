@@ -59,6 +59,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event Action<float> FinalVotingStarted;
     public event Action FinalVoteFailed;
     public event Action<bool, int> FinalVotingEnded;
+    public event Action<bool, int[]> GameEnded;
     #endregion
 
     #endregion
@@ -146,6 +147,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.FinalVotingEnd:
                 OnFinalVotingEnded(photonEvent);
                 break;
+            case VrMafiaEventCode.GameEnd:
+                OnGameEnded(photonEvent);
+                break;
             default: break;
         }
     }
@@ -232,9 +236,21 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] result : {result}, pros : {pros}");
         FinalVotingEnded?.Invoke(result, pros);
     }
+    private void OnGameEnded(EventData data)
+    {
+        var content = (Hashtable)data.CustomData;
+        var mafiaWin = (bool)content["mafiaWin"];
+        var mafiaIds = (int[])content["mafiaIds"];
+        Debug.Log($"[GameManager] Game End, Mafia Win : {mafiaWin}");
+        GameEnded?.Invoke(mafiaWin, mafiaIds);
+    }
     #endregion
 
     #region ui handler
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        playerObjs.Remove(otherPlayer.ActorNumber);
+    }
     public void OnSpwanPlayer(PlayerCharacter obj)
     {
         playerObjs[obj.Owner.ActorNumber] = obj;

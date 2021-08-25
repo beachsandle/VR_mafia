@@ -90,7 +90,7 @@ public enum VrMafiaEventCode
     KillReady,
 
     /// <summary>
-    /// 
+    /// {bool mafiaWin, int[] mafiaIds}
     /// </summary>
     GameEnd
 }

@@ -62,10 +62,12 @@ public class InGameUIManager : MonoBehaviour
             gm.VotingStarted -= OnVotingStarted;
             gm.VoteFailed -= votingPanel.VoteFail;
             gm.FinalVoteFailed -= finalVotingPanel.FinalVoteFail;
+            gm.KillFailed -= OnKillFailed;
             gm.VotingEnded -= OnVotingEnded;
             gm.DefenseStarted -= OnDefenseStarted;
             gm.FinalVotingStarted -= OnFinalVotingStarted;
             gm.FinalVotingEnded -= OnFinalVotingEnded;
+            gm.GameEnded -= OnGameEnded;
         }
     }
     #endregion
@@ -103,14 +105,17 @@ public class InGameUIManager : MonoBehaviour
         gm.VotingStarted += OnVotingStarted;
         gm.VoteFailed += votingPanel.VoteFail;
         gm.FinalVoteFailed += finalVotingPanel.FinalVoteFail;
+        gm.KillFailed += OnKillFailed;
         gm.VotingEnded += OnVotingEnded;
         gm.DefenseStarted += OnDefenseStarted;
         gm.FinalVotingStarted += OnFinalVotingStarted;
         gm.FinalVotingEnded += OnFinalVotingEnded;
+        gm.GameEnded += OnGameEnded;
         votingPanel.VoteButtonClicked += gm.OnVoteButton;
         finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
 
     }
+
 
     private void OnFoundTarget(Player target)
     {
@@ -245,6 +250,15 @@ public class InGameUIManager : MonoBehaviour
             StartInformation($"{PhotonNetwork.CurrentRoom.Players[electedId].NickName}님이 {pros}명의 동의로 추방되었습니다.");
         else
             StartInformation($"찬성 {pros}표로 부결되었습니다.");
+    }
+    private void OnKillFailed()
+    {
+        //Todo: kill 실패
+    }
+    private void OnGameEnded(bool mafiaWin, int[] mafiaIds)
+    {
+        //Todo: 게임 종료 패널
+        endPanel.gameObject.SetActive(true);
     }
     #endregion
 
