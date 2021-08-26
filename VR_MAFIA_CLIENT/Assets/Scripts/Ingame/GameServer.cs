@@ -31,6 +31,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private int[] voteCounts;
     private int pros;
     private int maxVoters;
+    private int deadId;
     private readonly HashSet<int> voters = new HashSet<int>();
 
 
@@ -144,6 +145,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameServer] Day Start");
         phase = GamePhase.Day;
         SendBroadcastEvent(VrMafiaEventCode.DayStart);
+        deadId = -1;
         Invoke(nameof(NightStart), dayTime);
     }
     private void NightStart()
@@ -152,7 +154,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase != GamePhase.Day) return;
         Debug.Log($"[GameServer] Night Start");
         phase = GamePhase.Night;
-        SendBroadcastEvent(VrMafiaEventCode.NightStart);
+        SendBroadcastEvent(VrMafiaEventCode.NightStart, deadId);
         Invoke(nameof(VotingStart), nightTime);
     }
     private void VotingStart()
@@ -278,6 +280,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
             !players.ContainsKey(targetId) ||
             players[targetId].Alive())
             return;
+        deadId = targetId;
         NightStart();
         Debug.Log($"[GameServer] On Dead Report : {players[data.Sender].NickName} -> {players[targetId].NickName}");
     }

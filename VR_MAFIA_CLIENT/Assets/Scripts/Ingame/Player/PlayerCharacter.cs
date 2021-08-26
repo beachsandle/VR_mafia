@@ -28,6 +28,12 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
         {
             Controller = gameObject.AddComponent<PlayerController>();
             Controller.SetCamera(Camera.main);
+            Hide();
         }
+    }
+    public void Hide()
+    {
+        foreach (var render in GetComponentsInChildren<Renderer>(false))
+            render.enabled = false;
     }
 }

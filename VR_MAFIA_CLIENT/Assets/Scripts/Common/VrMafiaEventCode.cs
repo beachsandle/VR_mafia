@@ -16,7 +16,7 @@ public enum VrMafiaEventCode
     DayStart,
 
     /// <summary>
-    /// none
+    /// int deadId(-1 : none)
     /// </summary>
     NightStart,
 

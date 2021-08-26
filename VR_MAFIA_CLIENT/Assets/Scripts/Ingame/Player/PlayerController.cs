@@ -40,7 +40,6 @@ public class PlayerController : MonoBehaviour
     {
         layermask = (1 << (int)Global.Layers.Player);
         InactiveMyRay();
-        HideMyCharacter();
     }
     private void Update()
     {
@@ -107,11 +106,6 @@ public class PlayerController : MonoBehaviour
     {
         gameObject.layer = (int)Global.Layers.IgnoreRaycast;
         head.gameObject.layer = (int)Global.Layers.IgnoreRaycast;
-    }
-    private void HideMyCharacter()
-    {
-        foreach (var render in GetComponentsInChildren<Renderer>(false))
-            render.enabled = false;
     }
     private void FindTarget()
     {

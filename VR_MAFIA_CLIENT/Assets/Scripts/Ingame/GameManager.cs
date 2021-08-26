@@ -10,6 +10,7 @@ using PhotonRoom = Photon.Realtime.Room;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
 using static PhotonManager;
+using System.Linq;
 
 public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -96,7 +97,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 OnDayStarted();
                 break;
             case VrMafiaEventCode.NightStart:
-                OnNightStarted();
+                OnNightStarted(photonEvent);
                 break;
             case VrMafiaEventCode.VotingStart:
                 OnVotingStarted(photonEvent);
@@ -155,9 +156,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         IsVoting = false;
         uiManager.OnDayStarted();
     }
-    private void OnNightStarted()
+    private void OnNightStarted(EventData data)
     {
-        Debug.Log($"[GameManager] Night Start");
+        var deadId = (int)data.CustomData;
+        Debug.Log($"[GameManager] Night Start : {deadId}");
+        foreach (var p in PlayerList.Where(p => !p.Alive()))
+            playerObjs[p.ActorNumber].Hide();
         uiManager.OnNightStarted();
     }
     private void OnVotingStarted(EventData data)
