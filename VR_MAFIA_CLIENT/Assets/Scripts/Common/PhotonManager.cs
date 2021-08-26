@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using Dissonance;
-using Dissonance.Audio.Playback;
-using Dissonance.Integrations.PhotonUnityNetworking2;
+using ExitGames.Client.Photon;
 
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using static Photon.Pun.PhotonNetwork;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -30,7 +29,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #region field
     private bool wait = false;
     private Player host;
-    private TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
+    private readonly TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
+    private static readonly RaiseEventOptions toMasterOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
+    private static readonly RaiseEventOptions multicastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.Others };
+    private static readonly RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
     #endregion
 
     #region property
@@ -42,6 +44,26 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+    }
+    #endregion
+
+    #region method
+    public static void SendEventToMaster(VrMafiaEventCode code, object content)
+    {
+        RaiseEvent((byte)code, content, toMasterOption, SendOptions.SendReliable);
+    }
+    public static void SendUnicastEvent(VrMafiaEventCode code, int target, object content = null)
+    {
+        SendMulticastEvent(code, new int[] { target }, content);
+    }
+    public static void SendMulticastEvent(VrMafiaEventCode code, int[] targets, object content = null)
+    {
+        multicastOption.TargetActors = targets;
+        RaiseEvent((byte)code, content, multicastOption, SendOptions.SendReliable);
+    }
+    public static void SendBroadcastEvent(VrMafiaEventCode code, object content = null)
+    {
+        RaiseEvent((byte)code, content, broadcastOption, SendOptions.SendReliable);
     }
     #endregion
 
@@ -166,7 +188,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         host = PhotonNetwork.MasterClient;
         PhotonNetwork.AutomaticallySyncScene = true;
-        if(PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient)
             PhotonNetwork.LoadLevel("WaitingRoom");
         Debug.Log("[Photon Manager] : joined room");
         wait = false;

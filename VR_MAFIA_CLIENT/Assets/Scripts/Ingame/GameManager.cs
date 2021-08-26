@@ -9,6 +9,7 @@ using UnityEngine;
 using PhotonRoom = Photon.Realtime.Room;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
+using static PhotonManager;
 
 public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -33,7 +34,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private PlayerCharacter localCharacter;
     private bool canKill = true;
     private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
-    private readonly RaiseEventOptions eventOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
     #endregion
 
     #region property
@@ -272,7 +272,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             return;
         Debug.Log($"[GameManager] Kill Request : {target.NickName}");
         canKill = false;
-        RaiseEvent((byte)VrMafiaEventCode.KillReq, target.ActorNumber, eventOption, SendOptions.SendReliable);
+        SendEventToMaster(VrMafiaEventCode.KillReq, target.ActorNumber);
     }
     public void OnDeadReportButton()
     {
@@ -281,17 +281,17 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             !LocalPlayer.Alive())
             return;
         Debug.Log($"[GameManager] Dead Report : {target.NickName}");
-        RaiseEvent((byte)VrMafiaEventCode.DeadReport, target.ActorNumber, eventOption, SendOptions.SendReliable);
+        SendEventToMaster(VrMafiaEventCode.DeadReport, target.ActorNumber);
     }
     public void OnVoteButton(int id)
     {
         Debug.Log($"[GameManager] Vote Request : {CurrentRoom.Players[id].NickName}");
-        RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
+        SendEventToMaster(VrMafiaEventCode.VoteReq, id);
     }
     public void OnFinalVoteButton(bool pros)
     {
         Debug.Log($"[GameManager] Final Vote Request : {pros}");
-        RaiseEvent((byte)VrMafiaEventCode.FinalVoteReq, pros, eventOption, SendOptions.SendReliable);
+        SendEventToMaster(VrMafiaEventCode.FinalVoteReq, pros);
     }
     #endregion
 

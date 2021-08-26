@@ -9,6 +9,7 @@ using UnityEngine;
 
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
+using static PhotonManager;
 
 public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -22,8 +23,6 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     public float killCoolTime = 5f;
     public bool checkGameEnd = true;
     private GamePhase phase = GamePhase.None;
-    private readonly RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
-    private readonly RaiseEventOptions unicastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.Others };
 
     private int[] mafiaIds;
     private int lives = 0;
@@ -51,22 +50,6 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     #endregion
 
     #region method
-
-    #region send event
-    private void SendUnicastEvent(VrMafiaEventCode code, int target, object content = null)
-    {
-        SendMulticastEvent(code, new int[] { target }, content);
-    }
-    private void SendMulticastEvent(VrMafiaEventCode code, int[] targets, object content = null)
-    {
-        unicastOption.TargetActors = targets;
-        RaiseEvent((byte)code, content, unicastOption, SendOptions.SendReliable);
-    }
-    private void SendBroadcastEvent(VrMafiaEventCode code, object content = null)
-    {
-        RaiseEvent((byte)code, content, broadcastOption, SendOptions.SendReliable);
-    }
-    #endregion
 
     #region game start
     private void Init()
@@ -293,7 +276,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         else
         {
             voters.Remove(data.Sender);
-            ++voteCounts[Array.IndexOf(PhotonNetwork.PlayerList, players[targetId])];
+            ++voteCounts[Array.IndexOf(PlayerList, players[targetId])];
         }
         Debug.Log($"[GameServer] On Vote Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, result : {result}");
         SendUnicastEvent(VrMafiaEventCode.VoteRes, data.Sender, result);
