@@ -71,7 +71,7 @@ public class VotingPanel : MonoBehaviour
                 btns[i].transform.Find("Count Text").GetComponent<Text>().text = "0";
                 btns[i].transform.Find("Selected UI").gameObject.SetActive(false);
 
-                if (!playerList[i].Alive())
+                if (!playerList[i].GetAlive())
                     btns[i].interactable = false;
             }
             else

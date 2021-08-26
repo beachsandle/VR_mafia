@@ -106,7 +106,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private void ResetVoters()
     {
         voters.Clear();
-        foreach (var id in players.Where(p => p.Value.Alive()).Select(p => p.Key))
+        foreach (var id in players.Where(p => p.Value.GetAlive()).Select(p => p.Key))
             voters.Add(id);
     }
     private void GetElectedPlayer()
@@ -258,9 +258,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         var cool = killCoolTime;
         var targetId = (int)data.CustomData;
         if (phase != GamePhase.Day ||
-            !players[data.Sender].Alive() ||
+            !players[data.Sender].GetAlive() ||
             !players.ContainsKey(targetId) ||
-            !players[targetId].Alive() ||
+            !players[targetId].GetAlive() ||
             mafiaIds.Contains(targetId))
             cool = -1;
         else
@@ -276,9 +276,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         var targetId = (int)data.CustomData;
         if (phase != GamePhase.Day ||
-            !players[data.Sender].Alive() ||
+            !players[data.Sender].GetAlive() ||
             !players.ContainsKey(targetId) ||
-            players[targetId].Alive())
+            players[targetId].GetAlive())
             return;
         deadId = targetId;
         NightStart();
@@ -288,7 +288,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         bool result = true;
         int targetId = (int)data.CustomData;
-        if (phase != GamePhase.Voting || !voters.Contains(data.Sender) || !players.ContainsKey(targetId) || !players[targetId].Alive())
+        if (phase != GamePhase.Voting || !voters.Contains(data.Sender) || !players.ContainsKey(targetId) || !players[targetId].GetAlive())
             result = false;
         else
         {

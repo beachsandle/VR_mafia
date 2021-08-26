@@ -1,18 +1,43 @@
-﻿using System.Collections;
+﻿using Dissonance;
+using Dissonance.Audio.Playback;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class VoiceChatManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private DissonanceComms comms;
+    public string LocalVoiceName => comms.LocalPlayerName;
+    private readonly Dictionary<string, PlayerCharacter> playerMap = new Dictionary<string, PlayerCharacter>();
+    private void Awake()
     {
-        
+        comms = GetComponent<DissonanceComms>();
+        comms.OnPlayerJoinedSession += OnPlayerJoinedSession;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnPlayerJoinedSession(VoicePlayerState obj)
     {
-        
+        if (playerMap.ContainsKey(obj.Name))
+            InitPlayback(obj.Name);
+    }
+    private IEnumerator SetSpatialSound(VoicePlayback playback)
+    {
+        while (playback.AudioSource.spatialBlend != 0)
+            yield return null;
+        playback.AudioSource.spatialBlend = 1f;
+    }
+    private void InitPlayback(string voiceName)
+    {
+        Debug.Log("Init Player " + voiceName);
+        var playback = comms.FindPlayer(voiceName).Playback as VoicePlayback;
+        playback.transform.parent = playerMap[voiceName].transform;
+        playback.transform.localPosition = Vector3.zero;
+        StartCoroutine(SetSpatialSound(playback));
+    }
+    public void MappingPlayer(string voiceName, PlayerCharacter character)
+    {
+        playerMap[voiceName] = character;
+        if (comms.FindPlayer(voiceName) != null)
+            InitPlayback(voiceName);
     }
 }

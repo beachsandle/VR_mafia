@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region field
     [SerializeField] private InGameUIManager uiManager;
+    [SerializeField] private VoiceChatManager voiceManager;
     private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
@@ -48,7 +49,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void Awake()
     {
         FindReference();
-        Init();
+    }
+    private void Start()
+    {
+        SpawnPlayer();
     }
     #endregion
 
@@ -58,11 +62,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void FindReference()
     {
         spawnPositions = transform.Find("SpawnPosition").GetComponentsInChildren<Transform>();
-    }
-    private void Init()
-    {
-        if (PhotonManager.Instance != null)
-            SpawnPlayer();
     }
     private void SpawnPlayer()
     {
@@ -75,7 +74,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #region public
     public void ReturnSpawnPosition()
     {
-        if (LocalPlayer.Alive())
+        if (LocalPlayer.GetAlive())
             localCharacter.Controller.MoveTo(spawnPosition);
     }
     #endregion
@@ -160,7 +159,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         var deadId = (int)data.CustomData;
         Debug.Log($"[GameManager] Night Start : {deadId}");
-        foreach (var p in PlayerList.Where(p => !p.Alive()))
+        foreach (var p in PlayerList.Where(p => !p.GetAlive()))
             playerObjs[p.ActorNumber].Hide();
         uiManager.OnNightStarted();
     }
@@ -257,9 +256,18 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         playerObjs.Remove(otherPlayer.ActorNumber);
     }
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if (!targetPlayer.IsLocal && changedProps.ContainsKey("VoiceName"))
+        {
+            voiceManager.MappingPlayer(targetPlayer.GetVoiceName(), playerObjs[targetPlayer.ActorNumber]);
+        }
+    }
     public void OnSpwanPlayer(PlayerCharacter obj)
     {
         playerObjs[obj.Owner.ActorNumber] = obj;
+        if (obj.Owner.IsLocal)
+            SetVoiceName(voiceManager.LocalVoiceName);
     }
     public void OnFoundTarget(Player p)
     {
@@ -269,8 +277,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnKillButton()
     {
         if (target == null ||
-            !target.Alive() ||
-            !LocalPlayer.Alive() ||
+            !target.GetAlive() ||
+            !LocalPlayer.GetAlive() ||
             !IsMafia ||
             !canKill)
             return;
@@ -281,8 +289,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnDeadReportButton()
     {
         if (target == null ||
-            target.Alive() ||
-            !LocalPlayer.Alive())
+            target.GetAlive() ||
+            !LocalPlayer.GetAlive())
             return;
         Debug.Log($"[GameManager] Dead Report : {target.NickName}");
         SendEventToMaster(VrMafiaEventCode.DeadReport, target.ActorNumber);

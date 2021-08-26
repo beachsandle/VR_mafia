@@ -10,23 +10,27 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public static class PlayerExtender
 {
-    public static bool Alive(this Player p)
+    public static bool GetAlive(this Player p)
     {
         return p.CustomProperties.ContainsKey("Alive") && (bool)p.CustomProperties["Alive"];
     }
     public static void Die(this Player p)
     {
-        p.SetCustomProperties(new ExitGames.Client.Photon.Hashtable() { { "Alive", false } });
+        p.SetCustomProperties(new Hashtable() { { "Alive", false } });
+    }
+    public static string GetVoiceName(this Player p)
+    {
+        return p.CustomProperties.ContainsKey("VoiceName") ? (string)p.CustomProperties["VoiceName"] : "";
     }
 }
 
 public static class RoomExtenter
 {
-    public static string HostName(this PhotonRoom r)
+    public static string GetHostName(this PhotonRoom r)
     {
         return r.CustomProperties.ContainsKey("HostName") ? (string)r.CustomProperties["HostName"] : "";
     }
-    public static string HostName(this RoomInfo r)
+    public static string GetHostName(this RoomInfo r)
     {
         return r.CustomProperties.ContainsKey("HostName") ? (string)r.CustomProperties["HostName"] : "";
     }

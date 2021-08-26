@@ -32,7 +32,7 @@ public class Room : MonoBehaviour, IPointerClickHandler
     {
         this.roomInfo = roomInfo;
         roomName.text = roomInfo.Name;
-        hostName.text = roomInfo.HostName();
+        hostName.text = roomInfo.GetHostName();
         headCount.text = $"{roomInfo.PlayerCount}/{roomInfo.MaxPlayers}";
     }
 }

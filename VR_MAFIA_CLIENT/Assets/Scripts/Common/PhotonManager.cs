@@ -36,8 +36,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region property
-    private Photon.Realtime.Room cr => PhotonNetwork.CurrentRoom;
-    public Player[] PlayerList => PhotonNetwork.PlayerList;
     #endregion
 
     #region unity message
@@ -65,6 +63,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         RaiseEvent((byte)code, content, broadcastOption, SendOptions.SendReliable);
     }
+    public static void SetVoiceName(string name)
+    {
+        LocalPlayer.SetCustomProperties(new Hashtable() { { "VoiceName", name } });
+    }
     #endregion
 
     #region intro
@@ -77,9 +79,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         try
         {
             // #Critical, we must first and foremost connect to Photon Online Server.
-            PhotonNetwork.GameVersion = "1.0";
-            PhotonNetwork.NickName = nickname;
-            PhotonNetwork.ConnectUsingSettings();
+            GameVersion = "1.0";
+            NickName = nickname;
+            ConnectUsingSettings();
         }
         catch
         {
@@ -93,13 +95,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         wait = false;
         Debug.Log("[Photon Manager] : connected");
-        if (PhotonNetwork.NickName.Trim() == "")
-            PhotonNetwork.NickName = PhotonNetwork.LocalPlayer.UserId.Substring(0, 6);
-        PhotonNetwork.LoadLevel("Lobby");
+        if (NickName.Trim() == "")
+            NickName = LocalPlayer.UserId.Substring(0, 6);
+        LoadLevel("Lobby");
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
-        Connect(PhotonNetwork.NickName);
+        Connect(NickName);
     }
     #endregion
 
@@ -130,10 +132,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (wait) return;
         wait = true;
         if (roomName == "")
-            roomName = PhotonNetwork.LocalPlayer.NickName + "'s room";
+            roomName = LocalPlayer.NickName + "'s room";
         var option = new RoomOptions();
         option.MaxPlayers = 10;
-        option.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "HostName", PhotonNetwork.NickName } };
+        option.CustomRoomProperties = new Hashtable() { { "HostName", NickName } };
         option.CustomRoomPropertiesForLobby = new string[] { "HostName" };
         try
         {
@@ -177,7 +179,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnCreatedRoom()
     {
         Debug.Log("[Photon Manager] : room created");
-        PhotonNetwork.CurrentRoom.SetMasterClient(PhotonNetwork.LocalPlayer);
+        CurrentRoom.SetMasterClient(LocalPlayer);
     }
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
@@ -186,10 +188,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-        host = PhotonNetwork.MasterClient;
-        PhotonNetwork.AutomaticallySyncScene = true;
-        if (PhotonNetwork.IsMasterClient)
-            PhotonNetwork.LoadLevel("WaitingRoom");
+        host = MasterClient;
+        AutomaticallySyncScene = true;
+        if (IsMasterClient)
+            LoadLevel("WaitingRoom");
         Debug.Log("[Photon Manager] : joined room");
         wait = false;
     }
@@ -213,12 +215,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public void LeaveRoom() => PhotonNetwork.LeaveRoom();
     public void GameStart()
     {
-        if (!PhotonNetwork.LocalPlayer.IsMasterClient)
+        if (!LocalPlayer.IsMasterClient)
             return;
-        cr.IsOpen = false;
-        foreach (var p in PhotonNetwork.PlayerList)
+        CurrentRoom.IsOpen = false;
+        foreach (var p in PlayerList)
             p.SetCustomProperties(new Hashtable() { { "Alive", true } });
-        PhotonNetwork.LoadLevel("InGame");
+        LoadLevel("InGame");
     }
     #endregion
 
@@ -233,7 +235,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
         if (otherPlayer == host)
             LeaveRoom();
-        else if (!cr.IsOpen)
+        else if (!CurrentRoom.IsOpen)
         {
             //게임중 퇴장
         }

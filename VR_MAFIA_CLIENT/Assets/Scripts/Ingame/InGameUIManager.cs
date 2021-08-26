@@ -235,7 +235,7 @@ public class InGameUIManager : MonoBehaviour
         deadReportUI.color = Color.white;
         if (target != null)
         {
-            if (target.Alive())
+            if (target.GetAlive())
                 killCheckUI.color = Color.red;
             else
                 deadReportUI.color = Color.red;
