@@ -88,29 +88,18 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         switch ((VrMafiaEventCode)photonEvent.Code)
         {
+            #region phase
             case VrMafiaEventCode.GameStart:
                 OnGameStarted(photonEvent);
                 break;
             case VrMafiaEventCode.DayStart:
                 OnDayStarted();
                 break;
-            case VrMafiaEventCode.KillRes:
-                OnKillResponse(photonEvent);
-                break;
-            case VrMafiaEventCode.KillReady:
-                OnKillReady();
-                break;
-            case VrMafiaEventCode.DieEvent:
-                OnDieEvent(photonEvent);
-                break;
             case VrMafiaEventCode.NightStart:
                 OnNightStarted();
                 break;
             case VrMafiaEventCode.VotingStart:
                 OnVotingStarted(photonEvent);
-                break;
-            case VrMafiaEventCode.VoteRes:
-                OnVoteResponse(photonEvent);
                 break;
             case VrMafiaEventCode.VotingEnd:
                 OnVotingEnded(photonEvent);
@@ -121,19 +110,37 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.FinalVotingStart:
                 OnFinalVotingStarted(photonEvent);
                 break;
-            case VrMafiaEventCode.FinalVoteRes:
-                OnFinalVoteResponse(photonEvent);
-                break;
             case VrMafiaEventCode.FinalVotingEnd:
                 OnFinalVotingEnded(photonEvent);
                 break;
             case VrMafiaEventCode.GameEnd:
                 OnGameEnded(photonEvent);
                 break;
+            #endregion
+
+            #region response
+            case VrMafiaEventCode.KillRes:
+                OnKillResponse(photonEvent);
+                break;
+            case VrMafiaEventCode.DieEvent:
+                OnDieEvent(photonEvent);
+                break;
+            case VrMafiaEventCode.KillReady:
+                OnKillReady();
+                break;
+            case VrMafiaEventCode.VoteRes:
+                OnVoteResponse(photonEvent);
+                break;
+            case VrMafiaEventCode.FinalVoteRes:
+                OnFinalVoteResponse(photonEvent);
+                break;
+            #endregion
+
             default: break;
         }
     }
 
+    #region phase
     private void OnGameStarted(EventData data)
     {
         var content = (Hashtable)data.CustomData;
@@ -148,24 +155,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         IsVoting = false;
         uiManager.OnDayStarted();
     }
-    private void OnKillResponse(EventData photonEvent)
-    {
-        var coolTime = (float)photonEvent.CustomData;
-        Debug.Log($"[GameManager] Kill Response : {coolTime}");
-        uiManager.OnKillResponse(coolTime);
-        if (coolTime < 0)
-            canKill = true;
-    }
-    private void OnKillReady()
-    {
-        Debug.Log($"[GameManager] Kill Ready");
-        canKill = true;
-    }
-    private void OnDieEvent(EventData data)
-    {
-        playerObjs[(int)data.CustomData].Die();
-        Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
-    }
     private void OnNightStarted()
     {
         Debug.Log($"[GameManager] Night Start");
@@ -177,13 +166,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         IsVoting = true;
         uiManager.OnVotingStarted(votingTime);
-    }
-    private void OnVoteResponse(EventData data)
-    {
-        var result = (bool)data.CustomData;
-        Debug.Log($"[GameManager] Vote Response : {result}");
-        if (!result)
-            uiManager.OnVoteFailed();
     }
     private void OnVotingEnded(EventData data)
     {
@@ -199,20 +181,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var electedId = (int)content["electedId"];
         var defenseTime = (float)content["defenseTime"];
         Debug.Log($"[GameManager] Defense Start : {defenseTime}");
-        uiManager.OnDefenseStarted(electedId,defenseTime);
+        uiManager.OnDefenseStarted(electedId, defenseTime);
     }
     private void OnFinalVotingStarted(EventData data)
     {
         var finalVotingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Final Voting Start : {finalVotingTime}");
         uiManager.OnFinalVotingStarted(finalVotingTime);
-    }
-    private void OnFinalVoteResponse(EventData data)
-    {
-        var result = (bool)data.CustomData;
-        Debug.Log($"[GameManager] Final Vote Response : {result}");
-        if (!result)
-            uiManager.OnFinalVoteFailed();
     }
     private void OnFinalVotingEnded(EventData data)
     {
@@ -234,6 +209,43 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Game End, Mafia Win : {mafiaWin}");
         uiManager.OnGameEnded(mafiaWin, mafiaIds);
     }
+    #endregion
+
+    #region response
+    private void OnKillResponse(EventData photonEvent)
+    {
+        var coolTime = (float)photonEvent.CustomData;
+        Debug.Log($"[GameManager] Kill Response : {coolTime}");
+        uiManager.OnKillResponse(coolTime);
+        if (coolTime < 0)
+            canKill = true;
+    }
+    private void OnKillReady()
+    {
+        Debug.Log($"[GameManager] Kill Ready");
+        canKill = true;
+    }
+    private void OnDieEvent(EventData data)
+    {
+        playerObjs[(int)data.CustomData].Die();
+        Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
+    }
+    private void OnVoteResponse(EventData data)
+    {
+        var result = (bool)data.CustomData;
+        Debug.Log($"[GameManager] Vote Response : {result}");
+        if (!result)
+            uiManager.OnVoteFailed();
+    }
+    private void OnFinalVoteResponse(EventData data)
+    {
+        var result = (bool)data.CustomData;
+        Debug.Log($"[GameManager] Final Vote Response : {result}");
+        if (!result)
+            uiManager.OnFinalVoteFailed();
+    }
+    #endregion
+
     #endregion
 
     #region ui handler
@@ -262,7 +274,15 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         canKill = false;
         RaiseEvent((byte)VrMafiaEventCode.KillReq, target.ActorNumber, eventOption, SendOptions.SendReliable);
     }
-    public void OnDeadReportButton() { }
+    public void OnDeadReportButton()
+    {
+        if (target == null ||
+            target.Alive() ||
+            !LocalPlayer.Alive())
+            return;
+        Debug.Log($"[GameManager] Dead Report : {target.NickName}");
+        RaiseEvent((byte)VrMafiaEventCode.DeadReport, target.ActorNumber, eventOption, SendOptions.SendReliable);
+    }
     public void OnVoteButton(int id)
     {
         Debug.Log($"[GameManager] Vote Request : {CurrentRoom.Players[id].NickName}");

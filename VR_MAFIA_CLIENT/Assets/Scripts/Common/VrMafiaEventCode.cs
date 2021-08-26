@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum VrMafiaEventCode
 {
+    #region phase
     /// <summary>
     /// {bool isMafia, int[] mafiaIds}
     /// </summary>
@@ -19,6 +20,39 @@ public enum VrMafiaEventCode
     /// </summary>
     NightStart,
 
+    /// <summary>
+    /// float votingTime
+    /// </summary>
+    VotingStart,
+
+    /// <summary>
+    /// {int electedId, int[] result}
+    /// </summary>
+    VotingEnd,
+
+    /// <summary>
+    /// {int electedId, float defenseTime}
+    /// </summary>
+    DefenseStart,
+
+    /// <summary>
+    /// float finalVotingTime
+    /// </summary>
+    FinalVotingStart,
+
+    /// <summary>
+    /// {int electedId(fail : -1), int pros}
+    /// </summary>
+    FinalVotingEnd,
+
+    /// <summary>
+    /// {bool mafiaWin, int[] mafiaIds}
+    /// </summary>
+    GameEnd,
+
+    #endregion
+
+    #region event
     /// <summary>
     /// int targetId
     /// </summary>
@@ -40,14 +74,9 @@ public enum VrMafiaEventCode
     DieEvent,
 
     /// <summary>
-    /// 
+    /// int targetId
     /// </summary>
     DeadReport,
-
-    /// <summary>
-    /// float votingTime
-    /// </summary>
-    VotingStart,
 
     /// <summary>
     /// int targetId
@@ -60,21 +89,6 @@ public enum VrMafiaEventCode
     VoteRes,
 
     /// <summary>
-    /// {int electedId, int[] result}
-    /// </summary>
-    VotingEnd,
-
-    /// <summary>
-    /// {int electedId, float defenseTime}
-    /// </summary>
-    DefenseStart,
-
-    /// <summary>
-    /// float finalVotingTime
-    /// </summary>
-    FinalVotingStart,
-
-    /// <summary>
     /// bool pros
     /// </summary>
     FinalVoteReq,
@@ -83,14 +97,5 @@ public enum VrMafiaEventCode
     /// bool result
     /// </summary>
     FinalVoteRes,
-
-    /// <summary>
-    /// {int electedId(fail : -1), int pros}
-    /// </summary>
-    FinalVotingEnd,
-
-    /// <summary>
-    /// {bool mafiaWin, int[] mafiaIds}
-    /// </summary>
-    GameEnd
+    #endregion
 }
