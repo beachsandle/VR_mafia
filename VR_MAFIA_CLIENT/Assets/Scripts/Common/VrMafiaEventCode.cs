@@ -65,7 +65,7 @@ public enum VrMafiaEventCode
     VotingEnd,
 
     /// <summary>
-    /// float defenseTime
+    /// {int electedId, float defenseTime}
     /// </summary>
     DefenseStart,
 
@@ -85,7 +85,7 @@ public enum VrMafiaEventCode
     FinalVoteRes,
 
     /// <summary>
-    /// {bool result, int pros}
+    /// {int electedId(fail : -1), int pros}
     /// </summary>
     FinalVotingEnd,
 

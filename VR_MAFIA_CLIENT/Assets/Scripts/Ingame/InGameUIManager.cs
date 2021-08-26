@@ -26,7 +26,6 @@ public class InGameUIManager : MonoBehaviour
     private FinalVotingPanel finalVotingPanel;
     private GameObject endPanel;
 
-    private int electedId;
     private readonly float fadeTime = 3f;
     #endregion
 
@@ -169,7 +168,6 @@ public class InGameUIManager : MonoBehaviour
     }
     public void OnVotingEnded(int electedId, int[] result)
     {
-        this.electedId = electedId;
         if (electedId == -1)
         {
             StartInformation("투표가 부결되었습니다.");
@@ -181,16 +179,17 @@ public class InGameUIManager : MonoBehaviour
         }
         votingPanel.VotingEnd(electedId, result);
     }
-    public void OnDefenseStarted(float defenseTime)
+    public void OnDefenseStarted(int electedId, float defenseTime)
     {
-        finalVotingPanel.DefenseStart(defenseTime, electedId);
+        finalVotingPanel.DefenseStart(electedId, defenseTime);
     }
     public void OnFinalVotingStarted(float finalVotingTime)
     {
         finalVotingPanel.FinalVotingStart(finalVotingTime);
     }
-    public void OnFinalVotingEnded(bool result, int pros)
+    public void OnFinalVotingEnded(int electedId, int pros)
     {
+        var result = electedId != -1;
         finalVotingPanel.FinalVotingEnd(result);
         if (result)
             StartInformation($"{PhotonNetwork.CurrentRoom.Players[electedId].NickName}님이 {pros}명의 동의로 추방되었습니다.");

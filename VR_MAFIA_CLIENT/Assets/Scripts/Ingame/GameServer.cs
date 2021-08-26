@@ -173,7 +173,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         if (phase != GamePhase.Voting_End) return;
         Debug.Log($"[GameServer] Defense Start");
         phase = GamePhase.Defense;
-        SendBroadcastEvent(VrMafiaEventCode.DefenseStart, defenseTime);
+        SendBroadcastEvent(VrMafiaEventCode.DefenseStart, new Hashtable() { { "electedId", electedId }, { "defenseTime", defenseTime } });
         Invoke(nameof(FinalVotingStart), defenseTime);
     }
     private void FinalVotingStart()
@@ -193,7 +193,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameServer] Final Voting End");
         phase = GamePhase.FinalVoting_End;
 
-        SendBroadcastEvent(VrMafiaEventCode.FinalVotingEnd, new Hashtable() { { "result", finalVotingResult }, { "pros", pros } });
+        SendBroadcastEvent(VrMafiaEventCode.FinalVotingEnd, new Hashtable() { { "electedId", finalVotingResult ? electedId : -1 }, { "pros", pros } });
         if (finalVotingResult)
         {
             PlayerDead(electedId);

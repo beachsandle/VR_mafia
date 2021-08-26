@@ -195,9 +195,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnDefenseStarted(EventData data)
     {
-        var defenseTime = (float)data.CustomData;
+        var content = (Hashtable)data.CustomData;
+        var electedId = (int)content["electedId"];
+        var defenseTime = (float)content["defenseTime"];
         Debug.Log($"[GameManager] Defense Start : {defenseTime}");
-        uiManager.OnDefenseStarted(defenseTime);
+        uiManager.OnDefenseStarted(electedId,defenseTime);
     }
     private void OnFinalVotingStarted(EventData data)
     {
@@ -215,10 +217,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnFinalVotingEnded(EventData data)
     {
         var content = (Hashtable)data.CustomData;
-        var result = (bool)content["result"];
+        var electedId = (int)content["electedId"];
         var pros = (int)content["pros"];
-        Debug.Log($"[GameManager] result : {result}, pros : {pros}");
-        uiManager.OnFinalVotingEnded(result, pros);
+        Debug.Log($"[GameManager] result : {electedId}, pros : {pros}");
+        if (electedId != -1)
+        {
+
+        }
+        uiManager.OnFinalVotingEnded(electedId, pros);
     }
     private void OnGameEnded(EventData data)
     {
@@ -259,7 +265,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnDeadReportButton() { }
     public void OnVoteButton(int id)
     {
-        Debug.Log($"[GameManager] Vote Request : {PlayerList[id].NickName}");
+        Debug.Log($"[GameManager] Vote Request : {CurrentRoom.Players[id].NickName}");
         RaiseEvent((byte)VrMafiaEventCode.VoteReq, id, eventOption, SendOptions.SendReliable);
     }
     public void OnFinalVoteButton(bool pros)

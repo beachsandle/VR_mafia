@@ -68,7 +68,7 @@ public class FinalVotingPanel : MonoBehaviour
     #endregion
 
     #region public
-    public void DefenseStart(float defenseTime, int electedId)
+    public void DefenseStart(int electedId, float defenseTime)
     {
         subjectText.text = "Defense";
         timeText.enabled = true;
