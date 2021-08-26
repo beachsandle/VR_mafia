@@ -42,7 +42,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     #region unity message
     private void Start()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (IsMasterClient)
             GameStart();
         else
             Destroy(GetComponent<GameServer>());
@@ -230,6 +230,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.KillReq:
                 OnKillRequest(photonEvent);
                 break;
+            case VrMafiaEventCode.DeadReport:
+                OnDeadReport(photonEvent);
+                break;
             case VrMafiaEventCode.VoteReq:
                 OnVoteRequest(photonEvent);
                 break;
@@ -266,6 +269,17 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         }
         Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, Result : {cool}");
         SendUnicastEvent(VrMafiaEventCode.KillRes, data.Sender, cool);
+    }
+    private void OnDeadReport(EventData data)
+    {
+        var targetId = (int)data.CustomData;
+        if (phase != GamePhase.Day ||
+            !players[data.Sender].Alive() ||
+            !players.ContainsKey(targetId) ||
+            players[targetId].Alive())
+            return;
+        NightStart();
+        Debug.Log($"[GameServer] On Dead Report : {players[data.Sender].NickName} -> {players[targetId].NickName}");
     }
     private void OnVoteRequest(EventData data)
     {
