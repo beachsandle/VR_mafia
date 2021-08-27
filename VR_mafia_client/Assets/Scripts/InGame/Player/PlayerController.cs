@@ -19,6 +19,8 @@ public class PlayerController : MonoBehaviour
     private int layermask;
     private bool onKillTarget = false;
     private bool canDeadReport = false;
+    private Transform hand;
+    private bool isVR;
 
     [Header("Status")]
     public float moveSpeed = 5.0F;
@@ -48,19 +50,22 @@ public class PlayerController : MonoBehaviour
 
         HEAD = transform.Find("Helmet_LOD0");
         BODY = transform.Find("Space Explorer_LOD0");
+
+        isVR = SceneLoader.Instance.isVR;
     }
     void Start()
     {
         layermask = (1 << (int)Global.Layers.Player);
         InactiveMyRay();
         HideMyCharacter();
+        if (isVR) hand = InGameManager.Instance.handAnchor;
     }
 
     void Update()
     {
         if (InGameManager.Instance.phaseChange || InGameManager.Instance.isVoting) return;
 
-        if (!SceneLoader.Instance.isVR)
+        if (!isVR)
         {
             Move();
             Rotate();
@@ -93,7 +98,7 @@ public class PlayerController : MonoBehaviour
         HEAD.GetComponent<SkinnedMeshRenderer>().enabled = false;
         BODY.GetComponent<SkinnedMeshRenderer>().enabled = false;
 
-        if (SceneLoader.Instance.isVR)
+        if (isVR)
         {
             transform.Find("Space Explorer_Forearm_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
             transform.Find("Space Explorer_ShoulderPad_LOD0").GetComponent<SkinnedMeshRenderer>().enabled = false;
@@ -103,16 +108,17 @@ public class PlayerController : MonoBehaviour
     #region 상호작용
     void FindTarget()
     {
-        if (Physics.Raycast(HEAD.transform.position, HEAD.transform.forward, out hit, range, layermask))
+        Transform anchor = isVR ? hand : HEAD.transform;
+        if (Physics.Raycast(anchor.position, anchor.forward, out hit, range, layermask))
         {
-            Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * hit.distance, Color.red);
+            Debug.DrawRay(anchor.position, anchor.forward * hit.distance, Color.red);
 
             if (myInfo.IsMafia) onKillTarget = true;
             if (!hit.transform.GetComponent<PlayerCharacter>().IsAlive) canDeadReport = true;
         }
         else
         {
-            Debug.DrawRay(HEAD.transform.position, HEAD.transform.forward * range, Color.red);
+            Debug.DrawRay(anchor.position, anchor.forward * range, Color.red);
 
             if (myInfo.IsMafia) onKillTarget = false;
             canDeadReport = false;

@@ -32,6 +32,7 @@ public class InGameManager : MonoBehaviour
 
     [Header("VR")]
     [SerializeField] private GameObject cameraRig;
+    public Transform handAnchor;
 
     [HideInInspector] public bool phaseChange;
     [HideInInspector] public bool isVoting;
