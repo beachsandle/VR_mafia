@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class WaitingRoomUIManager : MonoBehaviour
 {
     #region field
-
+    public bool isVR;
     private Text roomName;
     private Transform players;
 
@@ -24,7 +24,7 @@ public class WaitingRoomUIManager : MonoBehaviour
     {
         if (!pm || PhotonNetwork.CurrentRoom == null)
         {
-            SceneManager.LoadScene("Intro");
+            SceneManager.LoadScene(isVR ? "IntroVR" : "Intro");
             return;
         }
         FindReference();
