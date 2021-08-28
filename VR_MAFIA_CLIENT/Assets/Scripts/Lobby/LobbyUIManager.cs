@@ -20,7 +20,7 @@ public class LobbyUIManager : MonoBehaviour
     private GameObject createRoomPanel;
     private InputField roomNameInputField;
     #endregion
-
+    public bool isVR;
     private RoomInfo target = null;
     #endregion
 
@@ -33,7 +33,7 @@ public class LobbyUIManager : MonoBehaviour
     {
         if (!pm)
         {
-            SceneManager.LoadScene("Intro");
+            SceneManager.LoadScene(isVR ? "IntroVR" : "Intro");
             return;
         }
         FindReference();
