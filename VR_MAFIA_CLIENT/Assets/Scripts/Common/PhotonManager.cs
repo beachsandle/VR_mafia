@@ -10,6 +10,7 @@ using ExitGames.Client.Photon;
 
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
+using UnityEngine.SceneManagement;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -27,6 +28,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     #endregion
 
     #region field
+    public bool isVR;
+
     private bool wait = false;
     private Player host;
     private readonly TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
@@ -97,7 +100,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("[Photon Manager] : connected");
         if (NickName.Trim() == "")
             NickName = LocalPlayer.UserId.Substring(0, 6);
-        LoadLevel("Lobby");
+        LoadLevel(isVR ? "LobbyVR" : "Lobby");
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
@@ -191,7 +194,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         host = MasterClient;
         AutomaticallySyncScene = true;
         if (IsMasterClient)
-            LoadLevel("WaitingRoom");
+            LoadLevel(isVR ? "WaitingRoomVR" : "WaitingRoom");
         Debug.Log("[Photon Manager] : joined room");
         wait = false;
     }
@@ -220,7 +223,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         CurrentRoom.IsOpen = false;
         foreach (var p in PlayerList)
             p.SetCustomProperties(new Hashtable() { { "Alive", true } });
-        LoadLevel("InGame");
+        LoadLevel(isVR ? "InGameVR" : "InGame");
     }
     #endregion
 
