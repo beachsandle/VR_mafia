@@ -24,16 +24,18 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
     {
         Owner = info.Sender;
         GameManager.Instance.OnSpwanPlayer(this);
-        if (Owner.IsLocal)
-        {
-            Controller = gameObject.AddComponent<PlayerController>();
-            Controller.SetCamera(Camera.main);
-            Hide();
-        }
     }
     public void Hide()
     {
         foreach (var render in GetComponentsInChildren<Renderer>(false))
             render.enabled = false;
+    }
+
+    public void InitLocalCharacter(GameObject cameraObj, bool isVR)
+    {
+        Controller = gameObject.AddComponent<PlayerController>();
+        Controller.InitLocalCharacter(cameraObj);
+        if (isVR)
+            gameObject.AddComponent<OVRPlayerController>();
     }
 }

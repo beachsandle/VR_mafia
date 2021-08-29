@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     #region field
     [SerializeField] private InGameUIManager uiManager;
     [SerializeField] private VoiceChatManager voiceManager;
+    [SerializeField] private GameObject cameraObj;
     private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
@@ -67,7 +68,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         int idx = Array.IndexOf(PlayerList, LocalPlayer);
         spawnPosition = spawnPositions[idx + 1].position;
-        localCharacter = PhotonNetwork.Instantiate("Player_SE", spawnPosition, Quaternion.identity).GetComponent<PlayerCharacter>();
+        localCharacter = PhotonNetwork.Instantiate(uiManager.isVR ? "PlayerVR" : "Player", spawnPosition, Quaternion.identity).GetComponent<PlayerCharacter>();
     }
     #endregion
 
@@ -267,7 +268,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         playerObjs[obj.Owner.ActorNumber] = obj;
         if (obj.Owner.IsLocal)
+        {
             SetVoiceName(voiceManager.LocalVoiceName);
+
+            obj.InitLocalCharacter(cameraObj, uiManager.isVR);
+            obj.Hide();
+        }
     }
     public void OnFoundTarget(Player p)
     {

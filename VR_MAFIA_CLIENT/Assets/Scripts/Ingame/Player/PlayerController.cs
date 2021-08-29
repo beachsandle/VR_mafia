@@ -116,9 +116,9 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region public
-    public void SetCamera(Camera cam)
+    public void InitLocalCharacter(GameObject cam)
     {
-        cam.transform.parent = head.transform;
+        cam.transform.parent = transform;
         cam.transform.localPosition = Vector3.zero;
     }
     public void MoveTo(Vector3 pos)

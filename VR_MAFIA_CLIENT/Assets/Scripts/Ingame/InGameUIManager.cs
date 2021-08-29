@@ -11,6 +11,7 @@ public class InGameUIManager : MonoBehaviour
 {
 
     #region field
+    public bool isVR;
     //text
     private Text roleText;
     private Text informationText;
@@ -39,7 +40,7 @@ public class InGameUIManager : MonoBehaviour
     {
         if (pm == null || PhotonNetwork.CurrentRoom == null)
         {
-            SceneManager.LoadScene("Intro");
+            SceneManager.LoadScene(isVR ? "IntroVR" : "Intro");
             return;
         }
         FindReference();
