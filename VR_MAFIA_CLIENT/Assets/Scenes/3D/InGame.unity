@@ -1453,6 +1453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf160d15e5e87294fbd6f187aaa88c02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isVR: 0
 --- !u!1001 &1281421850
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2416,6 +2417,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiManager: {fileID: 1275793200}
   voiceManager: {fileID: 1736965672}
+  cameraObj: {fileID: 873079811}
 --- !u!114 &1819207291
 MonoBehaviour:
   m_ObjectHideFlags: 0

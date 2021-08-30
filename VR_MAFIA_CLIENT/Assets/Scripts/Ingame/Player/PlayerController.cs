@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
 
     #region property
     private GameManager gm => GameManager.Instance;
+    private bool isVR => PhotonManager.Instance.isVR;
     #endregion
 
     #region unity message
@@ -45,10 +46,10 @@ public class PlayerController : MonoBehaviour
     {
         if (gm.PhaseChanging || gm.IsVoting)
             return;
-        Move();
+        if(!isVR) Move();
         if (gm.MenuOpened)
             return;
-        Rotate();
+        if(!isVR) Rotate();
         FindTarget();
         if (Input.GetKeyDown(KeyCode.Q))
             gm.OnKillButton();
@@ -118,7 +119,7 @@ public class PlayerController : MonoBehaviour
     #region public
     public void InitLocalCharacter(GameObject cam)
     {
-        cam.transform.parent = transform;
+        cam.transform.parent = isVR ? transform : head.transform;
         cam.transform.localPosition = Vector3.zero;
     }
     public void MoveTo(Vector3 pos)
