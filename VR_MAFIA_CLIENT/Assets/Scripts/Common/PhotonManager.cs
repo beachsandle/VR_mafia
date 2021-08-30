@@ -10,6 +10,7 @@ using ExitGames.Client.Photon;
 
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
+using UnityEngine.SceneManagement;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -95,7 +96,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("[Photon Manager] : connected");
         if (PhotonNetwork.NickName.Trim() == "")
             PhotonNetwork.NickName = PhotonNetwork.LocalPlayer.UserId.Substring(0, 6);
-        PhotonNetwork.LoadLevel("Lobby");
+        SceneManager.LoadScene("Lobby");
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
@@ -187,9 +188,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         host = PhotonNetwork.MasterClient;
-        PhotonNetwork.AutomaticallySyncScene = true;
-        if (PhotonNetwork.IsMasterClient)
-            PhotonNetwork.LoadLevel("WaitingRoom");
+        SceneManager.LoadScene("WaitingRoom");
         Debug.Log("[Photon Manager] : joined room");
         wait = false;
     }
@@ -216,9 +215,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.LocalPlayer.IsMasterClient)
             return;
         cr.IsOpen = false;
+        cr.SetCustomProperties(new Hashtable() { { "Started", true } });
         foreach (var p in PhotonNetwork.PlayerList)
             p.SetCustomProperties(new Hashtable() { { "Alive", true } });
-        PhotonNetwork.LoadLevel("InGame");
     }
     #endregion
 
@@ -233,13 +232,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
         if (otherPlayer == host)
             LeaveRoom();
-        else if (!cr.IsOpen)
-        {
-            //게임중 퇴장
-        }
-        else
+        else if (cr.IsOpen)
             PlayerListChanged?.Invoke();
 
+    }
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        if (propertiesThatChanged.ContainsKey("Started") && (bool)propertiesThatChanged["Started"])
+            SceneManager.LoadScene("InGame");
     }
     #endregion
 
