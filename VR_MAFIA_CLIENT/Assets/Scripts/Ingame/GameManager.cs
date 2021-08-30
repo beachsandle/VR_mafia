@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void Start()
     {
+        IsMessageQueueRunning = true;
         SpawnPlayer();
     }
     #endregion

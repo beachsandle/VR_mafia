@@ -10,7 +10,6 @@ using ExitGames.Client.Photon;
 
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
-using UnityEngine.SceneManagement;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -32,13 +31,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     private bool wait = false;
     private Player host;
-    private readonly TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
+    private static readonly TypedLobby defaultLobby = new TypedLobby(null, LobbyType.SqlLobby);
     private static readonly RaiseEventOptions toMasterOption = new RaiseEventOptions() { Receivers = ReceiverGroup.MasterClient };
     private static readonly RaiseEventOptions multicastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.Others };
     private static readonly RaiseEventOptions broadcastOption = new RaiseEventOptions() { Receivers = ReceiverGroup.All };
-    #endregion
-
-    #region property
     #endregion
 
     #region unity message
@@ -53,16 +49,16 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         RaiseEvent((byte)code, content, toMasterOption, SendOptions.SendReliable);
     }
-    public static void SendUnicastEvent(VrMafiaEventCode code, int target, object content = null)
+    public static void UnicastEvent(VrMafiaEventCode code, int target, object content = null)
     {
-        SendMulticastEvent(code, new int[] { target }, content);
+        MulticastEvent(code, new int[] { target }, content);
     }
-    public static void SendMulticastEvent(VrMafiaEventCode code, int[] targets, object content = null)
+    public static void MulticastEvent(VrMafiaEventCode code, int[] targets, object content = null)
     {
         multicastOption.TargetActors = targets;
         RaiseEvent((byte)code, content, multicastOption, SendOptions.SendReliable);
     }
-    public static void SendBroadcastEvent(VrMafiaEventCode code, object content = null)
+    public static void BroadcastEvent(VrMafiaEventCode code, object content = null)
     {
         RaiseEvent((byte)code, content, broadcastOption, SendOptions.SendReliable);
     }
@@ -100,7 +96,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("[Photon Manager] : connected");
         if (NickName.Trim() == "")
             NickName = LocalPlayer.UserId.Substring(0, 6);
-        LoadLevel(isVR ? "LobbyVR" : "Lobby");
+        SceneLoader.Instance.Load(isVR ? "LobbyVR" : "Lobby");
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
@@ -151,7 +147,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public void RefreshRoomList()
     {
-        //PhotonNetwork.GetCustomRoomList(defaultLobby, "*");
     }
     public void JoinRoom(RoomInfo roomInfo)
     {
@@ -192,9 +187,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         host = MasterClient;
-        AutomaticallySyncScene = true;
-        if (IsMasterClient)
-            LoadLevel(isVR ? "WaitingRoomVR" : "WaitingRoom");
+        SceneLoader.Instance.Load(isVR ? "WaitingRoomVR" : "WaitingRoom");
         Debug.Log("[Photon Manager] : joined room");
         wait = false;
     }
@@ -221,9 +214,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (!LocalPlayer.IsMasterClient)
             return;
         CurrentRoom.IsOpen = false;
+        CurrentRoom.SetCustomProperties(new Hashtable() { { "Started", true } });
         foreach (var p in PlayerList)
             p.SetCustomProperties(new Hashtable() { { "Alive", true } });
-        LoadLevel(isVR ? "InGameVR" : "InGame");
     }
     #endregion
 
@@ -238,13 +231,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log($"[Photon Manager] : left user {otherPlayer}");
         if (otherPlayer == host)
             LeaveRoom();
-        else if (!CurrentRoom.IsOpen)
-        {
-            //게임중 퇴장
-        }
-        else
+        else if (CurrentRoom.IsOpen)
             PlayerListChanged?.Invoke();
 
+    }
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        if (propertiesThatChanged.ContainsKey("Started") && (bool)propertiesThatChanged["Started"])
+        {
+            IsMessageQueueRunning = false;
+            SceneLoader.Instance.Load(isVR ? "InGameVR" : "InGame");
+        }
     }
     #endregion
 

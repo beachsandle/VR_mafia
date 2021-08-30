@@ -72,7 +72,7 @@ public class LobbyUIManager : MonoBehaviour
     private void OnRoomListChanged(List<RoomInfo> roomInfos)
     {
         roomList.Clear();
-        roomList.CreateRoom(roomInfos);
+        roomList.CreateRooms(roomInfos);
     }
     private void OnRoomClicked(RoomInfo roomInfo) => target = roomInfo;
 
