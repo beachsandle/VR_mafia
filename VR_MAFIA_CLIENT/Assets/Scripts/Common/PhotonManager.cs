@@ -7,7 +7,6 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
-using UnityEngine.SceneManagement;
 
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using static Photon.Pun.PhotonNetwork;
@@ -91,7 +90,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("[Photon Manager] : connected");
         if (NickName.Trim() == "")
             NickName = LocalPlayer.UserId.Substring(0, 6);
-        SceneManager.LoadScene("Lobby");
+        SceneLoader.Instance.Load("Lobby");
     }
     public override void OnDisconnected(DisconnectCause cause)
     {
@@ -182,7 +181,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         host = MasterClient;
-        SceneManager.LoadScene("WaitingRoom");
+        SceneLoader.Instance.Load("WaitingRoom");
         Debug.Log("[Photon Manager] : joined room");
         wait = false;
     }
@@ -233,7 +232,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         if (propertiesThatChanged.ContainsKey("Started") && (bool)propertiesThatChanged["Started"])
-            SceneManager.LoadScene("InGame");
+            SceneLoader.Instance.Load("InGame");
     }
     #endregion
 
