@@ -48,7 +48,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void Awake()
     {
         FindReference();
-        Init();
+    }
+    private void Start()
+    {
+        IsMessageQueueRunning = true;
+        SpawnPlayer();
     }
     #endregion
 
@@ -58,11 +62,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void FindReference()
     {
         spawnPositions = transform.Find("SpawnPosition").GetComponentsInChildren<Transform>();
-    }
-    private void Init()
-    {
-        if (PhotonManager.Instance != null)
-            SpawnPlayer();
     }
     private void SpawnPlayer()
     {

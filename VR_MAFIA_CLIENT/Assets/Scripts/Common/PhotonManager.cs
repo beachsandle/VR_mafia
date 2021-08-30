@@ -232,7 +232,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         if (propertiesThatChanged.ContainsKey("Started") && (bool)propertiesThatChanged["Started"])
+        {
+            IsMessageQueueRunning = false;
             SceneLoader.Instance.Load("InGame");
+        }
     }
     #endregion
 
