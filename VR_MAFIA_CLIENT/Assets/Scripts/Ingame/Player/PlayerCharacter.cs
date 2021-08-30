@@ -24,6 +24,8 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
     {
         Owner = info.Sender;
         GameManager.Instance.OnSpwanPlayer(this);
+
+        GetComponentInChildren<NameTag>().nameText.text = Owner.NickName;
     }
     public void Hide()
     {
