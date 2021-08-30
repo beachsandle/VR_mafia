@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+using static Photon.Pun.PhotonNetwork;
+
 public class WaitingRoomUIManager : MonoBehaviour
 {
     #region field
@@ -22,7 +24,7 @@ public class WaitingRoomUIManager : MonoBehaviour
     #region unity message
     private void Awake()
     {
-        if (!pm || PhotonNetwork.CurrentRoom == null)
+        if (!pm || CurrentRoom == null)
         {
             SceneManager.LoadScene("Intro");
             return;
@@ -45,7 +47,7 @@ public class WaitingRoomUIManager : MonoBehaviour
     }
     private void Init()
     {
-        roomName.text = PhotonNetwork.CurrentRoom.Name;
+        roomName.text = CurrentRoom.Name;
         SetPlayers();
         pm.PlayerListChanged += SetPlayers;
     }
@@ -56,10 +58,10 @@ public class WaitingRoomUIManager : MonoBehaviour
             var p = players.GetChild(i);
             var img = p.GetComponentInChildren<Image>();
             var name = p.GetComponentInChildren<Text>();
-            if (pm.PlayerList.Length > i)
+            if (PlayerList.Length > i)
             {
                 img.color = Global.colors[i];
-                name.text = pm.PlayerList[i].NickName;
+                name.text = PlayerList[i].NickName;
             }
             else
             {
@@ -71,11 +73,7 @@ public class WaitingRoomUIManager : MonoBehaviour
     #endregion
 
     #region event handler
-    #region button event
     public void OnLeaveButton() => pm.LeaveRoom();
     public void OnStartButton() => pm.GameStart();
-
-    #endregion 
-
     #endregion
 }

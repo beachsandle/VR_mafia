@@ -39,7 +39,7 @@ public class RoomList : MonoBehaviour
         room.DoubleClicked += OnRoomDoubleClicked;
         rooms.Add(room);
     }
-    public void CreateRoom(List<RoomInfo> roomInfos)
+    public void CreateRooms(List<RoomInfo> roomInfos)
     {
         foreach (var info in roomInfos)
             CreateRoom(info);
