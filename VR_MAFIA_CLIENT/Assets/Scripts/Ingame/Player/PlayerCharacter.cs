@@ -8,10 +8,14 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
 {
     public Player Owner { get; private set; }
     private Animator animator;
+    private NameTag nameTag;
     public PlayerController Controller { get; private set; } = null;
+
+
     private void OnEnable()
     {
         animator = GetComponent<Animator>();
+        nameTag = GetComponentInChildren<NameTag>();
     }
     public void Die()
     {
@@ -25,12 +29,14 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
         Owner = info.Sender;
         GameManager.Instance.OnSpwanPlayer(this);
 
-        GetComponentInChildren<NameTag>().nameText.text = Owner.NickName;
+        nameTag.nameText.text = Owner.NickName;
     }
     public void Hide()
     {
         foreach (var render in GetComponentsInChildren<Renderer>(false))
             render.enabled = false;
+
+        nameTag.gameObject.SetActive(false);
     }
 
     public void InitLocalCharacter(GameObject cameraObj, bool isVR)
