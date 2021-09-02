@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     private CharacterController cc;
     private Animator animator;
     private Head head;
+    private Hand hand;
+    private Transform findAnchor;
     //variable
     private Vector3 moveDirection = Vector3.zero;
     private float rotX, rotY;
@@ -36,6 +38,7 @@ public class PlayerController : MonoBehaviour
         cc = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         head = GetComponentInChildren<Head>();
+        findAnchor = head.transform;
     }
     private void Start()
     {
@@ -58,6 +61,8 @@ public class PlayerController : MonoBehaviour
     }
     private void OnDestroy()
     {
+        if (isVR) //TODO: VR일 때 cc 바로 파괴 불가함
+            Destroy(GetComponent<OVRPlayerController>());
         Destroy(cc);
     }
     #endregion
@@ -93,7 +98,6 @@ public class PlayerController : MonoBehaviour
     }
     private void Rotate()
     {
-
         rotX += Input.GetAxis("Mouse Y") * rotateSpeed * Time.deltaTime;
         rotY += Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime;
 
@@ -110,8 +114,8 @@ public class PlayerController : MonoBehaviour
     }
     private void FindTarget()
     {
-        Physics.Raycast(head.transform.position, head.transform.forward, out hit, range, layermask);
-        Debug.DrawRay(head.transform.position, head.transform.forward * range, Color.red);
+        Physics.Raycast(findAnchor.position, findAnchor.forward, out hit, range, layermask);
+        Debug.DrawRay(findAnchor.position, findAnchor.forward * range, Color.red);
         gm.OnFoundTarget(hit.transform?.GetComponent<PhotonView>().Owner);
     }
     #endregion
@@ -121,6 +125,12 @@ public class PlayerController : MonoBehaviour
     {
         cam.transform.parent = isVR ? transform : head.transform;
         cam.transform.localPosition = Vector3.zero;
+
+        if (isVR)
+        {
+            hand = GetComponentInChildren<Hand>();
+            findAnchor = hand.transform;
+        }
     }
     public void MoveTo(Vector3 pos)
     {
