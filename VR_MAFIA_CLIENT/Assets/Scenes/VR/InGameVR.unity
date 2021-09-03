@@ -1582,7 +1582,7 @@ PrefabInstance:
     - target: {fileID: 2339135393283519741, guid: 97051b990b20360468081d4872a27265,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 2339135393283519741, guid: 97051b990b20360468081d4872a27265,
         type: 3}
@@ -1629,6 +1629,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2339135393283519742, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2339135393283519742, guid: 97051b990b20360468081d4872a27265,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 370522eb54c23474bbb2185929930d18,
+        type: 3}
     - target: {fileID: 2339135393300350315, guid: 97051b990b20360468081d4872a27265,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -2267,7 +2278,7 @@ PrefabInstance:
     - target: {fileID: 956987425825114576, guid: a33872146d3a58143bd4ec9922addab3,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 956987425825114576, guid: a33872146d3a58143bd4ec9922addab3,
         type: 3}
@@ -2324,6 +2335,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 956987425825114607, guid: a33872146d3a58143bd4ec9922addab3,
+        type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 956987425825114607, guid: a33872146d3a58143bd4ec9922addab3,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 370522eb54c23474bbb2185929930d18,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a33872146d3a58143bd4ec9922addab3, type: 3}
 --- !u!224 &1252320707 stripped
@@ -2925,7 +2947,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1531260721}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 1000}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1277942617}
