@@ -71,6 +71,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         spawnPosition = spawnPositions[idx + 1].position;
         localCharacter = PhotonNetwork.Instantiate(uiManager.isVR ? "PlayerVR" : "Player", spawnPosition, Quaternion.identity).GetComponent<PlayerCharacter>();
     }
+    private void SetHelmetColor(PlayerCharacter character)
+    {
+        Material mat = character.transform.GetComponentInChildren<Head>().GetComponent<SkinnedMeshRenderer>().material;
+        //mat.SetColor("_BaseColor", Global.colors[character.Owner.ActorNumber - 1]);
+        mat.SetColor("_EmissionColor", Global.colors[character.Owner.ActorNumber - 1] * Mathf.LinearToGammaSpace(2f));
+    }
     #endregion
 
     #region public
@@ -267,6 +273,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     public void OnSpwanPlayer(PlayerCharacter obj)
     {
+        SetHelmetColor(obj);
+
         playerObjs[obj.Owner.ActorNumber] = obj;
         if (obj.Owner.IsLocal)
         {
