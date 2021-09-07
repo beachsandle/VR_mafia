@@ -44,6 +44,9 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
         Controller = gameObject.AddComponent<PlayerController>();
         Controller.InitLocalCharacter(cameraObj);
         if (isVR)
-            gameObject.AddComponent<OVRPlayerController>();
+        {
+            OVRPlayerController ovrPlayerController = gameObject.AddComponent<OVRPlayerController>();
+            ovrPlayerController.RotateAroundGuardianCenter = true;
+        }
     }
 }
