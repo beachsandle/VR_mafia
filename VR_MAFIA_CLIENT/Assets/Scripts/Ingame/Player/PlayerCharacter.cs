@@ -46,7 +46,11 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
         if (isVR)
         {
             OVRPlayerController ovrPlayerController = gameObject.AddComponent<OVRPlayerController>();
+            ovrPlayerController.BackAndSideDampen = 1f;
+            ovrPlayerController.SnapRotation = false;
             ovrPlayerController.RotateAroundGuardianCenter = true;
+            ovrPlayerController.GravityModifier = 0.0f;
+            ovrPlayerController.EnableLinearMovement = false;
         }
     }
 }

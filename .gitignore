@@ -12,6 +12,13 @@
 **/[Aa]ssets/Imported/
 **/[Aa]ssets/Plugins/
 
+**/[Aa]ssets/Oculus/*
+!**/[Aa]ssets/Oculus/VR.meta
+!**/[Aa]ssets/Oculus/VR/
+**/[Aa]ssets/Oculus/VR/*
+!**/[Aa]ssets/Oculus/VR/Scripts.meta
+!**/[Aa]ssets/Oculus/VR/Scripts/
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 [Mm]emoryCaptures/
