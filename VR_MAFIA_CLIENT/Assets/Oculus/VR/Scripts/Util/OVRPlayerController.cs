@@ -229,6 +229,23 @@ public class OVRPlayerController : MonoBehaviour
 
 		//if (Input.GetKeyDown(KeyCode.E))
 		//	buttonRotation += RotationRatchet;
+
+		if (OVRInput.Get(OVRInput.Button.One))
+        {
+			Debug.Log("one");
+        }
+		if (OVRInput.Get(OVRInput.Button.Two))
+		{
+			Debug.Log("two");
+		}
+		if (OVRInput.Get(OVRInput.Button.Three))
+		{
+			Debug.Log("three");
+		}
+		if (OVRInput.Get(OVRInput.Button.Four))
+		{
+			Debug.Log("four");
+		}
 	}
 
 	protected virtual void UpdateController()
@@ -272,9 +289,9 @@ public class OVRPlayerController : MonoBehaviour
 			CameraUpdated();
 		}
 
-		UpdateMovement();
+        UpdateMovement();
 
-		Vector3 moveDirection = Vector3.zero;
+        Vector3 moveDirection = Vector3.zero;
 
 		float motorDamp = (1.0f + (Damping * SimulationRate * Time.deltaTime));
 

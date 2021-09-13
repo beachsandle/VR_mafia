@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
     {
         if (gm.PhaseChanging || gm.IsVoting)
             return;
-        if(!isVR) Move();
+        Move();
         if (gm.MenuOpened)
             return;
         if(!isVR) Rotate();
@@ -87,7 +87,7 @@ public class PlayerController : MonoBehaviour
             moveDirection = transform.TransformDirection(moveDirection);
             moveDirection *= moveSpeed;
 
-            if (Input.GetButton("Jump"))
+            if (isVR ? OVRInput.Get(OVRInput.Button.Two) : Input.GetButton("Jump"))
             {
                 moveDirection.y = jumpSpeed;
                 animator.SetBool("jump", true);
