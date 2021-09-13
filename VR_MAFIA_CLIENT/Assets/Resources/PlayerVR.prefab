@@ -85919,13 +85919,13 @@ MonoBehaviour:
   ShowParameterInspector: 1
   m_SynchronizeParameters:
   - Type: 4
-    SynchronizeType: 0
+    SynchronizeType: 2
     Name: run
   - Type: 4
-    SynchronizeType: 0
+    SynchronizeType: 2
     Name: jump
   m_SynchronizeLayers:
-  - SynchronizeType: 0
+  - SynchronizeType: 2
     LayerIndex: 0
 --- !u!114 &3225123629357929011
 MonoBehaviour:
