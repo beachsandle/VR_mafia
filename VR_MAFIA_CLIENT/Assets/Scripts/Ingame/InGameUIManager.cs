@@ -48,7 +48,7 @@ public class InGameUIManager : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (isVR ? OVRInput.GetDown(OVRInput.Button.Start) : Input.GetKeyDown(KeyCode.Escape))
             OnMenuButton();
     }
     private void OnDestroy()
