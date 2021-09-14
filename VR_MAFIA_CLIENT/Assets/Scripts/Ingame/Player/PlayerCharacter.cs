@@ -21,7 +21,7 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
     {
         animator.applyRootMotion = true;
         animator.Play("death2");
-        if (Owner == PhotonNetwork.LocalPlayer)
+        if (Owner.IsLocal)
             Destroy(GetComponent<PlayerController>());
     }
     public void OnPhotonInstantiate(PhotonMessageInfo info)

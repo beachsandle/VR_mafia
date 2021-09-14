@@ -29,7 +29,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/VR/InGameVR.unity
     guid: be87f752f902afe4892c3e80c687cd5a
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
   m_configObjects: {}
