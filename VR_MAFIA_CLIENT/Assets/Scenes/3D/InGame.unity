@@ -2943,6 +2943,8 @@ MonoBehaviour:
   uiManager: {fileID: 1275793200}
   voiceManager: {fileID: 1736965672}
   cameraObj: {fileID: 873079811}
+  ghostPrefab: {fileID: 86432202842480118, guid: 1bbd48c87ebf4934f87e378f4c6ef364,
+    type: 3}
 --- !u!114 &1819207291
 MonoBehaviour:
   m_ObjectHideFlags: 0

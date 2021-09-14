@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     [SerializeField] private InGameUIManager uiManager;
     [SerializeField] private VoiceChatManager voiceManager;
     [SerializeField] private GameObject cameraObj;
+    [SerializeField] private GhostController ghostPrefab;
     private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
@@ -194,7 +195,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var deadId = (int)data.CustomData;
         Debug.Log($"[GameManager] Night Start : {deadId}");
         foreach (var p in PlayerList.Where(p => !p.GetAlive()))
-            playerObjs[p.ActorNumber].Hide();
+        {
+            if (playerObjs.ContainsKey(p.ActorNumber))
+            {
+                PhotonView.Destroy(playerObjs[p.ActorNumber].gameObject);
+                playerObjs.Remove(p.ActorNumber);
+            }
+        }
         uiManager.OnNightStarted();
     }
     private void OnVotingStarted(EventData data)
@@ -264,7 +271,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnDieEvent(EventData data)
     {
-        playerObjs[(int)data.CustomData].Die();
+        var player = playerObjs[(int)data.CustomData];
+        if (player.Owner.IsLocal)
+            Instantiate(ghostPrefab, player.transform.position, player.transform.rotation).InitGhost(cameraObj);
+        player.Die();
+
         Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
     }
     private void OnVoteResponse(EventData data)

@@ -720,6 +720,8 @@ MonoBehaviour:
   uiManager: {fileID: 1275793200}
   voiceManager: {fileID: 260507888}
   cameraObj: {fileID: 1263125248}
+  ghostPrefab: {fileID: 8964887907732782728, guid: 7ba772c160fe81a4d95f532f50e76f19,
+    type: 3}
 --- !u!4 &283038100
 Transform:
   m_ObjectHideFlags: 0
