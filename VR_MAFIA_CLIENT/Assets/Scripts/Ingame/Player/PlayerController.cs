@@ -54,9 +54,9 @@ public class PlayerController : MonoBehaviour
             return;
         if(!isVR) Rotate();
         FindTarget();
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (isVR ? OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) : Input.GetKeyDown(KeyCode.Q))
             gm.OnKillButton();
-        else if (Input.GetKeyDown(KeyCode.E))
+        else if (isVR ? OVRInput.GetDown(OVRInput.Button.One) : Input.GetKeyDown(KeyCode.E))
             gm.OnDeadReportButton();
     }
     private void OnDestroy()

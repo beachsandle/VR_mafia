@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private Vector3 spawnPosition;
     private PlayerCharacter localCharacter;
     private bool canKill = true;
+    private bool isVibrating = false;
     private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
     #endregion
 
@@ -77,6 +78,24 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //mat.SetColor("_BaseColor", Global.colors[character.Owner.ActorNumber - 1]);
         mat.SetColor("_EmissionColor", Global.colors[character.Owner.ActorNumber - 1] * Mathf.LinearToGammaSpace(2f));
     }
+    
+    private IEnumerator Vibration(float frequency, float amplitude, float duration, bool isRight)
+    {
+        OVRInput.Controller controller = isRight ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
+        float time = 0f;
+        isVibrating = true;
+
+        while (time < duration)
+        {
+            if((time % 1.5f) == 0) OVRInput.SetControllerVibration(frequency, amplitude, controller);
+            time += 0.5f;
+
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        OVRInput.SetControllerVibration(0, 0, controller);
+        isVibrating = false;
+    }
     #endregion
 
     #region public
@@ -84,6 +103,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         if (LocalPlayer.GetAlive())
             localCharacter.Controller.MoveTo(spawnPosition);
+    }
+
+    public void MakeVibration(float frequency, float amplitude, float duration, bool isRight)
+    {
+        if (isVibrating) return;
+
+        StartCoroutine(Vibration(frequency, amplitude, duration, isRight));
     }
     #endregion
 
@@ -299,6 +325,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             return;
         Debug.Log($"[GameManager] Kill Request : {target.NickName}");
         canKill = false;
+        MakeVibration(0.5f, 1f, 1f, true);
         SendEventToMaster(VrMafiaEventCode.KillReq, target.ActorNumber);
     }
     public void OnDeadReportButton()
