@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //mat.SetColor("_BaseColor", Global.colors[character.Owner.ActorNumber - 1]);
         mat.SetColor("_EmissionColor", Global.colors[character.Owner.ActorNumber - 1] * Mathf.LinearToGammaSpace(2f));
     }
-    
+
     private IEnumerator Vibration(float frequency, float amplitude, float duration, bool isRight)
     {
         OVRInput.Controller controller = isRight ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
         while (time < duration)
         {
-            if((time % 1.5f) == 0) OVRInput.SetControllerVibration(frequency, amplitude, controller);
+            if ((time % 1.5f) == 0) OVRInput.SetControllerVibration(frequency, amplitude, controller);
             time += 0.5f;
 
             yield return new WaitForSeconds(0.5f);
@@ -187,12 +187,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnDayStarted()
     {
         Debug.Log($"[GameManager] Day Start");
+        voiceManager.SetMute(true);
         IsVoting = false;
         uiManager.OnDayStarted();
     }
     private void OnNightStarted(EventData data)
     {
         var deadId = (int)data.CustomData;
+        voiceManager.SetMute(false);
         Debug.Log($"[GameManager] Night Start : {deadId}");
         foreach (var p in PlayerList.Where(p => !p.GetAlive()))
         {
@@ -209,6 +211,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var votingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         IsVoting = true;
+        voiceManager.SetMute(true);
         uiManager.OnVotingStarted(votingTime);
     }
     private void OnVotingEnded(EventData data)
@@ -224,11 +227,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var content = (Hashtable)data.CustomData;
         var electedId = (int)content["electedId"];
         var defenseTime = (float)content["defenseTime"];
+        if (electedId == LocalPlayer.ActorNumber)
+            voiceManager.SetMute(false);
         Debug.Log($"[GameManager] Defense Start : {defenseTime}");
         uiManager.OnDefenseStarted(electedId, defenseTime);
     }
     private void OnFinalVotingStarted(EventData data)
     {
+        voiceManager.SetMute(true);
         var finalVotingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Final Voting Start : {finalVotingTime}");
         uiManager.OnFinalVotingStarted(finalVotingTime);
