@@ -187,22 +187,26 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnDayStarted()
     {
         Debug.Log($"[GameManager] Day Start");
-        voiceManager.SetMute(true);
+        if(LocalPlayer.GetAlive())
+            voiceManager.SetMute(true);
         IsVoting = false;
         uiManager.OnDayStarted();
+    }
+    private void RemoveBody(int playerId)
+    {
+        var player = playerObjs[playerId];
+        player.gameObject.layer = (int)Global.Layers.Ghost;
+        player.Hide();
     }
     private void OnNightStarted(EventData data)
     {
         var deadId = (int)data.CustomData;
-        voiceManager.SetMute(false);
+        if (LocalPlayer.GetAlive())
+            voiceManager.SetMute(false);
         Debug.Log($"[GameManager] Night Start : {deadId}");
         foreach (var p in PlayerList.Where(p => !p.GetAlive()))
         {
-            if (playerObjs.ContainsKey(p.ActorNumber))
-            {
-                PhotonView.Destroy(playerObjs[p.ActorNumber].gameObject);
-                playerObjs.Remove(p.ActorNumber);
-            }
+            RemoveBody(p.ActorNumber);
         }
         uiManager.OnNightStarted();
     }
@@ -211,7 +215,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var votingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         IsVoting = true;
-        voiceManager.SetMute(true);
+        if (LocalPlayer.GetAlive())
+            voiceManager.SetMute(true);
         uiManager.OnVotingStarted(votingTime);
     }
     private void OnVotingEnded(EventData data)
@@ -234,7 +239,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnFinalVotingStarted(EventData data)
     {
-        voiceManager.SetMute(true);
+        if (LocalPlayer.GetAlive())
+            voiceManager.SetMute(true);
         var finalVotingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Final Voting Start : {finalVotingTime}");
         uiManager.OnFinalVotingStarted(finalVotingTime);
@@ -247,7 +253,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] result : {electedId}, pros : {pros}");
         if (electedId != -1)
         {
-
+            PlayerDeath(electedId);
+            RemoveBody(electedId);
         }
         uiManager.OnFinalVotingEnded(electedId, pros);
     }
@@ -275,13 +282,19 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Kill Ready");
         canKill = true;
     }
+    private void PlayerDeath(int playerId)
+    {
+        var player = playerObjs[playerId];
+        if (player.Owner.IsLocal)
+        {
+            Instantiate(ghostPrefab, player.transform.position, player.transform.rotation).InitGhost(cameraObj);
+            voiceManager.SetMute(true);
+        }
+        player.Die();
+    }
     private void OnDieEvent(EventData data)
     {
-        var player = playerObjs[(int)data.CustomData];
-        if (player.Owner.IsLocal)
-            Instantiate(ghostPrefab, player.transform.position, player.transform.rotation).InitGhost(cameraObj);
-        player.Die();
-
+        PlayerDeath((int)data.CustomData);
         Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
     }
     private void OnVoteResponse(EventData data)
