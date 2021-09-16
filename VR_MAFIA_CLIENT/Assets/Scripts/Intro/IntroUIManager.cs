@@ -2,17 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using VRKeyboard.Utils;
 
 public class IntroUIManager : MonoBehaviour
 {
+    [SerializeField] private KeyboardManager keyboard;
     private InputField nicknameInput;
+
     private void Awake()
     {
         nicknameInput = transform.Find("IntroPanel").Find("Nickname").GetComponentInChildren<InputField>();
+
+        if(keyboard)
+        {
+            InitKeyboard();
+        }
     }
     private void Start()
     {
-        OnConnectButton();
+        //OnConnectButton();
+    }
+    private void Update()
+    {
+        if (!keyboard) return;
+
+        if (nicknameInput.isFocused && !keyboard.gameObject.activeSelf)
+        {
+            keyboard.gameObject.SetActive(true);
+        }
+    }
+
+    private void InitKeyboard()
+    {
+        keyboard.keys.Find("row4").Find("Enter").GetComponent<Button>().onClick.AddListener(() => OnEnterKey(keyboard.inputText));
+    }
+
+    public void OnEnterKey(Text text)
+    {
+        nicknameInput.text = text.text;
+        keyboard.gameObject.SetActive(false);
     }
     public void OnConnectButton()
     {
