@@ -35,6 +35,7 @@ public class IntroUIManager : MonoBehaviour
     private void InitKeyboard()
     {
         keyboard.keys.Find("row4").Find("Enter").GetComponent<Button>().onClick.AddListener(() => OnEnterKey(keyboard.inputText));
+        keyboard.keys.Find("row0").Find("Back").GetComponent<Button>().onClick.AddListener(keyboard.Backspace);
     }
 
     public void OnEnterKey(Text text)
