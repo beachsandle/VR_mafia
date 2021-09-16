@@ -13,6 +13,7 @@ public class VoiceChatManager : MonoBehaviour
     {
         comms = GetComponent<DissonanceComms>();
         comms.OnPlayerJoinedSession += OnPlayerJoinedSession;
+        comms.IsMuted = true;
     }
 
     private void OnPlayerJoinedSession(VoicePlayerState obj)
@@ -29,7 +30,8 @@ public class VoiceChatManager : MonoBehaviour
     private void InitPlayback(string voiceName)
     {
         Debug.Log("Init Player " + voiceName);
-        var playback = comms.FindPlayer(voiceName).Playback as VoicePlayback;
+        var player = comms.FindPlayer(voiceName);
+        var playback = player.Playback as VoicePlayback;
         playback.transform.parent = playerMap[voiceName].transform;
         playback.transform.localPosition = Vector3.zero;
         StartCoroutine(SetSpatialSound(playback));
@@ -39,5 +41,9 @@ public class VoiceChatManager : MonoBehaviour
         playerMap[voiceName] = character;
         if (comms.FindPlayer(voiceName) != null)
             InitPlayback(voiceName);
+    }
+    public void SetMute(bool muted)
+    {
+        comms.IsMuted = muted;
     }
 }
