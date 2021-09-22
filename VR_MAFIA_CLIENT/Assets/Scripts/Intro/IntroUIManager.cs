@@ -34,8 +34,20 @@ public class IntroUIManager : MonoBehaviour
 
     private void InitKeyboard()
     {
-        keyboard.keys.Find("row4").Find("Enter").GetComponent<Button>().onClick.AddListener(() => OnEnterKey(keyboard.inputText));
-        keyboard.keys.Find("row0").Find("Back").GetComponent<Button>().onClick.AddListener(keyboard.Backspace);
+        Transform row;
+        
+        row = keyboard.keys.Find("row0");
+        row.Find("Back").GetComponent<Button>().onClick.AddListener(keyboard.Backspace);
+        
+        row = keyboard.keys.Find("row2");
+        row.Find("CapsLock").GetComponent<Button>().onClick.AddListener(keyboard.CapsLock);
+
+        row = keyboard.keys.Find("row3");
+        row.Find("Shift").GetComponent<Button>().onClick.AddListener(keyboard.Shift);
+
+        row = keyboard.keys.Find("row4");
+        row.Find("Clear").GetComponent<Button>().onClick.AddListener(keyboard.Clear);
+        row.Find("Enter").GetComponent<Button>().onClick.AddListener(() => OnEnterKey(keyboard.inputText));
     }
 
     public void OnEnterKey(Text text)
