@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using VRKeyboard.Utils;
 
 public class LobbyUIManager : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class LobbyUIManager : MonoBehaviour
     #endregion
     public bool isVR;
     private RoomInfo target = null;
+
+    [SerializeField] private KeyboardManager keyboard;
     #endregion
 
     #region property
@@ -65,6 +68,12 @@ public class LobbyUIManager : MonoBehaviour
         playerName.text = PhotonNetwork.NickName;
         pm.RoomListChanged += OnRoomListChanged;
         pm.JoinLobby();
+
+        if (keyboard)
+        {
+            keyboard.keys.Find("row4").Find("Enter").GetComponent<Button>().onClick.AddListener(() => OnEnterKey(keyboard.inputText));
+            keyboard.keys.Find("row0").Find("Back").GetComponent<Button>().onClick.AddListener(keyboard.Backspace);
+        }
     }
     #endregion
 
@@ -90,6 +99,8 @@ public class LobbyUIManager : MonoBehaviour
     {
         nameInputField.text = playerName.text;
         changeNamePanel.SetActive(true);
+
+        if (keyboard) keyboard.gameObject.SetActive(true);
     }
     public void OnChangeNameOKButton()
     {
@@ -111,6 +122,8 @@ public class LobbyUIManager : MonoBehaviour
     {
         roomNameInputField.text = "";
         createRoomPanel.SetActive(true);
+
+        if (keyboard) keyboard.gameObject.SetActive(true);
     }
     public void OnCreateRoomOKButton()
     {
@@ -123,6 +136,13 @@ public class LobbyUIManager : MonoBehaviour
     }
     #endregion
 
+    public void OnEnterKey(Text text)
+    {
+        if (changeNamePanel.activeSelf) nameInputField.text = text.text;
+        if (createRoomPanel.activeSelf) roomNameInputField.text = text.text;
+
+        keyboard.gameObject.SetActive(false);
+    }
     #endregion 
 
     #endregion
