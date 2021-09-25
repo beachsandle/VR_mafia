@@ -38,6 +38,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private PlayerCharacter localCharacter;
     private bool canKill = true;
     private bool isVibrating = false;
+    private bool voiceState = true;
     private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
     #endregion
 
@@ -366,6 +367,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             return;
         Debug.Log($"[GameManager] Dead Report : {target.NickName}");
         SendEventToMaster(VrMafiaEventCode.DeadReport, target.ActorNumber);
+    }
+    public void OnVoiceKey()
+    {
+        voiceState = !voiceState;
+        Debug.Log("Voice : " + (voiceState ? "On" : "Off"));
+        uiManager.OnVoiceKey(voiceState);
     }
     public void OnVoteButton(int id)
     {
