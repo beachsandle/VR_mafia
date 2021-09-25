@@ -53,11 +53,15 @@ public class PlayerController : MonoBehaviour
         if (gm.MenuOpened)
             return;
         if(!isVR) Rotate();
+
         FindTarget();
         if (isVR ? OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) : Input.GetKeyDown(KeyCode.Q))
             gm.OnKillButton();
         else if (isVR ? OVRInput.GetDown(OVRInput.Button.One) : Input.GetKeyDown(KeyCode.E))
             gm.OnDeadReportButton();
+
+        if (isVR ? OVRInput.GetDown(OVRInput.Button.Three) : Input.GetKeyDown(KeyCode.V))
+            ToggleVoiceState();
     }
     private void OnDestroy()
     {
@@ -117,6 +121,10 @@ public class PlayerController : MonoBehaviour
         Physics.Raycast(findAnchor.position, findAnchor.forward, out hit, range, layermask);
         Debug.DrawRay(findAnchor.position, findAnchor.forward * range, Color.red);
         gm.OnFoundTarget(hit.transform?.GetComponent<PhotonView>().Owner);
+    }
+    private void ToggleVoiceState()
+    {
+        gm.OnVoiceKey();
     }
     #endregion
 

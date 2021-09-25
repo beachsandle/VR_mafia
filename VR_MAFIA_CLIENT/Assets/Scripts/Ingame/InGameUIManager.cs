@@ -20,6 +20,7 @@ public class InGameUIManager : MonoBehaviour
     private Image killCheckUI;
     private Image killFillImage;
     private Image deadReportUI;
+    private Image voiceUI;
     private FadeInOut fadeInOut;
     //panel
     private GameObject menuPanel;
@@ -68,6 +69,7 @@ public class InGameUIManager : MonoBehaviour
         killCheckUI = killUI.transform.Find("Kill Check UI").GetComponent<Image>();
         killFillImage = killUI.transform.Find("Fill Image").GetComponent<Image>();
         deadReportUI = transform.Find("DeadReport UI").GetComponent<Image>();
+        voiceUI = transform.Find("Voice UI").GetComponent<Image>();
         fadeInOut = transform.GetComponentInChildren<FadeInOut>();
         //panel
         menuPanel = transform.Find("Menu Panel").gameObject;
@@ -241,6 +243,10 @@ public class InGameUIManager : MonoBehaviour
             else
                 deadReportUI.color = Color.red;
         }
+    }
+    public void OnVoiceKey(bool voiceState)
+    {
+        voiceUI.color = (voiceState ? Color.white : Color.gray);
     }
     #endregion
 
