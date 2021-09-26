@@ -86,7 +86,15 @@ public class GhostController : MonoBehaviour
         cam.transform.parent = isVR ? transform : head.transform;
         cam.transform.localPosition = Vector3.zero;
         if (isVR)
+        {
             cam.transform.localPosition = new Vector3(0, 2f, 0);
+            OVRPlayerController ovrPlayerController = gameObject.AddComponent<OVRPlayerController>();
+            ovrPlayerController.BackAndSideDampen = 1f;
+            ovrPlayerController.SnapRotation = false;
+            ovrPlayerController.RotateAroundGuardianCenter = true;
+            ovrPlayerController.GravityModifier = 0.0f;
+            ovrPlayerController.EnableLinearMovement = false;
+        }
         cc.enabled = true;
     }
     public void MoveTo(Vector3 pos)
