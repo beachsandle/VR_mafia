@@ -26,7 +26,8 @@ public class InGameUIManager : MonoBehaviour
     private GameObject menuPanel;
     private VotingPanel votingPanel;
     private FinalVotingPanel finalVotingPanel;
-    private GameObject endPanel;
+    private GameObject winPanel;
+    private GameObject losePanel;
 
     private readonly float fadeTime = 3f;
     #endregion
@@ -75,7 +76,8 @@ public class InGameUIManager : MonoBehaviour
         menuPanel = transform.Find("Menu Panel").gameObject;
         votingPanel = transform.Find("Voting Panel").GetComponent<VotingPanel>();
         finalVotingPanel = transform.Find("Final Voting Panel").GetComponent<FinalVotingPanel>();
-        endPanel = transform.Find("End Panel").gameObject;
+        winPanel = transform.Find("Win Panel").gameObject;
+        losePanel = transform.Find("Lose Panel").gameObject;
     }
     private void Init()
     {
@@ -227,10 +229,13 @@ public class InGameUIManager : MonoBehaviour
         killFillImage.fillAmount = 0f;
 
     }
-    public void OnGameEnded(bool mafiaWin, int[] mafiaIds)
+    public void OnGameEnded(bool win)
     {
-        //Todo: 게임 종료 패널
-        endPanel.gameObject.SetActive(true);
+        if (win)
+            winPanel.gameObject.SetActive(true);
+        else
+            losePanel.gameObject.SetActive(true);
+        SetActiveCursor(true);
     }
     public void OnFoundTarget(Player target)
     {

@@ -288,7 +288,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var mafiaWin = (bool)content["mafiaWin"];
         var mafiaIds = (int[])content["mafiaIds"];
         Debug.Log($"[GameManager] Game End, Mafia Win : {mafiaWin}");
-        uiManager.OnGameEnded(mafiaWin, mafiaIds);
+        uiManager.OnGameEnded(!(IsMafia ^ mafiaWin));
     }
     #endregion
 
