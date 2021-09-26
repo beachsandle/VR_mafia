@@ -527,6 +527,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 252407044}
   m_CullTransparentMesh: 0
+--- !u!1 &323002067 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8011846075548736258, guid: ace5831fb9764284d84faa4d5c84e8e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 1281421850}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &453355889
 GameObject:
   m_ObjectHideFlags: 0
@@ -3020,6 +3026,10 @@ MonoBehaviour:
   cameraObj: {fileID: 873079811}
   ghostPrefab: {fileID: 86432202842480118, guid: 1bbd48c87ebf4934f87e378f4c6ef364,
     type: 3}
+  spotlight: {fileID: 705507994}
+  doors:
+  - {fileID: 323002067}
+  - {fileID: 1872990847}
 --- !u!114 &1819207291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3161,6 +3171,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1861971120}
   m_CullTransparentMesh: 0
+--- !u!1 &1872990847 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 644058217496440892, guid: ace5831fb9764284d84faa4d5c84e8e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 1281421850}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1874765354
 GameObject:
   m_ObjectHideFlags: 0

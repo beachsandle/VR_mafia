@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     [SerializeField] private VoiceChatManager voiceManager;
     [SerializeField] private GameObject cameraObj;
     [SerializeField] private GhostController ghostPrefab;
+    [SerializeField] private Light spotlight;
+    [SerializeField] private GameObject[] doors;
     private Player target;
     private Transform[] spawnPositions;
     private Vector3 spawnPosition;
@@ -210,6 +212,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         Debug.Log($"[GameManager] Day Start");
         IsVoting = false;
         uiManager.OnDayStarted();
+        spotlight.intensity = 5;
+        foreach (var d in doors)
+            d.SetActive(false);
+
     }
     private void RemoveBody(int playerId)
     {
@@ -226,6 +232,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             RemoveBody(p.ActorNumber);
         }
         uiManager.OnNightStarted();
+        spotlight.intensity = 1;
+        foreach (var d in doors)
+            d.SetActive(true);
     }
     private void OnVotingStarted(EventData data)
     {
