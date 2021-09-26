@@ -1104,7 +1104,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1275793200}
-        m_MethodName: OnMenuBackButton
+        m_MethodName: OnOutGameButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

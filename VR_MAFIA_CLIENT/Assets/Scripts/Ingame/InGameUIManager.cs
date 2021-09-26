@@ -262,6 +262,10 @@ public class InGameUIManager : MonoBehaviour
         menuPanel.SetActive(false);
         gm.MenuOpened = false;
     }
+    public void OnOutGameButton()
+    {
+        PhotonManager.Instance.Dissconnect();
+    }
     #endregion
 
     #endregion

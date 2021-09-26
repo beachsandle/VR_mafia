@@ -66,6 +66,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         LocalPlayer.SetCustomProperties(new Hashtable() { { "VoiceName", name } });
     }
+
+    public void Dissconnect()
+    {
+        PhotonNetwork.Disconnect();
+    }
     #endregion
 
     #region intro
