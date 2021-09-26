@@ -9,6 +9,7 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
     public Player Owner { get; private set; }
     private Animator animator;
     private NameTag nameTag;
+    private AudioSource gunSound;
     public PlayerController Controller { get; private set; } = null;
 
 
@@ -16,6 +17,11 @@ public class PlayerCharacter : MonoBehaviour, IPunInstantiateMagicCallback
     {
         animator = GetComponent<Animator>();
         nameTag = GetComponentInChildren<NameTag>();
+        gunSound = GetComponent<AudioSource>();
+    }
+    public void Shoot()
+    {
+        gunSound.Play();
     }
     public void Die()
     {

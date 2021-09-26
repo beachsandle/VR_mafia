@@ -3039,6 +3039,7 @@ MonoBehaviour:
   defenseTime: 5
   finalVotingTime: 5
   killCoolTime: 5
+  hostMafia: 0
   checkGameEnd: 0
 --- !u!1 &1861971120
 GameObject:
@@ -3570,7 +3571,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 6e283ef4a133f76468293e4db51c5e52, type: 3}
+  m_Texture: {fileID: 2800000, guid: 1fa8bbb551e487c40a640129b891101b, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

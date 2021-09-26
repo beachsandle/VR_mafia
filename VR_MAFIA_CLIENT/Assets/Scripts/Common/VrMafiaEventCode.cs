@@ -74,6 +74,7 @@ public enum VrMafiaEventCode
     DieEvent,
 
     /// <summary>
+    /// int killerId
     /// int targetId
     /// </summary>
     DeadReport,

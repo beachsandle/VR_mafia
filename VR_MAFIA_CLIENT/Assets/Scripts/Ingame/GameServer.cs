@@ -21,6 +21,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     public float defenseTime = 15f;
     public float finalVotingTime = 15f;
     public float killCoolTime = 5f;
+    public bool hostMafia = false;
     public bool checkGameEnd = true;
     private GamePhase phase = GamePhase.None;
 
@@ -59,10 +60,17 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void SelectMafia()
     {
-        mafiaIds = (from p in players.Values
-                    select p.ActorNumber).OrderBy(a => Guid.NewGuid())
-                   .Take(players.Count > 6 ? 2 : 1)
-                   .ToArray();
+        if (hostMafia)
+        {
+            mafiaIds = new int[] { LocalPlayer.ActorNumber };
+        }
+        else
+        {
+            mafiaIds = (from p in players.Values
+                        select p.ActorNumber).OrderBy(a => Guid.NewGuid())
+                       .Take(players.Count > 6 ? 2 : 1)
+                       .ToArray();
+        }
         liveMafias = mafiaIds.Length;
     }
     private void SetRole()
@@ -266,7 +274,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         else
         {
             PlayerDead(targetId);
-            BroadcastEvent(VrMafiaEventCode.DieEvent, targetId);
+            BroadcastEvent(VrMafiaEventCode.DieEvent, new Hashtable() { { "killerId", data.Sender }, { "targetId", targetId } });
             StartCoroutine(KillReady(data.Sender));
         }
         Debug.Log($"[GameServer] On Kill Request : {players[data.Sender].NickName} -> {players[targetId].NickName}, Result : {cool}");

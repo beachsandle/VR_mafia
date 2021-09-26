@@ -309,8 +309,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void OnDieEvent(EventData data)
     {
-        PlayerDeath((int)data.CustomData);
-        Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[(int)data.CustomData].NickName}");
+        var content = (Hashtable)data.CustomData;
+        var killerId = (int)content["killerId"];
+        var targetId = (int)content["targetId"];
+        playerObjs[killerId].Shoot();
+        PlayerDeath(targetId);
+        Debug.Log($"[GameManager] Die Event : {CurrentRoom.Players[targetId].NickName}");
     }
     private void OnVoteResponse(EventData data)
     {

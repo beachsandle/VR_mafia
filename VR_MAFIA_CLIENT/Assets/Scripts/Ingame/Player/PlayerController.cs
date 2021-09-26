@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour
         Move();
         if (gm.MenuOpened)
             return;
-        if(!isVR) Rotate();
+        if (!isVR) Rotate();
 
         FindTarget();
         if (isVR ? OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) : Input.GetKeyDown(KeyCode.Q))
