@@ -244,9 +244,9 @@ public class InGameUIManager : MonoBehaviour
                 deadReportUI.color = Color.red;
         }
     }
-    public void OnVoiceKey(bool voiceState)
+    public void OnVoiceKey(bool userMute)
     {
-        voiceUI.color = (voiceState ? Color.white : Color.gray);
+        voiceUI.color = (userMute ? Color.gray : Color.white);
     }
     #endregion
 

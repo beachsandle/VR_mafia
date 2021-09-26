@@ -38,7 +38,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private PlayerCharacter localCharacter;
     private bool canKill = true;
     private bool isVibrating = false;
-    private bool voiceState = true;
+    private bool userMute = false;
+    private bool systemMute = false;
     private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
     #endregion
 
@@ -47,6 +48,24 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public bool MenuOpened { get; set; } = false;
     public bool PhaseChanging { get; set; } = false;
     public bool IsVoting { get; private set; } = false;
+    public bool UserMute
+    {
+        get => userMute;
+        set
+        {
+            userMute = value;
+            voiceManager.SetMute(userMute || systemMute);
+        }
+    }
+    private bool SystemMute
+    {
+        get => systemMute;
+        set
+        {
+            systemMute = value;
+            voiceManager.SetMute(userMute || systemMute);
+        }
+    }
     #endregion
 
     #region unity message
@@ -180,6 +199,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnGameStarted(EventData data)
     {
         var content = (Hashtable)data.CustomData;
+        SystemMute = false;
         IsMafia = (bool)content["isMafia"];
         var mafiaIds = IsMafia ? (int[])content["mafiaIds"] : null;
         Debug.Log($"[GameManager] Game Start, Is Mafia : {IsMafia}");
@@ -188,8 +208,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnDayStarted()
     {
         Debug.Log($"[GameManager] Day Start");
-        if(LocalPlayer.GetAlive())
-            voiceManager.SetMute(true);
         IsVoting = false;
         uiManager.OnDayStarted();
     }
@@ -202,8 +220,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void OnNightStarted(EventData data)
     {
         var deadId = (int)data.CustomData;
-        if (LocalPlayer.GetAlive())
-            voiceManager.SetMute(false);
         Debug.Log($"[GameManager] Night Start : {deadId}");
         foreach (var p in PlayerList.Where(p => !p.GetAlive()))
         {
@@ -216,8 +232,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var votingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Voting Start : {votingTime}");
         IsVoting = true;
-        if (LocalPlayer.GetAlive())
-            voiceManager.SetMute(true);
         uiManager.OnVotingStarted(votingTime);
     }
     private void OnVotingEnded(EventData data)
@@ -233,15 +247,15 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         var content = (Hashtable)data.CustomData;
         var electedId = (int)content["electedId"];
         var defenseTime = (float)content["defenseTime"];
-        if (electedId == LocalPlayer.ActorNumber)
-            voiceManager.SetMute(false);
+        if (electedId != LocalPlayer.ActorNumber)
+            SystemMute = true;
         Debug.Log($"[GameManager] Defense Start : {defenseTime}");
         uiManager.OnDefenseStarted(electedId, defenseTime);
     }
     private void OnFinalVotingStarted(EventData data)
     {
         if (LocalPlayer.GetAlive())
-            voiceManager.SetMute(true);
+            SystemMute = false;
         var finalVotingTime = (float)data.CustomData;
         Debug.Log($"[GameManager] Final Voting Start : {finalVotingTime}");
         uiManager.OnFinalVotingStarted(finalVotingTime);
@@ -289,7 +303,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         if (player.Owner.IsLocal)
         {
             Instantiate(ghostPrefab, player.transform.position, player.transform.rotation).InitGhost(cameraObj);
-            voiceManager.SetMute(true);
+            SystemMute = true;
         }
         player.Die();
     }
@@ -370,9 +384,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     public void OnVoiceKey()
     {
-        voiceState = !voiceState;
-        Debug.Log("Voice : " + (voiceState ? "On" : "Off"));
-        uiManager.OnVoiceKey(voiceState);
+        UserMute = !UserMute;
+        Debug.Log("Voice : " + (UserMute ? "Off" : "On"));
+        uiManager.OnVoiceKey(UserMute);
     }
     public void OnVoteButton(int id)
     {

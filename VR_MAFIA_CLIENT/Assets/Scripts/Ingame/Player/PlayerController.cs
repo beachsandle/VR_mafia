@@ -47,6 +47,9 @@ public class PlayerController : MonoBehaviour
     }
     private void Update()
     {
+        if (isVR ? OVRInput.GetDown(OVRInput.Button.Three) : Input.GetKeyDown(KeyCode.V))
+            ToggleVoiceState();
+
         if (gm.PhaseChanging || gm.IsVoting)
             return;
         Move();
@@ -60,8 +63,6 @@ public class PlayerController : MonoBehaviour
         else if (isVR ? OVRInput.GetDown(OVRInput.Button.One) : Input.GetKeyDown(KeyCode.E))
             gm.OnDeadReportButton();
 
-        if (isVR ? OVRInput.GetDown(OVRInput.Button.Three) : Input.GetKeyDown(KeyCode.V))
-            ToggleVoiceState();
     }
     private void OnDestroy()
     {
