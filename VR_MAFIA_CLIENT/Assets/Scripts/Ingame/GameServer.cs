@@ -38,7 +38,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private Dictionary<int, Player> players => CurrentRoom.Players;
     private bool finalVotingResult => pros * 2 >= maxVoters;
-    private bool isGameEnd => checkGameEnd && (liveMafias == 0 || liveMafias * 2 >= lives);
+    private bool isGameEnd => liveMafias == 0 || liveMafias * 2 >= lives;
     #endregion
 
     #region unity message
@@ -223,6 +223,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void GameEnd()
     {
+        if (!checkGameEnd && lives > 1)
+            return;
         phase = GamePhase.GameEnd;
         var mafiaWin = liveMafias != 0;
         BroadcastEvent(VrMafiaEventCode.GameEnd, new Hashtable() { { "mafiaWin", mafiaWin }, { "mafiaIds", mafiaIds } });

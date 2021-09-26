@@ -723,6 +723,10 @@ MonoBehaviour:
   cameraObj: {fileID: 1263125248}
   ghostPrefab: {fileID: 8964887907732782728, guid: 7ba772c160fe81a4d95f532f50e76f19,
     type: 3}
+  spotlight: {fileID: 705507994}
+  doors:
+  - {fileID: 498820447}
+  - {fileID: 498820446}
 --- !u!4 &283038100
 Transform:
   m_ObjectHideFlags: 0
@@ -1431,6 +1435,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ace5831fb9764284d84faa4d5c84e8e8, type: 3}
+--- !u!1 &498820446 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 644058217496440892, guid: ace5831fb9764284d84faa4d5c84e8e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 498820445}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &498820447 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8011846075548736258, guid: ace5831fb9764284d84faa4d5c84e8e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 498820445}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &525057387
 GameObject:
   m_ObjectHideFlags: 0
