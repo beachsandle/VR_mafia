@@ -186,6 +186,7 @@ public class InGameUIManager : MonoBehaviour
     }
     public void OnDefenseStarted(int electedId, float defenseTime)
     {
+        votingPanel.PanelOff();
         finalVotingPanel.DefenseStart(electedId, defenseTime);
     }
     public void OnFinalVotingStarted(float finalVotingTime)
@@ -231,6 +232,7 @@ public class InGameUIManager : MonoBehaviour
     }
     public void OnGameEnded(bool win)
     {
+        finalVotingPanel.PanelOff();
         if (win)
             winPanel.gameObject.SetActive(true);
         else
