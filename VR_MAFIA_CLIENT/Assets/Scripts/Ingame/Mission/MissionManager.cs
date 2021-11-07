@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MissionManager : MonoBehaviour
 {
+    private GameManager gm => GameManager.Instance;
+
     public GameObject missionObject;
 
     void Start()

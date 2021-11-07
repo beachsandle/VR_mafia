@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region field
     [SerializeField] private InGameUIManager uiManager;
+    [SerializeField] private MissionManager missionManager;
     [SerializeField] private VoiceChatManager voiceManager;
     [SerializeField] private GameObject cameraObj;
     [SerializeField] private GhostController ghostPrefab;
@@ -410,6 +411,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         Debug.Log($"[GameManager] Final Vote Request : {pros}");
         SendEventToMaster(VrMafiaEventCode.FinalVoteReq, pros);
+    }
+    public void UpdateMission(string text)
+    {
+        uiManager.SetMissionText(text);
     }
     #endregion
 
