@@ -25,4 +25,9 @@ public class FirstMission : MonoBehaviour
             place /= 10;
         }
     }
+
+    public void MissionStart()
+    {
+        gameObject.SetActive(true);
+    }
 }

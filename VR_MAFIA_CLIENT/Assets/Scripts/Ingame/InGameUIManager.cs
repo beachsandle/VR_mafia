@@ -30,6 +30,7 @@ public class InGameUIManager : MonoBehaviour
     private GameObject losePanel;
     //Mision
     private Text missionText;
+    private FirstMission firstMissionPanel;
 
     private readonly float fadeTime = 3f;
     #endregion
@@ -82,6 +83,7 @@ public class InGameUIManager : MonoBehaviour
         losePanel = transform.Find("Lose Panel").gameObject;
         //Mision
         missionText = transform.Find("Mission UI").GetComponentInChildren<Text>();
+        firstMissionPanel = transform.Find("First Mission Panel").GetComponent<FirstMission>();
     }
     private void Init()
     {
@@ -261,6 +263,11 @@ public class InGameUIManager : MonoBehaviour
     public void OnVoiceKey(bool userMute)
     {
         voiceUI.color = (userMute ? Color.gray : Color.white);
+    }
+    public void OnMissionStarted()
+    {
+        SetActiveCursor(true);
+        firstMissionPanel.MissionStart();
     }
     #endregion
 

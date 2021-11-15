@@ -15,6 +15,6 @@ public class MissionManager : MonoBehaviour
 
     void GenerateMission()
     {
-        missionObject.AddComponent<FirstMission>();
+        
     }
 }

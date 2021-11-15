@@ -416,6 +416,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         uiManager.SetMissionText(text);
     }
+    public void OnMissionButton()
+    {
+        if (3f < Vector3.Distance(missionManager.missionObject.transform.position, localCharacter.transform.position))
+            return;
+
+        uiManager.OnMissionStarted();
+    }
     #endregion
 
     #endregion
