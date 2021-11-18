@@ -92,6 +92,7 @@ public class InGameUIManager : MonoBehaviour
         finalVotingPanel.gameObject.SetActive(true);
         votingPanel.VoteButtonClicked += gm.OnVoteButton;
         finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
+        firstMissionPanel.MissionEnded += OnMissionEnded;
     }
     private void SetActiveCursor(bool active)
     {
@@ -268,6 +269,10 @@ public class InGameUIManager : MonoBehaviour
     {
         SetActiveCursor(true);
         firstMissionPanel.MissionStart();
+    }
+    public void OnMissionEnded(bool isSuccess)
+    {
+        SetActiveCursor(false);
     }
     #endregion
 

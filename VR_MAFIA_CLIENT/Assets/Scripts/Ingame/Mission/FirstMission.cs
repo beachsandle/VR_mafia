@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,8 @@ public class FirstMission : MonoBehaviour
     private int inputNum;
     private int buttonLeft = DIGIT;
     private Button[] buttons;
+
+    public event Action<bool> MissionEnded;
 
     private void Awake()
     {
@@ -50,7 +53,7 @@ public class FirstMission : MonoBehaviour
         int place = 1000;
         while(0 < list.Count)
         {
-            int idx = Random.Range(0, list.Count - 1);
+            int idx = UnityEngine.Random.Range(0, list.Count - 1);
             password += (place * list[idx]);
             list.RemoveAt(idx);
             place /= 10;
@@ -85,5 +88,6 @@ public class FirstMission : MonoBehaviour
         Debug.Log("Mission : " + (isSuccess ? "Clear" : "Fail"));
 
         gameObject.SetActive(false);
+        MissionEnded?.Invoke(isSuccess);
     }
 }
