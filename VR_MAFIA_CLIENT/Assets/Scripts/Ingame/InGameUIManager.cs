@@ -28,6 +28,9 @@ public class InGameUIManager : MonoBehaviour
     private FinalVotingPanel finalVotingPanel;
     private GameObject winPanel;
     private GameObject losePanel;
+    //Mision
+    private Text missionText;
+    private FirstMission firstMissionPanel;
 
     private readonly float fadeTime = 3f;
     #endregion
@@ -78,6 +81,9 @@ public class InGameUIManager : MonoBehaviour
         finalVotingPanel = transform.Find("Final Voting Panel").GetComponent<FinalVotingPanel>();
         winPanel = transform.Find("Win Panel").gameObject;
         losePanel = transform.Find("Lose Panel").gameObject;
+        //Mision
+        missionText = transform.Find("Mission UI").GetComponentInChildren<Text>();
+        firstMissionPanel = transform.Find("First Mission Panel").GetComponent<FirstMission>();
     }
     private void Init()
     {
@@ -86,6 +92,7 @@ public class InGameUIManager : MonoBehaviour
         finalVotingPanel.gameObject.SetActive(true);
         votingPanel.VoteButtonClicked += gm.OnVoteButton;
         finalVotingPanel.FinalVoteButtonClicked += gm.OnFinalVoteButton;
+        firstMissionPanel.MissionEnded += OnMissionEnded;
     }
     private void SetActiveCursor(bool active)
     {
@@ -100,7 +107,6 @@ public class InGameUIManager : MonoBehaviour
             Cursor.visible = false;
         }
     }
-
 
     #region Information
     public void StartInformation(string s)
@@ -131,6 +137,10 @@ public class InGameUIManager : MonoBehaviour
     }
     #endregion
 
+    public void SetMissionText(string text)
+    {
+        missionText.text = text;
+    }
     #endregion
 
     #region event handler
@@ -254,6 +264,15 @@ public class InGameUIManager : MonoBehaviour
     public void OnVoiceKey(bool userMute)
     {
         voiceUI.color = (userMute ? Color.gray : Color.white);
+    }
+    public void OnMissionStarted()
+    {
+        SetActiveCursor(true);
+        firstMissionPanel.MissionStart();
+    }
+    public void OnMissionEnded(bool isSuccess)
+    {
+        SetActiveCursor(false);
     }
     #endregion
 

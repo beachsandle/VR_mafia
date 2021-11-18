@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MissionManager : MonoBehaviour
 {
+    private GameManager gm => GameManager.Instance;
+
     public GameObject missionObject;
 
     void Start()
@@ -13,6 +15,6 @@ public class MissionManager : MonoBehaviour
 
     void GenerateMission()
     {
-        missionObject.AddComponent<FirstMission>();
+        
     }
 }

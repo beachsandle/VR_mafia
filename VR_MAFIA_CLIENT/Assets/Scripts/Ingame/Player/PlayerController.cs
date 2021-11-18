@@ -59,7 +59,10 @@ public class PlayerController : MonoBehaviour
 
         FindTarget();
         if (isVR ? OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) : Input.GetKeyDown(KeyCode.Q))
+        {
             gm.OnKillButton();
+            gm.OnMissionButton(); // 임시
+        }
         else if (isVR ? OVRInput.GetDown(OVRInput.Button.One) : Input.GetKeyDown(KeyCode.E))
             gm.OnDeadReportButton();
 
