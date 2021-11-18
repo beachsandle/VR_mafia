@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System;
 using UnityEngine;
@@ -8,6 +7,7 @@ using UnityEngine.UI;
 public class FirstMission : MonoBehaviour
 {
     const int DIGIT = 4;
+
     private int password;
     private int inputNum;
     private int buttonLeft = DIGIT;
@@ -71,7 +71,7 @@ public class FirstMission : MonoBehaviour
 
         if(buttonLeft == 0)
         {
-            MissionFinish();
+            MissionEnd();
         }
     }
 
@@ -82,10 +82,10 @@ public class FirstMission : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    private void MissionFinish()
+    private void MissionEnd()
     {
         bool isSuccess = (password == inputNum);
-        Debug.Log("Mission : " + (isSuccess ? "Clear" : "Fail"));
+        Debug.Log("Mission : " + (isSuccess ? "Success" : "Fail"));
 
         gameObject.SetActive(false);
         MissionEnded?.Invoke(isSuccess);
