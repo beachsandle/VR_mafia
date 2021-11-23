@@ -8,6 +8,13 @@ public class MissionManager : MonoBehaviour
 
     public GameObject missionObject;
 
+    private Transform[] lockPositions;
+
+    private void Awake()
+    {
+        lockPositions = transform.Find("LockPositions").GetComponentsInChildren<Transform>();
+    }
+
     void Start()
     {
         GenerateMission();
@@ -15,6 +22,7 @@ public class MissionManager : MonoBehaviour
 
     void GenerateMission()
     {
-        
+        Vector3 pos = lockPositions[Random.Range(0, lockPositions.Length)].position;
+        missionObject = Instantiate(missionObject, pos, Quaternion.identity);
     }
 }

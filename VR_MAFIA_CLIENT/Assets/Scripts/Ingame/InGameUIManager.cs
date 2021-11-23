@@ -170,6 +170,11 @@ public class InGameUIManager : MonoBehaviour
             () =>
             {
                 gm.ReturnSpawnPosition();
+                if (gm.IsMissionPlaying)
+                {
+                    firstMissionPanel.gameObject.SetActive(false);
+                    OnMissionEnded(false);
+                }
             },
             () =>
             {
@@ -267,11 +272,13 @@ public class InGameUIManager : MonoBehaviour
     }
     public void OnMissionStarted()
     {
-        SetActiveCursor(true);
         firstMissionPanel.MissionStart();
+        gm.IsMissionPlaying = true;
+        SetActiveCursor(true);
     }
     public void OnMissionEnded(bool isSuccess)
     {
+        gm.IsMissionPlaying = false;
         SetActiveCursor(false);
     }
     #endregion

@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public bool MenuOpened { get; set; } = false;
     public bool PhaseChanging { get; set; } = false;
     public bool IsVoting { get; private set; } = false;
+    public bool IsMissionPlaying { get; set; } = false;
     public bool UserMute
     {
         get => userMute;
