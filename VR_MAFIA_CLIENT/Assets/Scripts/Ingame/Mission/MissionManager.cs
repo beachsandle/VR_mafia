@@ -22,7 +22,7 @@ public class MissionManager : MonoBehaviour
 
     void GenerateMission()
     {
-        Vector3 pos = lockPositions[Random.Range(1, lockPositions.Length)].position;
-        Instantiate(missionObject, pos, Quaternion.identity);
+        Vector3 pos = lockPositions[Random.Range(0, lockPositions.Length)].position;
+        missionObject = Instantiate(missionObject, pos, Quaternion.identity);
     }
 }
