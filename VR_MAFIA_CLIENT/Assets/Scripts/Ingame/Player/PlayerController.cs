@@ -52,12 +52,14 @@ public class PlayerController : MonoBehaviour
         if (isVR ? OVRInput.GetDown(OVRInput.Button.Three) : Input.GetKeyDown(KeyCode.V))
             ToggleVoiceState();
 
-        if (gm.PhaseChanging || gm.IsVoting)
-            return;
+        if (gm.PhaseChanging || gm.IsVoting || gm.IsMissionPlaying) return;
+
         Move();
-        if (gm.MenuOpened)
-            return;
-        if (!isVR) Rotate();
+
+        if (gm.MenuOpened) return;
+
+        if (!isVR)
+            Rotate();
 
         FindTarget();
         if (isVR ? OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) : Input.GetKeyDown(KeyCode.Q))
