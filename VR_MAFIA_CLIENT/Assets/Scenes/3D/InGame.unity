@@ -2720,8 +2720,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4286bb2bbd63e47428fb4194291d3b86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missionObject: {fileID: 3884416917884726186, guid: e2e20eff5fcf0b14ca73c971c1591a27,
-    type: 3}
+  missionObject: {fileID: 0}
 --- !u!1 &1560801585
 GameObject:
   m_ObjectHideFlags: 0

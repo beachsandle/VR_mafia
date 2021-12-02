@@ -33,6 +33,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private int pros;
     private int maxVoters;
     private int deadId;
+    private int[][] missionIdx;
     private readonly HashSet<int> voters = new HashSet<int>();
 
 
@@ -57,6 +58,24 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
     private void Init()
     {
         lives = PlayerList.Length;
+        missionIdx = new int[10][];
+        for (int i = 0; i < 10; ++i)
+            missionIdx[i] = new int[3];
+        var random = new System.Random();
+        for (int i = 0; i < 3; ++i)
+        {
+            var index = Enumerable.Range(0, 10).ToArray();
+            for (int j = 0; j < 100; ++j)
+            {
+                int a = random.Next(0, 10);
+                int b = random.Next(0, 10);
+                int tmp = index[a];
+                index[a] = index[b];
+                index[b] = tmp;
+            }
+            for (int j = 0; j < 10; ++j)
+                missionIdx[j][i] = index[j];
+        }
     }
     private void SelectMafia()
     {
@@ -78,6 +97,10 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         var citizen = from p in players.Values where !mafiaIds.Contains(p.ActorNumber) select p.ActorNumber;
         MulticastEvent(VrMafiaEventCode.GameStart, mafiaIds, new Hashtable() { { "isMafia", true }, { "mafiaIds", mafiaIds } });
         MulticastEvent(VrMafiaEventCode.GameStart, citizen.ToArray(), new Hashtable() { { "isMafia", false } });
+        foreach(var c in citizen)
+        {
+            UnicastEvent(VrMafiaEventCode.SetMission, c, missionIdx[c - 1]);
+        }
     }
     #endregion
 

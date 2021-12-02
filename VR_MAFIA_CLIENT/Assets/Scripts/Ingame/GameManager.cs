@@ -35,8 +35,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     [SerializeField] private GhostController ghostPrefab;
     [SerializeField] private Light spotlight;
     [SerializeField] private GameObject[] doors;
+    [SerializeField] private GameObject mission1Prefab;
+    [SerializeField] private GameObject usbPrefab;
+    [SerializeField] private GameObject[] computers;
     private Player target;
     private Transform[] spawnPositions;
+    private Transform[] usbPositions;
     private Vector3 spawnPosition;
     private PlayerCharacter localCharacter;
     private bool canKill = true;
@@ -44,6 +48,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private bool userMute = false;
     private bool systemMute = false;
     private readonly Dictionary<int, PlayerCharacter> playerObjs = new Dictionary<int, PlayerCharacter>();
+
+    private int missionPhase;
+    private int[] missionIndex;
+    private bool missionFound = false;
     #endregion
 
     #region property
@@ -90,6 +98,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void FindReference()
     {
         spawnPositions = transform.Find("SpawnPosition").GetComponentsInChildren<Transform>();
+        usbPositions = transform.Find("USBPositions").GetComponentsInChildren<Transform>();
     }
     private void SpawnPlayer()
     {
@@ -103,7 +112,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //mat.SetColor("_BaseColor", Global.colors[character.Owner.ActorNumber - 1]);
         mat.SetColor("_EmissionColor", Global.colors[character.Owner.ActorNumber - 1] * Mathf.LinearToGammaSpace(2f));
     }
-
+    private void Mission1Start()
+    {
+        uiManager.SetMissionText("보안키가 담긴 USB를 찾으세요.");
+        Instantiate(usbPrefab, usbPositions[missionIndex[0]]);
+    }
     private IEnumerator Vibration(float frequency, float amplitude, float duration, bool isRight)
     {
         OVRInput.Controller controller = isRight ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
@@ -192,6 +205,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 break;
             case VrMafiaEventCode.FinalVoteRes:
                 OnFinalVoteResponse(photonEvent);
+                break;
+            case VrMafiaEventCode.SetMission:
+                OnSetMission(photonEvent);
                 break;
             #endregion
 
@@ -341,6 +357,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         if (!result)
             uiManager.OnFinalVoteFailed();
     }
+    private void OnSetMission(EventData data)
+    {
+        var result = (int[])data.CustomData;
+        Debug.Log($"[GameManager] Set Mission : {result}");
+        missionPhase = 0;
+        missionIndex = result;
+        Mission1Start();
+    }
     #endregion
 
     #endregion
@@ -374,6 +398,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         target = p;
         uiManager.OnFoundTarget(p);
+    }
+    public void OnFoundMission(bool found)
+    {
+        missionFound = found;
+        //ui 필요
     }
     public void OnKillButton()
     {
@@ -419,10 +448,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     public void OnMissionButton()
     {
-        if (3f < Vector3.Distance(missionManager.missionObject.transform.position, localCharacter.transform.position))
-            return;
+        //if (3f < Vector3.Distance(missionManager.missionObject.transform.position, localCharacter.transform.position))
+        //    return;
+        if (missionFound)
+        {
 
-        uiManager.OnMissionStarted();
+            //uiManager.OnMissionStarted();
+        }
     }
     #endregion
 

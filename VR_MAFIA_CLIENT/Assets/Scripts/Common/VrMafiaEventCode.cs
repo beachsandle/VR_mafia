@@ -98,5 +98,15 @@ public enum VrMafiaEventCode
     /// bool result
     /// </summary>
     FinalVoteRes,
+
+    /// <summary>
+    /// int[] index
+    /// </summary>
+    SetMission,
+
+    /// <summary>
+    /// {int step, int index}
+    /// </summary>
+    MissionComplete,
     #endregion
 }

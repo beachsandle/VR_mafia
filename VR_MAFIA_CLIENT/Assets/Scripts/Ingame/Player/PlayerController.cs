@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private float rotX, rotY;
     private RaycastHit hit;
     private int layermask;
+    private int missionMask;
     //inspector
     [Header("Status")]
     public float moveSpeed = 5.0F;
@@ -43,6 +44,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         layermask = (1 << (int)Global.Layers.Player);
+        missionMask = (1 << (int)Global.Layers.Mission);
         InactiveMyRay();
     }
     private void Update()
@@ -125,6 +127,9 @@ public class PlayerController : MonoBehaviour
         Physics.Raycast(findAnchor.position, findAnchor.forward, out hit, range, layermask);
         Debug.DrawRay(findAnchor.position, findAnchor.forward * range, Color.red);
         gm.OnFoundTarget(hit.transform?.GetComponent<PhotonView>().Owner);
+
+        Physics.Raycast(findAnchor.position, findAnchor.forward, out hit, range, missionMask);
+        gm.OnFoundMission(hit.transform != null);
     }
     private void ToggleVoiceState()
     {

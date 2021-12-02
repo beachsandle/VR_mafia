@@ -16,6 +16,7 @@ public static class Global
         Default,
         IgnoreRaycast = 2,
         Player = 8,
-        Ghost = 9
+        Ghost = 9,
+        Mission = 10,
     }
 }
