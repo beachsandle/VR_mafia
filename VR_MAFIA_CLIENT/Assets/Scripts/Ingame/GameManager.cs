@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private int missionPhase;
     private int[] missionIndex;
+    private GameObject usb;
     private bool missionFound = false;
     #endregion
 
@@ -114,8 +115,20 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void Mission1Start()
     {
-        uiManager.SetMissionText("보안키가 담긴 USB를 찾으세요.");
+        uiManager.SetMissionText("");
         Instantiate(usbPrefab, usbPositions[missionIndex[0]]);
+    }
+    private void Mission2Start()
+    {
+        uiManager.SetMissionText("보안키가 담긴 USB를 찾으세요.");
+        var spawnTrans = usbPositions[missionIndex[1]];
+        usb = Instantiate(usbPrefab, spawnTrans.position, spawnTrans.rotation);
+    }
+    private void Mission3Start()
+    {
+        uiManager.SetMissionText("USB를 사용할 수 있는 PC를 찾으세요.");
+        foreach (var obj in computers[missionIndex[2]].GetComponentsInChildren<Transform>())
+            obj.gameObject.layer = (int)Global.Layers.Mission;
     }
     private IEnumerator Vibration(float frequency, float amplitude, float duration, bool isRight)
     {
@@ -208,6 +221,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 break;
             case VrMafiaEventCode.SetMission:
                 OnSetMission(photonEvent);
+                break;
+            case VrMafiaEventCode.MissionEvent:
+                OnMissionEvent(photonEvent);
                 break;
             #endregion
 
@@ -361,9 +377,16 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         var result = (int[])data.CustomData;
         Debug.Log($"[GameManager] Set Mission : {result}");
-        missionPhase = 0;
+        missionPhase = 1;
         missionIndex = result;
-        Mission1Start();
+        //Mission1Start();
+        Mission2Start();
+    }
+    public void OnMissionEvent(EventData data)
+    {
+        var result = (string)data.CustomData;
+        Debug.Log($"[GameManager] OnMissionEvent : {result}");
+        uiManager.StartInformation($"{result}님은 시민입니다.");
     }
     #endregion
 
@@ -402,7 +425,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public void OnFoundMission(bool found)
     {
         missionFound = found;
-        //ui 필요
+        uiManager.OnFoundMission(found);
     }
     public void OnKillButton()
     {
@@ -448,10 +471,27 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     public void OnMissionButton()
     {
-        //if (3f < Vector3.Distance(missionManager.missionObject.transform.position, localCharacter.transform.position))
-        //    return;
         if (missionFound)
         {
+            switch (missionPhase)
+            {
+                case 0: break;
+                case 1:
+                    missionPhase = 2;
+                    Destroy(usb);
+                    Mission3Start();
+                    break;
+                case 2:
+                    uiManager.SetMissionText("미션 완료");
+                    missionPhase = 3;
+                    foreach (var obj in computers[missionIndex[2]].GetComponentsInChildren<Transform>())
+                        obj.gameObject.layer = (int)Global.Layers.Default;
+                    SendEventToMaster(VrMafiaEventCode.MissionComplete, null);
+                    break;
+                default: break;
+            }
+            //if (3f < Vector3.Distance(missionManager.missionObject.transform.position, localCharacter.transform.position))
+            //    return;
 
             //uiManager.OnMissionStarted();
         }

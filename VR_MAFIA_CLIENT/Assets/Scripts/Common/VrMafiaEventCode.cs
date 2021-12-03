@@ -105,8 +105,13 @@ public enum VrMafiaEventCode
     SetMission,
 
     /// <summary>
-    /// {int step, int index}
+    /// none
     /// </summary>
     MissionComplete,
+
+    /// <summary>
+    /// string name
+    /// </summary>
+    MissionEvent,
     #endregion
 }

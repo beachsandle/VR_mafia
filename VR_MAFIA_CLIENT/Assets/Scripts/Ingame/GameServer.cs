@@ -76,6 +76,8 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
             for (int j = 0; j < 10; ++j)
                 missionIdx[j][i] = index[j];
         }
+        for (int i = 0; i < 10; ++i)
+            missionIdx[i][2] /= 2;
     }
     private void SelectMafia()
     {
@@ -97,7 +99,7 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         var citizen = from p in players.Values where !mafiaIds.Contains(p.ActorNumber) select p.ActorNumber;
         MulticastEvent(VrMafiaEventCode.GameStart, mafiaIds, new Hashtable() { { "isMafia", true }, { "mafiaIds", mafiaIds } });
         MulticastEvent(VrMafiaEventCode.GameStart, citizen.ToArray(), new Hashtable() { { "isMafia", false } });
-        foreach(var c in citizen)
+        foreach (var c in citizen)
         {
             UnicastEvent(VrMafiaEventCode.SetMission, c, missionIdx[c - 1]);
         }
@@ -274,6 +276,9 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
             case VrMafiaEventCode.FinalVoteReq:
                 OnFinalVoteRequest(photonEvent);
                 break;
+            case VrMafiaEventCode.MissionComplete:
+                OnMissionComplete(photonEvent);
+                break;
             default: break;
         }
     }
@@ -349,6 +354,11 @@ public class GameServer : MonoBehaviourPunCallbacks, IOnEventCallback
         UnicastEvent(VrMafiaEventCode.FinalVoteRes, data.Sender, result);
         if (voters.Count == 0)
             FinalVotingEnd();
+    }
+    private void OnMissionComplete(EventData data)
+    {
+        Debug.Log($"[GameServer] OnMissionComplete : {players[data.Sender].NickName}");
+        BroadcastEvent(VrMafiaEventCode.MissionEvent, players[data.Sender].NickName);
     }
     #endregion
 }

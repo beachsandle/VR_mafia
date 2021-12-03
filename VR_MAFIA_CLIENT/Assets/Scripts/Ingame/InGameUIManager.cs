@@ -149,8 +149,8 @@ public class InGameUIManager : MonoBehaviour
     public void OnGameStarted(bool isMafia, int[] mafiaIds)
     {
         roleText.text = isMafia ? "마피아" : "시민";
-        if (!isMafia)
-            killUI.SetActive(false);
+        //if (!isMafia)
+        //    killUI.SetActive(false);
         StartInformation(string.Format("당신은 {0}입니다", roleText.text));
         fadeInOut.FadeIn();
     }
@@ -264,6 +264,14 @@ public class InGameUIManager : MonoBehaviour
                 killCheckUI.color = Color.red;
             else
                 deadReportUI.color = Color.red;
+        }
+    }
+    public void OnFoundMission(bool found)
+    {
+        killCheckUI.color = Color.white;
+        if (found)
+        {
+            killCheckUI.color = Color.red;
         }
     }
     public void OnVoiceKey(bool userMute)

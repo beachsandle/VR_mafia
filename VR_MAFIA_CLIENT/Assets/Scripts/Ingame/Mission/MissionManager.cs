@@ -12,12 +12,12 @@ public class MissionManager : MonoBehaviour
 
     private void Awake()
     {
-        lockPositions = transform.Find("LockPositions").GetComponentsInChildren<Transform>();
+        //lockPositions = transform.Find("LockPositions").GetComponentsInChildren<Transform>();
     }
 
     void Start()
     {
-        GenerateMission();
+       // GenerateMission();
     }
 
     void GenerateMission()
