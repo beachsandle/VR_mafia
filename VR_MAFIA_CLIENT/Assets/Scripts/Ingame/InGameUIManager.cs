@@ -288,6 +288,7 @@ public class InGameUIManager : MonoBehaviour
     {
         gm.IsMissionPlaying = false;
         SetActiveCursor(false);
+        gm.Mission1End(isSuccess);
     }
     #endregion
 

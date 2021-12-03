@@ -29,14 +29,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     #region field
     [SerializeField] private InGameUIManager uiManager;
-    [SerializeField] private MissionManager missionManager;
     [SerializeField] private VoiceChatManager voiceManager;
     [SerializeField] private GameObject cameraObj;
     [SerializeField] private GhostController ghostPrefab;
     [SerializeField] private Light spotlight;
     [SerializeField] private GameObject[] doors;
-    [SerializeField] private GameObject mission1Prefab;
     [SerializeField] private GameObject usbPrefab;
+    [SerializeField] private GameObject[] boxes;
     [SerializeField] private GameObject[] computers;
     private Player target;
     private Transform[] spawnPositions;
@@ -115,17 +114,20 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     }
     private void Mission1Start()
     {
-        uiManager.SetMissionText("");
-        Instantiate(usbPrefab, usbPositions[missionIndex[0]]);
+        missionPhase = 0;
+        uiManager.SetMissionText("잠금 장치를 해제하세요.");
+        boxes[missionIndex[0]].layer = (int)Global.Layers.Mission;
     }
     private void Mission2Start()
     {
+        missionPhase = 1;
         uiManager.SetMissionText("보안키가 담긴 USB를 찾으세요.");
         var spawnTrans = usbPositions[missionIndex[1]];
         usb = Instantiate(usbPrefab, spawnTrans.position, spawnTrans.rotation);
     }
     private void Mission3Start()
     {
+        missionPhase = 2;
         uiManager.SetMissionText("USB를 사용할 수 있는 PC를 찾으세요.");
         foreach (var obj in computers[missionIndex[2]].GetComponentsInChildren<Transform>())
             obj.gameObject.layer = (int)Global.Layers.Mission;
@@ -161,6 +163,14 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         if (isVibrating) return;
 
         StartCoroutine(Vibration(frequency, amplitude, duration, isRight));
+    }
+    public void Mission1End(bool isSuccess)
+    {
+        if (isSuccess)
+        {
+            Mission2Start();
+            boxes[missionIndex[0]].layer = (int)Global.Layers.Default;
+        }
     }
     #endregion
 
@@ -377,10 +387,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         var result = (int[])data.CustomData;
         Debug.Log($"[GameManager] Set Mission : {result}");
-        missionPhase = 1;
         missionIndex = result;
-        //Mission1Start();
-        Mission2Start();
+        Mission1Start();
     }
     public void OnMissionEvent(EventData data)
     {
@@ -475,9 +483,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         {
             switch (missionPhase)
             {
-                case 0: break;
+                case 0:
+                    uiManager.OnMissionStarted();
+                    break;
                 case 1:
-                    missionPhase = 2;
                     Destroy(usb);
                     Mission3Start();
                     break;
@@ -490,10 +499,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                     break;
                 default: break;
             }
-            //if (3f < Vector3.Distance(missionManager.missionObject.transform.position, localCharacter.transform.position))
-            //    return;
-
-            //uiManager.OnMissionStarted();
         }
     }
     #endregion
